@@ -38,8 +38,17 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 
 // === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IStartupRepository, StartupRepository>();
+builder.Services.AddScoped<IInvestorRepository, InvestorRepository>();
+builder.Services.AddScoped<IDeveloperRepository, DeveloperRepository>();
+builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
+
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<AuthService>(); // ← ДОБАВЬ ЭТУ СТРОЧКУ! Без неё AuthController не запустится!
+builder.Services.AddScoped<StartupService>();
+builder.Services.AddScoped<InvestorService>();
+builder.Services.AddScoped<DeveloperService>();
+builder.Services.AddScoped<BusinessService>();
+builder.Services.AddScoped<AuthService>();
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
