@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // MongoDB
 builder.Services.AddSingleton<IMongoClient>(sp =>
     new MongoClient(builder.Configuration.GetConnectionString("MongoDb") 
-        ?? "mongodb://localhost:27017"));
+        ?? "mongodb+srv://ATAIST:***k@manga.sw049.mongodb.net/"));
 
 builder.Services.AddScoped(sp =>
 {
