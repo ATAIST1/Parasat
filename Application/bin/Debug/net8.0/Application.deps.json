@@ -105,6 +105,9 @@
         }
       },
       "Core/1.0.0": {
+        "dependencies": {
+          "MongoDB.Driver": "3.5.2"
+        },
         "runtime": {
           "Core.dll": {
             "assemblyVersion": "1.0.0",

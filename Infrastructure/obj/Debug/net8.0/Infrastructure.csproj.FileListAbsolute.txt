@@ -13,3 +13,4 @@ C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\Infrastructure\obj\Debug\ne
 C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\Infrastructure\obj\Debug\net8.0\refint\Infrastructure.dll
 C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\Infrastructure\obj\Debug\net8.0\Infrastructure.pdb
 C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\Infrastructure\obj\Debug\net8.0\ref\Infrastructure.dll
+C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\Infrastructure\obj\Debug\net8.0\Infrastructure.sourcelink.json

@@ -42,3 +42,4 @@ C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\webapi\obj\Debug\net8.0\ref
 C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\webapi\obj\Debug\net8.0\WebApi.pdb
 C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\webapi\obj\Debug\net8.0\WebApi.genruntimeconfig.cache
 C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\webapi\obj\Debug\net8.0\ref\WebApi.dll
+C:\Users\HP\Documents\Stuff\parasatcsharp\mysolution\webapi\obj\Debug\net8.0\WebApi.sourcelink.json
