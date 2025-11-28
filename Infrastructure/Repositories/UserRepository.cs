@@ -24,4 +24,14 @@ public class UserRepository : IUserRepository
 
     public async Task<List<User>> GetAllAsync()
         => await _users.Find(_ => true).ToListAsync();
+
+    public async Task UpdateAsync(User user)
+    {
+        await _users.ReplaceOneAsync(x => x.Id == user.Id, user);
+    }
+    public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
+    {
+        return await _users.Find(x => x.RefreshTokens != null && x.RefreshTokens.Contains(refreshToken))
+                        .FirstOrDefaultAsync();
+    }
 }

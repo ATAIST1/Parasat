@@ -1,26 +1,66 @@
-using Core.Interfaces;              // IUserRepository
-using Infrastructure.Repositories;  // UserRepository
-using Application.Services;          // UserService
+using Core.Interfaces;
+using Infrastructure.Repositories;
+using Application.Services;
 using MongoDB.Driver;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MongoDB
+// === MongoDB — всё из secrets ===
 builder.Services.AddSingleton<IMongoClient>(sp =>
-    new MongoClient(builder.Configuration.GetConnectionString("MongoDb") 
-        ?? "mongodb+srv://ATAIST:***k@manga.sw049.mongodb.net/"));
-
-builder.Services.AddScoped(sp =>
 {
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("ParasatDb");
+    var configuration = sp.GetRequiredService<IConfiguration>();
+
+    var connectionString = configuration["MongoDb:ConnectionString"]
+                        ?? configuration.GetConnectionString("MongoDb");
+
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException(
+            "MongoDB connection string is missing! " +
+            "Run: dotnet user-secrets set \"MongoDb:ConnectionString\" \"mongodb+srv://...\"");
+    }
+
+    return new MongoClient(connectionString);
 });
 
-// Репозитории и сервисы
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var dbName = builder.Configuration["MongoDb:DatabaseName"] ?? "ParasatDb";
+    return client.GetDatabase(dbName);
+});
+
+// УДАЛИ ЭТУ СТРОКУ — она дублирует и хардкодит имя базы! 
+// builder.Services.AddScoped(sp => { ... "ParasatDb" });
+
+// === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AuthService>(); // ← ДОБАВЬ ЭТУ СТРОЧКУ! Без неё AuthController не запустится!
 
-// Контроллеры + Swagger
+// === JWT Authentication ===
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] 
+                    ?? throw new InvalidOperationException("Jwt:Key is missing in configuration")))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -34,6 +74,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// ВАЖНО: порядок именно такой!
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

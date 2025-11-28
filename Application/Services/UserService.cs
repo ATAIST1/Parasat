@@ -1,10 +1,10 @@
 using Application.Mappers;
 using Core.Dtos;
-using Core.Models;
 using Core.Interfaces;
+using Core.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -40,5 +40,8 @@ namespace Application.Services
             var user = UserMapper.ToModel(dto);
             await _userRepository.AddAsync(user);
         }
+
+        // УДАЛИ ЭТОТ МЕТОД ИЗ СЕРВИСА — он не должен быть здесь!
+        // public async Task<User?> GetByRefreshTokenAsync(...) — НЕТ!
     }
 }
