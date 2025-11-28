@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Application.Services;
 using Core.Dtos;
 using Microsoft.AspNetCore.Mvc;
