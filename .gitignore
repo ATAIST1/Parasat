@@ -1,6 +1,10 @@
 # Build artifacts
 bin/
 obj/
+*.dll
+*.pdb
+*.cache
+*.log
 
 # .NET stuff
 *.dll
@@ -11,7 +15,4 @@ obj/
 # Frontend
 node_modules/
 
-# Environment files
-.env
-appsettings.json
-appsettings.Development.json
+
