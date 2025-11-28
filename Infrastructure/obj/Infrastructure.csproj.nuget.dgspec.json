@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Infrastructure\\Infrastructure.csproj": {}
+    "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Infrastructure\\Infrastructure.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Core\\Core.csproj": {
+    "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Core\\Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Core\\Core.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Core\\Core.csproj",
         "projectName": "Core",
-        "projectPath": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Core\\Core.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Core\\obj\\",
+        "projectPath": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Core\\Core.csproj",
+        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Core\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -72,21 +68,17 @@
         }
       }
     },
-    "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Infrastructure\\Infrastructure.csproj": {
+    "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Infrastructure\\Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Infrastructure\\obj\\",
+        "projectPath": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Infrastructure\\Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -98,8 +90,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Core\\Core.csproj": {
-                "projectPath": "C:\\Users\\HP\\Documents\\Stuff\\parasatcsharp\\mysolution\\Core\\Core.csproj"
+              "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Core\\Core.csproj": {
+                "projectPath": "C:\\Users\\admin\\Desktop\\ParasatInv\\Parasat\\Core\\Core.csproj"
               }
             }
           }
