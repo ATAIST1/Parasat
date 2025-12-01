@@ -1,6 +1,6 @@
 namespace Core.Dtos;
 
-public class BusinessDto
+public class BusinessFeedDto
 {
     public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;
@@ -17,7 +17,7 @@ public class BusinessDto
     public bool Verified { get; set; }
 }
 
-public class CreateBusinessDto
+public class CreateBusinessFeedDto
 {
     public string Name { get; set; } = null!;
     public string Industry { get; set; } = null!;
@@ -33,7 +33,7 @@ public class CreateBusinessDto
     public bool Verified { get; set; }
 }
 
-public class UpdateBusinessDto
+public class UpdateBusinessFeedDto
 {
     public string? Name { get; set; }
     public string? Industry { get; set; }
@@ -48,4 +48,5 @@ public class UpdateBusinessDto
     public string? Equity { get; set; }
     public bool? Verified { get; set; }
 }
+
 

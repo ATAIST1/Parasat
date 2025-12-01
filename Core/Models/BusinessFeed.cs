@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Core.Models;
 
-public class Business
+public class BusinessFeed
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -19,7 +19,9 @@ public class Business
     public string Founded { get; set; } = null!;
     public string InvestmentNeeded { get; set; } = null!;
     public string InvestmentGoal { get; set; } = null!;
-    public string Equity { get; set; } = null!; // e.g., "%"
+    public string Equity { get; set; } = null!;
     public bool Verified { get; set; }
 }
+
+
 

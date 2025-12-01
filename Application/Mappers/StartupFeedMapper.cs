@@ -4,11 +4,11 @@ using Core.Models;
 
 namespace Application.Mappers;
 
-public static class StartupMapper
+public static class StartupFeedMapper
 {
-    public static StartupDto ToDto(Startup startup)
+    public static StartupFeedDto ToDto(StartupFeed startup)
     {
-        return new StartupDto
+        return new StartupFeedDto
         {
             Id = startup.Id,
             Name = startup.Name,
@@ -23,9 +23,9 @@ public static class StartupMapper
         };
     }
 
-    public static Startup ToModel(CreateStartupDto dto)
+    public static StartupFeed ToModel(CreateStartupFeedDto dto)
     {
-        return new Startup
+        return new StartupFeed
         {
             Name = dto.Name,
             Stage = dto.Stage,

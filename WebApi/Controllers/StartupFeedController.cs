@@ -7,11 +7,11 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class StartupController : ControllerBase
+public class StartupFeedController : ControllerBase
 {
-    private readonly StartupService _startupService;
+    private readonly StartupFeedService _startupService;
 
-    public StartupController(StartupService startupService)
+    public StartupFeedController(StartupFeedService startupService)
     {
         _startupService = startupService;
     }
@@ -31,7 +31,7 @@ public class StartupController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateStartupDto dto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateStartupFeedDto dto)
     {
         var created = await _startupService.CreateAsync(dto);
 
@@ -39,7 +39,7 @@ public class StartupController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateStartupDto dto)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateStartupFeedDto dto)
     {
         var updated = await _startupService.UpdateAsync(id, dto);
         return updated ? NoContent() : NotFound();
@@ -52,4 +52,5 @@ public class StartupController : ControllerBase
         return deleted ? NoContent() : NotFound();
     }
 }
+
 

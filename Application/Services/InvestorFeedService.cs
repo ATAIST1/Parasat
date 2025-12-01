@@ -8,35 +8,35 @@ using Core.Models;
 
 namespace Application.Services;
 
-public class InvestorService
+public class InvestorFeedService
 {
-    private readonly IInvestorRepository _repository;
+    private readonly IInvestorFeedRepository _repository;
 
-    public InvestorService(IInvestorRepository repository)
+    public InvestorFeedService(IInvestorFeedRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<List<InvestorDto>> GetAllAsync()
+    public async Task<List<InvestorFeedDto>> GetAllAsync()
     {
         var investors = await _repository.GetAllAsync();
-        return investors.Select(InvestorMapper.ToDto).ToList();
+        return investors.Select(InvestorFeedMapper.ToDto).ToList();
     }
 
-    public async Task<InvestorDto?> GetByIdAsync(string id)
+    public async Task<InvestorFeedDto?> GetByIdAsync(string id)
     {
         var investor = await _repository.GetByIdAsync(id);
-        return investor != null ? InvestorMapper.ToDto(investor) : null;
+        return investor != null ? InvestorFeedMapper.ToDto(investor) : null;
     }
 
-    public async Task<InvestorDto> CreateAsync(CreateInvestorDto dto)
+    public async Task<InvestorFeedDto> CreateAsync(CreateInvestorFeedDto dto)
     {
-        var investor = InvestorMapper.ToModel(dto);
+        var investor = InvestorFeedMapper.ToModel(dto);
         await _repository.CreateAsync(investor);
-        return InvestorMapper.ToDto(investor);
+        return InvestorFeedMapper.ToDto(investor);
     }
 
-    public async Task<bool> UpdateAsync(string id, UpdateInvestorDto dto)
+    public async Task<bool> UpdateAsync(string id, UpdateInvestorFeedDto dto)
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null)
@@ -61,7 +61,7 @@ public class InvestorService
         return true;
     }
 
-    private static void ApplyUpdates(Investor investor, UpdateInvestorDto dto)
+    private static void ApplyUpdates(InvestorFeed investor, UpdateInvestorFeedDto dto)
     {
         if (!string.IsNullOrWhiteSpace(dto.Name))
             investor.Name = dto.Name;
@@ -83,4 +83,5 @@ public class InvestorService
             investor.Verified = dto.Verified.Value;
     }
 }
+
 

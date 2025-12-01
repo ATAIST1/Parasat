@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Core.Models;
 
-public class Startup
+public class StartupFeed
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -20,4 +20,6 @@ public class Startup
     public string Team { get; set; } = string.Empty;
     public List<string> Tags { get; set; } = new();
 }
+
+
 

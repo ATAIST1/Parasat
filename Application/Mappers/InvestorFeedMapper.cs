@@ -3,11 +3,11 @@ using Core.Models;
 
 namespace Application.Mappers;
 
-public static class InvestorMapper
+public static class InvestorFeedMapper
 {
-    public static InvestorDto ToDto(Investor investor)
+    public static InvestorFeedDto ToDto(InvestorFeed investor)
     {
-        return new InvestorDto
+        return new InvestorFeedDto
         {
             Id = investor.Id,
             Name = investor.Name,
@@ -22,9 +22,9 @@ public static class InvestorMapper
         };
     }
 
-    public static Investor ToModel(CreateInvestorDto dto)
+    public static InvestorFeed ToModel(CreateInvestorFeedDto dto)
     {
-        return new Investor
+        return new InvestorFeed
         {
             Name = dto.Name,
             Title = dto.Title,
@@ -38,4 +38,5 @@ public static class InvestorMapper
         };
     }
 }
+
 

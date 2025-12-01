@@ -7,11 +7,11 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DeveloperController : ControllerBase
+public class DeveloperFeedController : ControllerBase
 {
-    private readonly DeveloperService _developerService;
+    private readonly DeveloperFeedService _developerService;
 
-    public DeveloperController(DeveloperService developerService)
+    public DeveloperFeedController(DeveloperFeedService developerService)
     {
         _developerService = developerService;
     }
@@ -31,14 +31,14 @@ public class DeveloperController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateDeveloperDto dto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateDeveloperFeedDto dto)
     {
         var created = await _developerService.CreateAsync(dto);
         return Ok();
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateDeveloperDto dto)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateDeveloperFeedDto dto)
     {
         var updated = await _developerService.UpdateAsync(id, dto);
         return updated ? NoContent() : NotFound();
@@ -51,4 +51,5 @@ public class DeveloperController : ControllerBase
         return deleted ? NoContent() : NotFound();
     }
 }
+
 

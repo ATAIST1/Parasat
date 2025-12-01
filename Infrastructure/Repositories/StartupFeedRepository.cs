@@ -4,28 +4,29 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Repositories;
 
-public class StartupRepository : IStartupRepository
+public class StartupFeedRepository : IStartupFeedRepository
 {
-    private readonly IMongoCollection<Startup> _startups;
+    private readonly IMongoCollection<StartupFeed> _startups;
 
-    public StartupRepository(IMongoDatabase database)
+    public StartupFeedRepository(IMongoDatabase database)
     {
-        _startups = database.GetCollection<Startup>("startups_feed");
+        _startups = database.GetCollection<StartupFeed>("startups_feed");
     }
 
-    public async Task<List<Startup>> GetAllAsync()
+    public async Task<List<StartupFeed>> GetAllAsync()
         => await _startups.Find(_ => true).ToListAsync();
 
-    public async Task<Startup?> GetByIdAsync(string id)
+    public async Task<StartupFeed?> GetByIdAsync(string id)
         => await _startups.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    public async Task CreateAsync(Startup startup)
+    public async Task CreateAsync(StartupFeed startup)
         => await _startups.InsertOneAsync(startup);
 
-    public async Task UpdateAsync(Startup startup)
+    public async Task UpdateAsync(StartupFeed startup)
         => await _startups.ReplaceOneAsync(x => x.Id == startup.Id, startup);
 
     public async Task DeleteAsync(string id)
         => await _startups.DeleteOneAsync(x => x.Id == id);
 }
+
 

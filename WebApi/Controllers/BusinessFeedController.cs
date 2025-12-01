@@ -7,11 +7,11 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BusinessController : ControllerBase
+public class BusinessFeedController : ControllerBase
 {
-    private readonly BusinessService _businessService;
+    private readonly BusinessFeedService _businessService;
 
-    public BusinessController(BusinessService businessService)
+    public BusinessFeedController(BusinessFeedService businessService)
     {
         _businessService = businessService;
     }
@@ -31,14 +31,14 @@ public class BusinessController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateBusinessDto dto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateBusinessFeedDto dto)
     {
         var created = await _businessService.CreateAsync(dto);
         return Ok();
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateBusinessDto dto)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateBusinessFeedDto dto)
     {
         var updated = await _businessService.UpdateAsync(id, dto);
         return updated ? NoContent() : NotFound();
@@ -51,4 +51,5 @@ public class BusinessController : ControllerBase
         return deleted ? NoContent() : NotFound();
     }
 }
+
 

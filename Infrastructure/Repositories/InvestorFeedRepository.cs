@@ -4,28 +4,29 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Repositories;
 
-public class InvestorRepository : IInvestorRepository
+public class InvestorFeedRepository : IInvestorFeedRepository
 {
-    private readonly IMongoCollection<Investor> _investors;
+    private readonly IMongoCollection<InvestorFeed> _investors;
 
-    public InvestorRepository(IMongoDatabase database)
+    public InvestorFeedRepository(IMongoDatabase database)
     {
-        _investors = database.GetCollection<Investor>("investors_feed");
+        _investors = database.GetCollection<InvestorFeed>("investors_feed");
     }
 
-    public async Task<List<Investor>> GetAllAsync()
+    public async Task<List<InvestorFeed>> GetAllAsync()
         => await _investors.Find(_ => true).ToListAsync();
 
-    public async Task<Investor?> GetByIdAsync(string id)
+    public async Task<InvestorFeed?> GetByIdAsync(string id)
         => await _investors.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    public async Task CreateAsync(Investor investor)
+    public async Task CreateAsync(InvestorFeed investor)
         => await _investors.InsertOneAsync(investor);
 
-    public async Task UpdateAsync(Investor investor)
+    public async Task UpdateAsync(InvestorFeed investor)
         => await _investors.ReplaceOneAsync(x => x.Id == investor.Id, investor);
 
     public async Task DeleteAsync(string id)
         => await _investors.DeleteOneAsync(x => x.Id == id);
 }
+
 

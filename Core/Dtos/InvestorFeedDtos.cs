@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Core.Dtos;
 
-public class InvestorDto
+public class InvestorFeedDto
 {
     public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;
@@ -16,7 +16,7 @@ public class InvestorDto
     public bool Verified { get; set; }
 }
 
-public class CreateInvestorDto
+public class CreateInvestorFeedDto
 {
     public string Name { get; set; } = null!;
     public string Title { get; set; } = null!;
@@ -29,7 +29,7 @@ public class CreateInvestorDto
     public bool Verified { get; set; }
 }
 
-public class UpdateInvestorDto
+public class UpdateInvestorFeedDto
 {
     public string? Name { get; set; }
     public string? Title { get; set; }
@@ -41,4 +41,5 @@ public class UpdateInvestorDto
     public string? Exits { get; set; }
     public bool? Verified { get; set; }
 }
+
 

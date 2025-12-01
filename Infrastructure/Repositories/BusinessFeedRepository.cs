@@ -4,28 +4,29 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Repositories;
 
-public class BusinessRepository : IBusinessRepository
+public class BusinessFeedRepository : IBusinessFeedRepository
 {
-    private readonly IMongoCollection<Business> _businesses;
+    private readonly IMongoCollection<BusinessFeed> _businesses;
 
-    public BusinessRepository(IMongoDatabase database)
+    public BusinessFeedRepository(IMongoDatabase database)
     {
-        _businesses = database.GetCollection<Business>("businesses_feed");
+        _businesses = database.GetCollection<BusinessFeed>("businesses_feed");
     }
 
-    public async Task<List<Business>> GetAllAsync()
+    public async Task<List<BusinessFeed>> GetAllAsync()
         => await _businesses.Find(_ => true).ToListAsync();
 
-    public async Task<Business?> GetByIdAsync(string id)
+    public async Task<BusinessFeed?> GetByIdAsync(string id)
         => await _businesses.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    public async Task CreateAsync(Business business)
+    public async Task CreateAsync(BusinessFeed business)
         => await _businesses.InsertOneAsync(business);
 
-    public async Task UpdateAsync(Business business)
+    public async Task UpdateAsync(BusinessFeed business)
         => await _businesses.ReplaceOneAsync(x => x.Id == business.Id, business);
 
     public async Task DeleteAsync(string id)
         => await _businesses.DeleteOneAsync(x => x.Id == id);
 }
+
 

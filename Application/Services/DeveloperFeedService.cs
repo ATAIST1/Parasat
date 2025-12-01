@@ -8,35 +8,35 @@ using Core.Models;
 
 namespace Application.Services;
 
-public class DeveloperService
+public class DeveloperFeedService
 {
-    private readonly IDeveloperRepository _repository;
+    private readonly IDeveloperFeedRepository _repository;
 
-    public DeveloperService(IDeveloperRepository repository)
+    public DeveloperFeedService(IDeveloperFeedRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<List<DeveloperDto>> GetAllAsync()
+    public async Task<List<DeveloperFeedDto>> GetAllAsync()
     {
         var developers = await _repository.GetAllAsync();
-        return developers.Select(DeveloperMapper.ToDto).ToList();
+        return developers.Select(DeveloperFeedMapper.ToDto).ToList();
     }
 
-    public async Task<DeveloperDto?> GetByIdAsync(string id)
+    public async Task<DeveloperFeedDto?> GetByIdAsync(string id)
     {
         var developer = await _repository.GetByIdAsync(id);
-        return developer != null ? DeveloperMapper.ToDto(developer) : null;
+        return developer != null ? DeveloperFeedMapper.ToDto(developer) : null;
     }
 
-    public async Task<DeveloperDto> CreateAsync(CreateDeveloperDto dto)
+    public async Task<DeveloperFeedDto> CreateAsync(CreateDeveloperFeedDto dto)
     {
-        var developer = DeveloperMapper.ToModel(dto);
+        var developer = DeveloperFeedMapper.ToModel(dto);
         await _repository.CreateAsync(developer);
-        return DeveloperMapper.ToDto(developer);
+        return DeveloperFeedMapper.ToDto(developer);
     }
 
-    public async Task<bool> UpdateAsync(string id, UpdateDeveloperDto dto)
+    public async Task<bool> UpdateAsync(string id, UpdateDeveloperFeedDto dto)
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null)
@@ -61,7 +61,7 @@ public class DeveloperService
         return true;
     }
 
-    private static void ApplyUpdates(Developer developer, UpdateDeveloperDto dto)
+    private static void ApplyUpdates(DeveloperFeed developer, UpdateDeveloperFeedDto dto)
     {
         if (!string.IsNullOrWhiteSpace(dto.Name))
             developer.Name = dto.Name;
@@ -83,4 +83,5 @@ public class DeveloperService
             developer.Available = dto.Available.Value;
     }
 }
+
 

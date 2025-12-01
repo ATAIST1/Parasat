@@ -3,11 +3,11 @@ using Core.Models;
 
 namespace Application.Mappers;
 
-public static class BusinessMapper
+public static class BusinessFeedMapper
 {
-    public static BusinessDto ToDto(Business business)
+    public static BusinessFeedDto ToDto(BusinessFeed business)
     {
-        return new BusinessDto
+        return new BusinessFeedDto
         {
             Id = business.Id,
             Name = business.Name,
@@ -25,9 +25,9 @@ public static class BusinessMapper
         };
     }
 
-    public static Business ToModel(CreateBusinessDto dto)
+    public static BusinessFeed ToModel(CreateBusinessFeedDto dto)
     {
-        return new Business
+        return new BusinessFeed
         {
             Name = dto.Name,
             Industry = dto.Industry,
@@ -44,4 +44,5 @@ public static class BusinessMapper
         };
     }
 }
+
 

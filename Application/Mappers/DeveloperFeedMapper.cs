@@ -3,11 +3,11 @@ using Core.Models;
 
 namespace Application.Mappers;
 
-public static class DeveloperMapper
+public static class DeveloperFeedMapper
 {
-    public static DeveloperDto ToDto(Developer developer)
+    public static DeveloperFeedDto ToDto(DeveloperFeed developer)
     {
-        return new DeveloperDto
+        return new DeveloperFeedDto
         {
             Id = developer.Id,
             Name = developer.Name,
@@ -22,9 +22,9 @@ public static class DeveloperMapper
         };
     }
 
-    public static Developer ToModel(CreateDeveloperDto dto)
+    public static DeveloperFeed ToModel(CreateDeveloperFeedDto dto)
     {
-        return new Developer
+        return new DeveloperFeed
         {
             Name = dto.Name,
             Type = dto.Type,
@@ -38,4 +38,5 @@ public static class DeveloperMapper
         };
     }
 }
+
 

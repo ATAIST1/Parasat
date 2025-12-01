@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Core.Dtos;
 
-public class StartupDto
+public class StartupFeedDto
 {
     public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;
@@ -16,7 +16,7 @@ public class StartupDto
     public List<string> Tags { get; set; } = new();
 }
 
-public class CreateStartupDto
+public class CreateStartupFeedDto
 {
     public string Name { get; set; } = null!;
     public string Stage { get; set; } = null!;
@@ -29,7 +29,7 @@ public class CreateStartupDto
     public List<string> Tags { get; set; } = new();
 }
 
-public class UpdateStartupDto
+public class UpdateStartupFeedDto
 {
     public string? Name { get; set; }
     public string? Stage { get; set; }
@@ -41,4 +41,5 @@ public class UpdateStartupDto
     public string? Team { get; set; }
     public List<string>? Tags { get; set; }
 }
+
 

@@ -8,35 +8,35 @@ using Core.Models;
 
 namespace Application.Services;
 
-public class BusinessService
+public class BusinessFeedService
 {
-    private readonly IBusinessRepository _repository;
+    private readonly IBusinessFeedRepository _repository;
 
-    public BusinessService(IBusinessRepository repository)
+    public BusinessFeedService(IBusinessFeedRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<List<BusinessDto>> GetAllAsync()
+    public async Task<List<BusinessFeedDto>> GetAllAsync()
     {
         var businesses = await _repository.GetAllAsync();
-        return businesses.Select(BusinessMapper.ToDto).ToList();
+        return businesses.Select(BusinessFeedMapper.ToDto).ToList();
     }
 
-    public async Task<BusinessDto?> GetByIdAsync(string id)
+    public async Task<BusinessFeedDto?> GetByIdAsync(string id)
     {
         var business = await _repository.GetByIdAsync(id);
-        return business != null ? BusinessMapper.ToDto(business) : null;
+        return business != null ? BusinessFeedMapper.ToDto(business) : null;
     }
 
-    public async Task<BusinessDto> CreateAsync(CreateBusinessDto dto)
+    public async Task<BusinessFeedDto> CreateAsync(CreateBusinessFeedDto dto)
     {
-        var business = BusinessMapper.ToModel(dto);
+        var business = BusinessFeedMapper.ToModel(dto);
         await _repository.CreateAsync(business);
-        return BusinessMapper.ToDto(business);
+        return BusinessFeedMapper.ToDto(business);
     }
 
-    public async Task<bool> UpdateAsync(string id, UpdateBusinessDto dto)
+    public async Task<bool> UpdateAsync(string id, UpdateBusinessFeedDto dto)
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null)
@@ -61,7 +61,7 @@ public class BusinessService
         return true;
     }
 
-    private static void ApplyUpdates(Business business, UpdateBusinessDto dto)
+    private static void ApplyUpdates(BusinessFeed business, UpdateBusinessFeedDto dto)
     {
         if (!string.IsNullOrWhiteSpace(dto.Name))
             business.Name = dto.Name;
@@ -89,4 +89,5 @@ public class BusinessService
             business.Verified = dto.Verified.Value;
     }
 }
+
 

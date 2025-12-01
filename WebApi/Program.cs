@@ -38,16 +38,18 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 
 // === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IStartupRepository, StartupRepository>();
-builder.Services.AddScoped<IInvestorRepository, InvestorRepository>();
-builder.Services.AddScoped<IDeveloperRepository, DeveloperRepository>();
-builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
+builder.Services.AddScoped<IStartupFeedRepository, StartupFeedRepository>();
+builder.Services.AddScoped<IInvestorFeedRepository, InvestorFeedRepository>();
+builder.Services.AddScoped<IDeveloperFeedRepository, DeveloperFeedRepository>();
+builder.Services.AddScoped<IBusinessFeedRepository, BusinessFeedRepository>();
+builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<StartupService>();
-builder.Services.AddScoped<InvestorService>();
-builder.Services.AddScoped<DeveloperService>();
-builder.Services.AddScoped<BusinessService>();
+builder.Services.AddScoped<StartupFeedService>();
+builder.Services.AddScoped<InvestorFeedService>();
+builder.Services.AddScoped<DeveloperFeedService>();
+builder.Services.AddScoped<BusinessFeedService>();
+builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AuthService>();
 
 // === JWT Authentication ===

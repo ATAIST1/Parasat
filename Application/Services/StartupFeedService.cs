@@ -8,35 +8,35 @@ using Core.Models;
 
 namespace Application.Services;
 
-public class StartupService
+public class StartupFeedService
 {
-    private readonly IStartupRepository _repository;
+    private readonly IStartupFeedRepository _repository;
 
-    public StartupService(IStartupRepository repository)
+    public StartupFeedService(IStartupFeedRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<List<StartupDto>> GetAllAsync()
+    public async Task<List<StartupFeedDto>> GetAllAsync()
     {
         var startups = await _repository.GetAllAsync();
-        return startups.Select(StartupMapper.ToDto).ToList();
+        return startups.Select(StartupFeedMapper.ToDto).ToList();
     }
 
-    public async Task<StartupDto?> GetByIdAsync(string id)
+    public async Task<StartupFeedDto?> GetByIdAsync(string id)
     {
         var startup = await _repository.GetByIdAsync(id);
-        return startup != null ? StartupMapper.ToDto(startup) : null;
+        return startup != null ? StartupFeedMapper.ToDto(startup) : null;
     }
 
-    public async Task<StartupDto> CreateAsync(CreateStartupDto dto)
+    public async Task<StartupFeedDto> CreateAsync(CreateStartupFeedDto dto)
     {
-        var startup = StartupMapper.ToModel(dto);
+        var startup = StartupFeedMapper.ToModel(dto);
         await _repository.CreateAsync(startup);
-        return StartupMapper.ToDto(startup);
+        return StartupFeedMapper.ToDto(startup);
     }
 
-    public async Task<bool> UpdateAsync(string id, UpdateStartupDto dto)
+    public async Task<bool> UpdateAsync(string id, UpdateStartupFeedDto dto)
     {
         var existing = await _repository.GetByIdAsync(id);
         if (existing == null)
@@ -61,7 +61,7 @@ public class StartupService
         return true;
     }
 
-    private static void ApplyUpdates(Startup startup, UpdateStartupDto dto)
+    private static void ApplyUpdates(StartupFeed startup, UpdateStartupFeedDto dto)
     {
         if (!string.IsNullOrWhiteSpace(dto.Name))
             startup.Name = dto.Name;
@@ -83,4 +83,5 @@ public class StartupService
             startup.Tags = dto.Tags;
     }
 }
+
 

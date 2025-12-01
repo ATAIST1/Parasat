@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Core.Models;
 
-public class Developer
+public class DeveloperFeed
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -17,7 +17,9 @@ public class Developer
     public List<string> Stack { get; set; } = new();
     public string Projects { get; set; } = string.Empty;
     public string Experience { get; set; } = string.Empty;
-    public string Rate { get; set; } = null!; // e.g., "800,000 ₸/месяц"
+    public string Rate { get; set; } = null!; //
     public bool Available { get; set; }
 }
+
+
 

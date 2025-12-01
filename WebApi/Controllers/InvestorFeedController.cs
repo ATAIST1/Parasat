@@ -7,11 +7,11 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class InvestorController : ControllerBase
+public class InvestorFeedController : ControllerBase
 {
-    private readonly InvestorService _investorService;
+    private readonly InvestorFeedService _investorService;
 
-    public InvestorController(InvestorService investorService)
+    public InvestorFeedController(InvestorFeedService investorService)
     {
         _investorService = investorService;
     }
@@ -31,14 +31,14 @@ public class InvestorController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateInvestorDto dto)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateInvestorFeedDto dto)
     {
         var created = await _investorService.CreateAsync(dto);
         return Ok();
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateInvestorDto dto)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateInvestorFeedDto dto)
     {
         var updated = await _investorService.UpdateAsync(id, dto);
         return updated ? NoContent() : NotFound();
@@ -51,4 +51,5 @@ public class InvestorController : ControllerBase
         return deleted ? NoContent() : NotFound();
     }
 }
+
 
