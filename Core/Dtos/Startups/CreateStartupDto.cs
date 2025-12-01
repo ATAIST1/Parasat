@@ -39,8 +39,7 @@ namespace Core.Dtos.Startups
         public long? Revenue { get; set; }
         public int? DAU { get; set; }
         public int? MAU { get; set; }
-        public int? GrowthPercentage { get; set; }
-
+        public double? GrowthPercentage { get; set; }
         public string? PitchDeckUrl { get; set; }
         public string? FinancialModelUrl { get; set; }
 
