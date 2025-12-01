@@ -42,6 +42,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>(); // ← ДОБАВЬ ЭТУ СТРОЧКУ! Без неё AuthController не запустится!
 builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
 builder.Services.AddScoped<StartupService>();
+builder.Services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
+builder.Services.AddScoped<DeveloperProfileService>();
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
