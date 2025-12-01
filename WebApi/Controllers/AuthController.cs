@@ -2,6 +2,7 @@ using Core.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Application.Services;
 using Application.Mappers;
+
 namespace WebApi.Controllers;
 
 [Route("api/[controller]")]
@@ -54,6 +55,19 @@ public class AuthController : ControllerBase
         catch (Exception)
         {
             return Unauthorized("Invalid refresh token");
+        }
+    }
+    [HttpPost("google")]
+    public async Task<ActionResult<TokenResponse>> GoogleLogin([FromBody] GoogleLoginDto dto)
+    {
+        try
+        {
+            var tokens = await _authService.LoginWithGoogleAsync(dto);
+            return Ok(tokens);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

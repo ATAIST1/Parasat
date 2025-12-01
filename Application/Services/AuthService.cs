@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Google.Apis.Auth;
 
 namespace Application.Services;
 
@@ -122,5 +123,42 @@ public class AuthService
         }, out var validatedToken);
 
         return handler.ValidateToken(token, new TokenValidationParameters(), out validatedToken);
+    }
+    public async Task<TokenResponse> LoginWithGoogleAsync(GoogleLoginDto dto)
+    {
+        var clientId = _config["Google:ClientId"]
+            ?? throw new InvalidOperationException("Google ClientId not configured");
+
+        // Валидируем Google-токен
+        var payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(dto.IdToken, new GoogleJsonWebSignature.ValidationSettings
+        {
+            Audience = new[] { clientId }
+        });
+
+        // Ищем или создаём пользователя по email
+        var user = await _userRepo.GetByEmailAsync(payload.Email);
+        if (user == null)
+        {
+            user = new User
+            {
+                Name = payload.Name,
+                Email = payload.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(
+                    Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+                ), // рандомный хеш
+                Role = "User"
+            };
+            await _userRepo.AddAsync(user);
+        }
+
+        // Выдаём твои JWT-токены
+        var accessToken = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        user.RefreshTokens ??= new List<string>();
+        user.RefreshTokens.Add(refreshToken);
+        await _userRepo.UpdateAsync(user);
+
+        return new TokenResponse(accessToken, refreshToken);
     }
 }
