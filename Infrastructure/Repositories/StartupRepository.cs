@@ -1,45 +1,47 @@
 using Core.Interfaces;
 using Core.Models;
-using System.Linq;
+using MongoDB.Driver;
 
 namespace Infrastructure.Repositories
 {
-    public class StartupRepository : Core.Interfaces.IStartupRepository
+    public class StartupRepository : IStartupRepository
     {
-        private readonly List<Startup> _store = new();
+        private readonly IMongoCollection<Startup> _collection;
 
-        public Task<IEnumerable<Startup>> GetAllAsync()
+        public StartupRepository(IMongoDatabase database)
         {
-            return Task.FromResult(_store.AsEnumerable());
+            _collection = database.GetCollection<Startup>("startups");
         }
 
-        public Task<Startup?> GetByIdAsync(string id)
+        public async Task<IEnumerable<Startup>> GetAllAsync()
         {
-            return Task.FromResult(_store.FirstOrDefault(x => x.Id == id));
+            return await _collection.Find(_ => true).ToListAsync();
         }
 
-        public Task AddAsync(Startup startup)
+        public async Task<Startup?> GetByIdAsync(string id)
         {
-            _store.Add(startup);
-            return Task.CompletedTask;
+            return await _collection
+                .Find(x => x.Id == id)
+                .FirstOrDefaultAsync();
         }
 
-        public Task<bool> UpdateAsync(Startup startup)
+        public async Task AddAsync(Startup startup)
         {
-            var index = _store.FindIndex(x => x.Id == startup.Id);
-            if (index == -1) return Task.FromResult(false);
-
-            _store[index] = startup;
-            return Task.FromResult(true);
+            await _collection.InsertOneAsync(startup);
         }
 
-        public Task<bool> DeleteAsync(string id)
+        public async Task<bool> UpdateAsync(Startup startup)
         {
-            var existing = _store.FirstOrDefault(x => x.Id == id);
-            if (existing == null) return Task.FromResult(false);
+            var result = await _collection
+                .ReplaceOneAsync(x => x.Id == startup.Id, startup);
 
-            _store.Remove(existing);
-            return Task.FromResult(true);
+            return result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> DeleteAsync(string id)
+        {
+            var result = await _collection.DeleteOneAsync(x => x.Id == id);
+            return result.DeletedCount > 0;
         }
     }
 }
