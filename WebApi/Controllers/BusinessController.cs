@@ -34,7 +34,7 @@ public class BusinessController : ControllerBase
     public async Task<IActionResult> CreateAsync([FromBody] CreateBusinessDto dto)
     {
         var created = await _businessService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+        return Ok();
     }
 
     [HttpPut("{id}")]

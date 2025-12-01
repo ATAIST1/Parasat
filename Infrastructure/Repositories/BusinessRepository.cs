@@ -10,7 +10,7 @@ public class BusinessRepository : IBusinessRepository
 
     public BusinessRepository(IMongoDatabase database)
     {
-        _businesses = database.GetCollection<Business>("businesses");
+        _businesses = database.GetCollection<Business>("businesses_feed");
     }
 
     public async Task<List<Business>> GetAllAsync()

@@ -10,7 +10,7 @@ public class StartupRepository : IStartupRepository
 
     public StartupRepository(IMongoDatabase database)
     {
-        _startups = database.GetCollection<Startup>("startups");
+        _startups = database.GetCollection<Startup>("startups_feed");
     }
 
     public async Task<List<Startup>> GetAllAsync()

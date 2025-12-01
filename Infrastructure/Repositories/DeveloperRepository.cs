@@ -10,7 +10,7 @@ public class DeveloperRepository : IDeveloperRepository
 
     public DeveloperRepository(IMongoDatabase database)
     {
-        _developers = database.GetCollection<Developer>("developers");
+        _developers = database.GetCollection<Developer>("developers_feed");
     }
 
     public async Task<List<Developer>> GetAllAsync()

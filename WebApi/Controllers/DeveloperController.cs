@@ -34,7 +34,7 @@ public class DeveloperController : ControllerBase
     public async Task<IActionResult> CreateAsync([FromBody] CreateDeveloperDto dto)
     {
         var created = await _developerService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+        return Ok();
     }
 
     [HttpPut("{id}")]

@@ -10,7 +10,7 @@ public class InvestorRepository : IInvestorRepository
 
     public InvestorRepository(IMongoDatabase database)
     {
-        _investors = database.GetCollection<Investor>("investors");
+        _investors = database.GetCollection<Investor>("investors_feed");
     }
 
     public async Task<List<Investor>> GetAllAsync()

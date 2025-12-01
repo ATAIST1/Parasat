@@ -34,7 +34,7 @@ public class InvestorController : ControllerBase
     public async Task<IActionResult> CreateAsync([FromBody] CreateInvestorDto dto)
     {
         var created = await _investorService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+        return Ok();
     }
 
     [HttpPut("{id}")]

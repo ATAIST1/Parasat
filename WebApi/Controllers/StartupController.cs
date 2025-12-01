@@ -34,7 +34,8 @@ public class StartupController : ControllerBase
     public async Task<IActionResult> CreateAsync([FromBody] CreateStartupDto dto)
     {
         var created = await _startupService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+
+        return Ok();
     }
 
     [HttpPut("{id}")]
