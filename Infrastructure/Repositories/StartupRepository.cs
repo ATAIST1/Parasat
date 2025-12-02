@@ -21,6 +21,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Startup>> GetAllAsync(
             string? search = null,
             string? industry = null,
+            string? subIndustry = null,
             string? city = null)
         {
             var filter = Builders<Startup>.Filter.Empty;
@@ -44,6 +45,11 @@ namespace Infrastructure.Repositories
             if (!string.IsNullOrWhiteSpace(industry))
             {
                 filter &= Builders<Startup>.Filter.Eq(x => x.Industry, industry);
+            }
+
+            if (!string.IsNullOrWhiteSpace(subIndustry))
+            {
+                filter &= Builders<Startup>.Filter.Eq(x => x.SubIndustry, subIndustry);
             }
 
             if (!string.IsNullOrWhiteSpace(city))

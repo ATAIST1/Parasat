@@ -14,6 +14,16 @@ namespace Application.Services
             _repo = repo;
         }
 
+        public async Task<List<InvestmentRequestResponseDto>> GetAllAsync(
+            string? search = null,
+            string? industry = null,
+            string? profitRange = null,
+            string? equityRange = null)
+        {
+            var requests = await _repo.GetAllAsync(search, industry, profitRange, equityRange);
+            return requests.Select(InvestmentRequestMapper.ToResponseDto).ToList();
+        }
+
         public async Task<List<InvestmentRequestResponseDto>> GetAllAsync()
         {
             var requests = await _repo.GetAllAsync();

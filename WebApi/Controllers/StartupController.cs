@@ -20,9 +20,10 @@ namespace WebApi.Controllers
         public async Task<ActionResult<List<StartupResponseDto>>> GetAll(
         [FromQuery] string? search,
         [FromQuery] string? industry,
+        [FromQuery] string? subIndustry,
         [FromQuery] string? city)
         {
-            var startups = await _service.GetAllAsync(search, industry, city);
+            var startups = await _service.GetAllAsync(search, industry, subIndustry, city);
             return Ok(startups);
         }
 

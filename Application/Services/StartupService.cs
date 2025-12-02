@@ -18,9 +18,10 @@ namespace Application.Services
         public async Task<List<StartupResponseDto>> GetAllAsync(
             string? search = null,
             string? industry = null,
+            string? subIndustry = null,
             string? city = null)
         {
-            var list = await _repo.GetAllAsync(search, industry, city);
+            var list = await _repo.GetAllAsync(search, industry, subIndustry, city);
             return list.Select(StartupResponseDto.FromModel).ToList();
         }
 

@@ -10,5 +10,11 @@ namespace Core.Interfaces
         Task AddAsync(InvestmentRequest request);
         Task<bool> UpdateAsync(InvestmentRequest request);
         Task<bool> DeleteAsync(string id);
+
+        Task<List<InvestmentRequest>> GetAllAsync(
+                    string? search = null,
+                    string? industry = null,
+                    string? profitRange = null,
+                    string? equityRange = null);
     }
 }

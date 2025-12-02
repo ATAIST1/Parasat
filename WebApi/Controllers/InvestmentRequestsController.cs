@@ -23,9 +23,20 @@ namespace WebApi.Controllers
         //private string CurrentUserId => _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value 
                                       //?? throw new UnauthorizedAccessException();
 
+//         [HttpGet]
+//         public async Task<ActionResult<List<InvestmentRequestResponseDto>>> GetAll()
+//             => Ok(await _service.GetAllAsync());
+
         [HttpGet]
-        public async Task<ActionResult<List<InvestmentRequestResponseDto>>> GetAll()
-            => Ok(await _service.GetAllAsync());
+        public async Task<ActionResult<List<InvestmentRequestResponseDto>>> GetAll(
+            [FromQuery] string? search,
+            [FromQuery] string? industry,
+            [FromQuery] string? profitRange,
+            [FromQuery] string? equityRange)
+        {
+            var requests = await _service.GetAllAsync(search, industry, profitRange, equityRange);
+            return Ok(requests);
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<InvestmentRequestResponseDto>> GetById(string id)
