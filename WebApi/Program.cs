@@ -39,10 +39,6 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 
 // === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IStartupFeedRepository, StartupFeedRepository>();
-builder.Services.AddScoped<IInvestorFeedRepository, InvestorFeedRepository>();
-builder.Services.AddScoped<IDeveloperFeedRepository, DeveloperFeedRepository>();
-builder.Services.AddScoped<IBusinessFeedRepository, BusinessFeedRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
