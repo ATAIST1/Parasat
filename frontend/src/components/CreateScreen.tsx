@@ -14,6 +14,7 @@ interface CreateScreenProps {
 export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps) {
   const [selectedType, setSelectedType] = useState<'project' | 'mandate' | 'developer' | 'business' | null>(null);
 
+  // ЭТО ГЛАВНОЕ ИЗМЕНЕНИЕ — ПЕРЕДАЁМ ПРОПСЫ ПРАВИЛЬНО!
   if (selectedType === 'project') {
     return (
       <ProjectForm
@@ -62,6 +63,7 @@ export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps
     );
   }
 
+  // Остальное — без изменений
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-md mx-auto space-y-8 pt-8">

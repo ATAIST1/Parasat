@@ -39,14 +39,29 @@ namespace WebApi.Controllers
 
         // POST api/startup
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateStartupDto model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+[HttpPost]
+public async Task<IActionResult> Create([FromBody] CreateStartupDto dto)
+{
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
-            await _service.CreateAsync(model);
-            return Ok(new { message = "Startup successfully created" });
-        }
+    await _service.CreateAsync(dto);
+    return Ok(new { message = "Startup created" });
+}
+
+private async Task<string> SaveFileAsync(IFormFile file, string folderName)
+{
+    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", folderName);
+    Directory.CreateDirectory(uploadsFolder);
+
+    var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+    await using var stream = new FileStream(filePath, FileMode.Create);
+    await file.CopyToAsync(stream);
+
+    return $"/uploads/{folderName}/{uniqueFileName}";
+}
 
         // PUT api/startup
         [HttpPut("{id}")]
