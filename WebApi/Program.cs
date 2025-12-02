@@ -43,6 +43,13 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<AuthService>(); // ← ДОБАВЬ ЭТУ СТРОЧКУ! Без неё AuthController не запустится!
+builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
+builder.Services.AddScoped<StartupService>();
+builder.Services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
+builder.Services.AddScoped<DeveloperProfileService>();
+builder.Services.AddScoped<IInvestmentRequestRepository, InvestmentRequestRepository>();
+builder.Services.AddScoped<InvestmentRequestService>();
+builder.Services.AddHttpContextAccessor();
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -91,6 +98,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
 
 var app = builder.Build();
 
