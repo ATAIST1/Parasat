@@ -1,27 +1,67 @@
-import { Settings, CreditCard, Shield, HelpCircle, ChevronRight, Bookmark, FileText, Calculator } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Settings,
+  CreditCard,
+  Shield,
+  HelpCircle,
+  ChevronRight,
+  Bookmark,
+  FileText,
+  Calculator,
+} from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 
+import MyProjectsScreen from './MyProjectsScreen';
+import FavoritesScreen from './FavoritesScreen';
+
 interface ProfileScreenProps {
   user: any;
-  navigateTo: (screen: any) => void;
+  navigateTo: (screen: string) => void;
 }
 
 export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) {
+  const [currentScreen, setCurrentScreen] = useState<'profile' | 'my-projects' | 'favorites'>('profile');
+
+  const myProjectsCount = 2;
+  const favoritesCount = 7;
+
+  if (currentScreen === 'my-projects') {
+    return (
+      <MyProjectsScreen
+        navigateTo={(screen) => {
+          if (screen === 'back') setCurrentScreen('profile');
+          else navigateTo(screen);
+        }}
+      />
+    );
+  }
+
+  if (currentScreen === 'favorites') {
+  return (
+    <FavoritesScreen
+      navigateTo={(screen) => {
+        if (screen === 'back') setCurrentScreen('profile');
+        else navigateTo(screen);
+      }}
+    />
+  );
+}
+
   const menuItems = [
     {
       icon: FileText,
       title: 'Мои проекты',
-      subtitle: '2 активных',
-      action: () => {},
+      subtitle: `${myProjectsCount} активных`,
+      action: () => setCurrentScreen('my-projects'),
     },
     {
       icon: Bookmark,
       title: 'Избранное',
-      subtitle: '5 проектов',
-      action: () => {},
+      subtitle: `${favoritesCount} элементов`,
+      action: () => setCurrentScreen('favorites'),
     },
     {
       icon: Calculator,
@@ -103,9 +143,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="text-gray-900">{item.title}</h3>
-                  {item.subtitle && (
-                    <p className="text-sm text-gray-500">{item.subtitle}</p>
-                  )}
+                  {item.subtitle && <p className="text-sm text-gray-500">{item.subtitle}</p>}
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
               </button>
