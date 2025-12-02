@@ -5,7 +5,6 @@ using MongoDB.Driver;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,8 +38,20 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 
 // === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IStartupFeedRepository, StartupFeedRepository>();
+builder.Services.AddScoped<IInvestorFeedRepository, InvestorFeedRepository>();
+builder.Services.AddScoped<IDeveloperFeedRepository, DeveloperFeedRepository>();
+builder.Services.AddScoped<IBusinessFeedRepository, BusinessFeedRepository>();
+builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
+
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<StartupFeedService>();
+builder.Services.AddScoped<InvestorFeedService>();
+builder.Services.AddScoped<DeveloperFeedService>();
+builder.Services.AddScoped<BusinessFeedService>();
+builder.Services.AddScoped<BookmarkService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<AuthService>(); // ← ДОБАВЬ ЭТУ СТРОЧКУ! Без неё AuthController не запустится!
 builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
