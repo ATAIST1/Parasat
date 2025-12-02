@@ -18,6 +18,47 @@ namespace Infrastructure.Repositories
             return await _collection.Find(_ => true).ToListAsync();
         }
 
+        public async Task<IEnumerable<Startup>> GetAllAsync(
+            string? search = null,
+            string? industry = null,
+            string? city = null)
+        {
+            var filter = Builders<Startup>.Filter.Empty;
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                var searchFilter = Builders<Startup>.Filter.Or(
+                    Builders<Startup>.Filter.Regex(x => x.ProjectName,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")),
+                    Builders<Startup>.Filter.Regex(x => x.Title,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")),
+                    Builders<Startup>.Filter.Regex(x => x.Description,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")),
+                    Builders<Startup>.Filter.Where(x => x.Technologies != null &&
+                        x.Technologies.Any(t => t.ToLower().Contains(searchLower)))
+                );
+                filter &= searchFilter;
+            }
+
+            if (!string.IsNullOrWhiteSpace(industry))
+            {
+                filter &= Builders<Startup>.Filter.Eq(x => x.Industry, industry);
+            }
+
+            if (!string.IsNullOrWhiteSpace(city))
+            {
+                filter &= Builders<Startup>.Filter.Regex(x => x.City,
+                    new MongoDB.Bson.BsonRegularExpression(city, "i"));
+            }
+
+            filter &= Builders<Startup>.Filter.Eq(x => x.Status, "published");
+
+            return await _collection.Find(filter)
+                .SortByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<Startup?> GetByIdAsync(string id)
         {
             return await _collection

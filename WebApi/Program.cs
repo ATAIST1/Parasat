@@ -47,10 +47,6 @@ builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<StartupFeedService>();
-builder.Services.AddScoped<InvestorFeedService>();
-builder.Services.AddScoped<DeveloperFeedService>();
-builder.Services.AddScoped<BusinessFeedService>();
 builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ChatService>();

@@ -17,9 +17,12 @@ namespace WebApi.Controllers
 
         // GET api/startup
         [HttpGet]
-        public async Task<ActionResult<List<StartupResponseDto>>> GetAll()
+        public async Task<ActionResult<List<StartupResponseDto>>> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] string? industry,
+        [FromQuery] string? city)
         {
-            var startups = await _service.GetAllAsync();
+            var startups = await _service.GetAllAsync(search, industry, city);
             return Ok(startups);
         }
 

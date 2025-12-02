@@ -15,11 +15,20 @@ namespace Application.Services
             _repo = repo;
         }
 
-        public async Task<List<StartupResponseDto>> GetAllAsync()
+        public async Task<List<StartupResponseDto>> GetAllAsync(
+            string? search = null,
+            string? industry = null,
+            string? city = null)
         {
-            var list = await _repo.GetAllAsync();
+            var list = await _repo.GetAllAsync(search, industry, city);
             return list.Select(StartupResponseDto.FromModel).ToList();
         }
+
+//         public async Task<List<StartupResponseDto>> GetAllAsync()
+//         {
+//             var list = await _repo.GetAllAsync();
+//             return list.Select(StartupResponseDto.FromModel).ToList();
+//         }
 
         public async Task<StartupResponseDto?> GetByIdAsync(string id)
         {
