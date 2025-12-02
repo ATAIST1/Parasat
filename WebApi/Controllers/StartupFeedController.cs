@@ -17,9 +17,14 @@ public class StartupFeedController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync(
+        [FromQuery] string? search,
+        [FromQuery] string? stage,
+        [FromQuery] string? industry,
+        [FromQuery] string? location
+        )  
     {
-        var startups = await _startupService.GetAllAsync();
+        var startups = await _startupService.GetAllAsync(search, stage, industry, location);
         return Ok(startups);
     }
 

@@ -17,6 +17,16 @@ public class StartupFeedService
         _repository = repository;
     }
 
+    public async Task<List<StartupFeedDto>> GetAllAsync(
+        string? search = null,
+        string? stage = null,
+        string? industry = null,
+        string? location = null)
+    {
+        var startups = await _repository.GetAllAsync(search, stage, industry, location);
+        return startups.Select(StartupFeedMapper.ToDto).ToList();
+    }
+
     public async Task<List<StartupFeedDto>> GetAllAsync()
     {
         var startups = await _repository.GetAllAsync();
