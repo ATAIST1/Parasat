@@ -47,7 +47,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ChatService>();
-builder.Services.AddScoped<AuthService>(); // ← ДОБАВЬ ЭТУ СТРОЧКУ! Без неё AuthController не запустится!
+builder.Services.AddScoped<AuthService>(); 
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
 builder.Services.AddScoped<StartupService>();
 builder.Services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
