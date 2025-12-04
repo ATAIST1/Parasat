@@ -1,6 +1,7 @@
 using Application.Services;
 using Core.Dtos.Startups;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace WebApi.Controllers
 {
@@ -18,10 +19,10 @@ namespace WebApi.Controllers
         // GET api/startup
         [HttpGet]
         public async Task<ActionResult<List<StartupResponseDto>>> GetAll(
-        [FromQuery] string? search,
-        [FromQuery] string? industry,
-        [FromQuery] string? subIndustry,
-        [FromQuery] string? city)
+            [FromQuery] string? search,
+            [FromQuery] string? industry,
+            [FromQuery] string? subIndustry,
+            [FromQuery] string? city)
         {
             var startups = await _service.GetAllAsync(search, industry, subIndustry, city);
             return Ok(startups);
@@ -39,46 +40,57 @@ namespace WebApi.Controllers
         }
 
         // POST api/startup
+        // Accepts form-data: all CreateStartupDto fields + optional file "pitchDeck"
         [HttpPost]
-[HttpPost]
-public async Task<IActionResult> Create([FromBody] CreateStartupDto dto)
-{
-    if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-
-    await _service.CreateAsync(dto);
-    return Ok(new { message = "Startup created" });
-}
-
-private async Task<string> SaveFileAsync(IFormFile file, string folderName)
-{
-    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", folderName);
-    Directory.CreateDirectory(uploadsFolder);
-
-    var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-    await using var stream = new FileStream(filePath, FileMode.Create);
-    await file.CopyToAsync(stream);
-
-    return $"/uploads/{folderName}/{uniqueFileName}";
-}
-
-        // PUT api/startup
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateStartupDto dto)
+        public async Task<IActionResult> Create(
+            [FromForm] CreateStartupDto dto,
+            IFormFile? pitchDeck)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var success = await _service.UpdateAsync(id, dto);
+            Stream? pitchDeckStream = null;
+            string? pitchDeckContentType = null;
+
+            if (pitchDeck is { Length: > 0 })
+            {
+                pitchDeckStream = pitchDeck.OpenReadStream();
+                pitchDeckContentType = pitchDeck.ContentType;
+            }
+
+            await _service.CreateAsync(dto, pitchDeckStream, pitchDeckContentType);
+
+            return Ok(new { message = "Startup created" });
+        }
+
+        // PUT api/startup/{id}
+        // Accepts form-data: all UpdateStartupDto fields + optional file "pitchDeck"
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(
+            string id,
+            [FromForm] UpdateStartupDto dto,
+            IFormFile? pitchDeck)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            Stream? pitchDeckStream = null;
+            string? pitchDeckContentType = null;
+
+            if (pitchDeck is { Length: > 0 })
+            {
+                pitchDeckStream = pitchDeck.OpenReadStream();
+                pitchDeckContentType = pitchDeck.ContentType;
+            }
+
+            var success = await _service.UpdateAsync(id, dto, pitchDeckStream, pitchDeckContentType);
             if (!success)
                 return NotFound();
 
             return NoContent();
         }
 
-        // DELETE api/startup
+        // DELETE api/startup/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

@@ -29,8 +29,8 @@ namespace Core.Models
         public int? MAU { get; set; }
         public double? GrowthPercentage { get; set; }
 
-        public string PitchDeckUrl { get; set; }
-        public string FinancialModelUrl { get; set; }
+        public string? PitchDeckKey { get; set; }
+        public string? FinancialModelKey { get; set; }
         public List<string> ExternalLinks { get; set; } = new();
 
         public string Status { get; set; } = "draft";
