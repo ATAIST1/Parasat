@@ -21,7 +21,7 @@ public class BookmarkRepository : IBookmarkRepository
     public async Task<Bookmark?> GetByIdAsync(string id)
         => await _bookmarks.Find(b => b.Id == id).FirstOrDefaultAsync();
 
-    public async Task<Bookmark?> GetByUserAndItemAsync(string userId, string itemId, string itemType)
+    public async Task<Bookmark?> GetByUserAndItemAsync(string userId, string itemId, BookmarkItemType itemType)
         => await _bookmarks.Find(b => b.UserId == userId && b.ItemId == itemId && b.ItemType == itemType)
             .FirstOrDefaultAsync();
 
@@ -31,7 +31,7 @@ public class BookmarkRepository : IBookmarkRepository
     public async Task DeleteAsync(string id)
         => await _bookmarks.DeleteOneAsync(b => b.Id == id);
 
-    public async Task DeleteByUserAndItemAsync(string userId, string itemId, string itemType)
+    public async Task DeleteByUserAndItemAsync(string userId, string itemId, BookmarkItemType itemType)
         => await _bookmarks.DeleteOneAsync(b => b.UserId == userId && b.ItemId == itemId && b.ItemType == itemType);
 }
 

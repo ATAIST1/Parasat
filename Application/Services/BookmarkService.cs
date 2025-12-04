@@ -22,15 +22,15 @@ public class BookmarkService
         return bookmarks.Select(BookmarkMapper.ToDto).ToList();
     }
 
-    public async Task<BookmarkDto?> CreateAsync(CreateBookmarkDto dto)
+    public async Task<BookmarkDto?> CreateAsync(CreateBookmarkDto dto, string userId)
     {
-        var existing = await _repository.GetByUserAndItemAsync(dto.UserId, dto.ItemId, dto.ItemType);
+        var existing = await _repository.GetByUserAndItemAsync(userId, dto.ItemId, dto.ItemType);
         if (existing != null)
         {
             return BookmarkMapper.ToDto(existing);
         }
 
-        var bookmark = BookmarkMapper.ToModel(dto);
+        var bookmark = BookmarkMapper.ToModel(dto, userId);
         await _repository.CreateAsync(bookmark);
         return BookmarkMapper.ToDto(bookmark);
     }
@@ -47,7 +47,7 @@ public class BookmarkService
         return true;
     }
 
-    public async Task<bool> DeleteByUserAndItemAsync(string userId, string itemId, string itemType)
+    public async Task<bool> DeleteByUserAndItemAsync(string userId, string itemId, Core.Models.BookmarkItemType itemType)
     {
         var existing = await _repository.GetByUserAndItemAsync(userId, itemId, itemType);
         if (existing == null)

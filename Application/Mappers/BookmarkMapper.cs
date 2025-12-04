@@ -17,11 +17,11 @@ public static class BookmarkMapper
         };
     }
 
-    public static Bookmark ToModel(CreateBookmarkDto dto)
+    public static Bookmark ToModel(CreateBookmarkDto dto, string userId)
     {
         return new Bookmark
         {
-            UserId = dto.UserId,
+            UserId = userId,
             ItemId = dto.ItemId,
             ItemType = dto.ItemType
         };
