@@ -44,7 +44,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
     pitch: '',
     description: '',
     industries: [] as string[],
-    teamMembers: '',          // ✔ правильно названо
+    teamMembers: '',
     evidence: '',
     stage: '',
     model: '',
@@ -76,14 +76,15 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
   };
 
   const handlePublish = async () => {
-    if (!formData.name || !formData.slogan) {
-      toast.error('Название и слоган — обязательны!');
+    if (!formData.name || !formData.slogan || !formData.description) {
+      toast.error('Название, слоган и описание — обязательны!');
       return;
     }
 
     setIsLoading(true);
 
-    const city = formData.location.split(',')[0]?.trim() || 'Astana';
+    const city = formData.location.split(',')[0]?.trim() || 'Город не указан';
+    const country = formData.location.split(',')[1]?.trim() || 'Страна не указана';
 
     const payload = {
       ownerId: '666f6f2d6261722d71757578', // Потом надо будет нам заменить тут логику после аутентификации
@@ -98,16 +99,16 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
       description: (formData.description || formData.pitch || 'Нет описания').trim(),
 
-      industry: formData.industries[0] || 'IT',
+      industry: formData.industries[0] || 'Отрасль не указана',
       evidence: (formData.evidence || 'Не указано').trim(),
 
       technologies:
-        formData.technologies.length > 0 ? formData.technologies : ['Не указано'],
+        formData.technologies.length > 0 ? formData.technologies : ['Технологии не указаны'],
 
       city,
-      country: formData.country || 'Kazakhstan',
+      country: formData.country || 'Страна не указана',
 
-      currency: formData.currency || 'KZT',
+      currency: formData.currency || 'Валюта не указана',
 
       investmentRequested: Number(formData.investment.replace(/\D/g, '')) || 0,
 
@@ -115,15 +116,14 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       // valuation: Number(formData.valuation.replace(/\D/g, '')) || 0,
       // dealStructure: formData.dealStructure || 'safe',
 
-      stage: formData.stage ? [formData.stage] : ['Идея'],
-      model: formData.model ? [formData.model] : ['B2B'],
+      //stage: formData.stage ? [formData.stage] : ['Идея'],
+      //model: formData.model ? [formData.model] : [''],
 
       revenue: Number(formData.mrr.replace(/\D/g, '')) || 0,
       dau: Number(formData.users.replace(/\D/g, '')) || 0,
       growthPercentage: Number(formData.growth) || 0,
 
-      // 👉 новое поле для DTO TeamMembers
-      teamMembers: Number(formData.teamMembers.replace(/\D/g, '')) || 0,
+      teamMembers: Number(formData.teamMembers.replace(/\D/g, '')) || 1,
 
       pitchDeckUrl: '',
       financialModelUrl: '',
@@ -131,7 +131,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       externalLinks: formData.externalLink
         ? [formData.externalLink.trim()]
         : [],
-      // status: 'published',
     };
 
     try {
@@ -343,7 +342,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </div>
             </div>
 
-            {/* команда — просто поле на вкладке "Основное" */}
             <div className="space-y-2">
               <Label htmlFor="teamMembers">Сколько человек в команде?</Label>
               <Input
