@@ -10,14 +10,13 @@ namespace Application.Services
     public class StartupService
     {
         private readonly IStartupRepository _repo;
-        private readonly IFileStorage _fileStorage;
+        private readonly IFileStorageService _fileStorage;
 
-        public StartupService(IStartupRepository repo, IFileStorage fileStorage)
+        public StartupService(IStartupRepository repo, IFileStorageService fileStorage)
         {
             _repo = repo;
             _fileStorage = fileStorage;
         }
-
         public async Task<List<StartupResponseDto>> GetAllAsync(
             string? search = null,
             string? industry = null,

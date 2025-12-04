@@ -1,16 +1,16 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
-using MySolution.Core.Interfaces;
+using Core.Interfaces;
 
-namespace MySolution.Infrastructure.FileStorage;
+namespace Infrastructure.FileStorage;
 
-public class S3FileStorageAdapter : IFileStorage
+public class S3FileStorageAdapter : IFileStorageService
 {
     private readonly IAmazonS3 _s3;
     private readonly string _bucketName;
 
-    public S3FileStorage(IAmazonS3 s3, IConfiguration config)
+    public S3FileStorageAdapter(IAmazonS3 s3, IConfiguration config)
     {
         _s3 = s3;
         _bucketName = config["S3:BucketName"]

@@ -24,8 +24,8 @@ namespace Core.Dtos.Startups
         public int? DAU { get; set; }
         public double? GrowthPercentage { get; set; }
         public int? TeamMembers { get; set; }
-        public string PitchDeckUrl { get; set; } = null!;
-        public string FinancialModelUrl { get; set; } = null!;
+        public string? PitchDeckKey { get; set; }
+        public string? FinancialModelKey { get; set; }
         public List<string> ExternalLinks { get; set; } = null!;
         public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
@@ -54,8 +54,8 @@ namespace Core.Dtos.Startups
                 Revenue = model.Revenue,
                 DAU = model.DAU,
                 GrowthPercentage = model.GrowthPercentage,
-                PitchDeckUrl = model.PitchDeckUrl,
-                FinancialModelUrl = model.FinancialModelUrl,
+                PitchDeckKey = model.PitchDeckKey,
+                FinancialModelKey = model.FinancialModelKey,
                 ExternalLinks = model.ExternalLinks,
                 Status = model.Status,
                 CreatedAt = model.CreatedAt

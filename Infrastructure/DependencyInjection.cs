@@ -2,10 +2,10 @@ using Amazon;
 using Amazon.S3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MySolution.Core.Interfaces;
-using MySolution.Infrastructure.FileStorage;
+using Core.Interfaces;
+using Infrastructure.FileStorage;
 
-namespace MySolution.Infrastructure;
+namespace Infrastructure;
 
 public static class DependencyInjection
 {
@@ -21,7 +21,7 @@ public static class DependencyInjection
         });
 
         // our file storage adapter
-        services.AddSingleton<IFileStorage, S3FileStorage>();
+        services.AddSingleton<IFileStorageService, S3FileStorageAdapter>();
 
         // other infra registrations...
         return services;

@@ -27,9 +27,8 @@ namespace Application.Mappers
                 Revenue = dto.Revenue,
                 DAU = dto.DAU,
                 GrowthPercentage = dto.GrowthPercentage,
-                PitchDeckUrl = dto.PitchDeckUrl,
-                FinancialModelUrl = dto.FinancialModelUrl,
                 ExternalLinks = dto.ExternalLinks ?? new List<string>()
+                // PitchDeckKey / FinancialModelKey are handled in StartupService via S3
             };
         }
 
@@ -48,13 +47,12 @@ namespace Application.Mappers
             model.Currency = dto.Currency;
             model.InvestmentRequested = dto.InvestmentRequested;
             model.Stage = dto.Stage ?? model.Stage;
-            model.Model = dto.Model ?? model.Stage;
+            model.Model = dto.Model ?? model.Model;
             model.Revenue = dto.Revenue;
             model.DAU = dto.DAU;
             model.GrowthPercentage = dto.GrowthPercentage;
-            model.PitchDeckUrl = dto.PitchDeckUrl;
-            model.FinancialModelUrl = dto.FinancialModelUrl;
             model.ExternalLinks = dto.ExternalLinks ?? model.ExternalLinks;
+            // PitchDeckKey stays under control of StartupService
         }
     }
 }

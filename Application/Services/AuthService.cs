@@ -1,7 +1,6 @@
 using BCrypt.Net;
 using Core.Dtos;
 using Core.Interfaces;
-using Core.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,27 +15,34 @@ public class AuthService
 {
     private readonly IUserRepository _userRepo;
     private readonly IConfiguration _config;
+    private readonly EmailService _emailService;
 
-    public AuthService(IUserRepository userRepo, IConfiguration config)
+    public AuthService(IUserRepository userRepo, IConfiguration config, EmailService emailService)
     {
         _userRepo = userRepo;
         _config = config;
+        _emailService = emailService;
     }
 
-    public async Task<User?> RegisterAsync(RegisterDto dto)
+    public async Task<Core.Models.User?> RegisterAsync(RegisterDto dto)
     {
         var existing = await _userRepo.GetByEmailAsync(dto.Email);
         if (existing != null) throw new Exception("Email already exists");
 
-        var user = new User
+        var confirmToken = Guid.NewGuid().ToString();
+
+        var user = new Core.Models.User
         {
             Name = dto.Name,
             Email = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = dto.Email.EndsWith("@admin.com") ? "Admin" : "User" // временно для теста
+            Role = dto.Email.EndsWith("@admin.com") ? "Admin" : "User",
+            EmailConfirmationToken = confirmToken,
+            EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(1)
         };
 
         await _userRepo.AddAsync(user);
+        await _emailService.SendConfirmationEmailAsync(dto.Email, confirmToken);
         return user;
     }
 
@@ -46,13 +52,16 @@ public class AuthService
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials");
 
-        var accessToken = GenerateJwtToken(user!);
+        if (!user.EmailConfirmed)
+            throw new UnauthorizedAccessException("Email not confirmed. Check your inbox.");
+
+        var accessToken = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
 
         user.RefreshTokens ??= new List<string>();
         user.RefreshTokens.Add(refreshToken);
 
-        await _userRepo.UpdateAsync(user);   // ← ЭТА СТРОКА ВСЁ ИСПРАВИТ
+        await _userRepo.UpdateAsync(user);
 
         return new TokenResponse(accessToken, refreshToken);
     }
@@ -62,23 +71,24 @@ public class AuthService
         if (string.IsNullOrWhiteSpace(request.RefreshToken))
             throw new SecurityTokenException("Refresh token is required");
 
-        // 1. Ищем пользователя, у которого в списке есть этот refresh-токен
+        // 1. Find user by refresh token
         var user = await _userRepo.GetByRefreshTokenAsync(request.RefreshToken);
         if (user == null)
             throw new SecurityTokenException("Invalid or expired refresh token");
 
-        // 2. Генерируем новые токены
+        // 2. Generate new tokens
         var newAccessToken = GenerateJwtToken(user);
         var newRefreshToken = GenerateRefreshToken();
 
-        // 3. Удаляем старый и добавляем новый
+        // 3. Rotate refresh token
         user.RefreshTokens!.Remove(request.RefreshToken);
         user.RefreshTokens.Add(newRefreshToken);
         await _userRepo.UpdateAsync(user);
 
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
-    private string GenerateJwtToken(User user)
+
+    private string GenerateJwtToken(Core.Models.User user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
@@ -124,34 +134,35 @@ public class AuthService
 
         return handler.ValidateToken(token, new TokenValidationParameters(), out validatedToken);
     }
+
     public async Task<TokenResponse> LoginWithGoogleAsync(GoogleLoginDto dto)
     {
         var clientId = _config["Google:ClientId"]
             ?? throw new InvalidOperationException("Google ClientId not configured");
 
-        // Валидируем Google-токен
-        var payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(dto.IdToken, new GoogleJsonWebSignature.ValidationSettings
-        {
-            Audience = new[] { clientId }
-        });
+        var payload = await GoogleJsonWebSignature.ValidateAsync(
+            dto.IdToken,
+            new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { clientId }
+            });
 
-        // Ищем или создаём пользователя по email
         var user = await _userRepo.GetByEmailAsync(payload.Email);
         if (user == null)
         {
-            user = new User
+            user = new Core.Models.User
             {
                 Name = payload.Name,
                 Email = payload.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(
                     Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
-                ), // рандомный хеш
-                Role = "User"
+                ),
+                Role = "User",
+                EmailConfirmed = true // Google-логин → можно считать подтверждённым
             };
             await _userRepo.AddAsync(user);
         }
 
-        // Выдаём твои JWT-токены
         var accessToken = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
 

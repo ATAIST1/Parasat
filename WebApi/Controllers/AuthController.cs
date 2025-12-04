@@ -2,6 +2,7 @@ using Core.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Application.Services;
 using Application.Mappers;
+using Core.Interfaces;
 
 namespace WebApi.Controllers;
 
@@ -10,10 +11,12 @@ namespace WebApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
+    private readonly IUserRepository _userRepo;
 
-    public AuthController(AuthService authService)
+    public AuthController(AuthService authService, IUserRepository userRepo)
     {
         _authService = authService;
+        _userRepo = userRepo;
     }
 
     [HttpPost("register")]
@@ -69,5 +72,22 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(string token, string email)
+    {
+        var user = await _userRepo.GetByEmailAsync(email);
+        if (user == null || user.EmailConfirmationToken != token || 
+            user.EmailConfirmationTokenExpires < DateTime.UtcNow)
+        {
+            return BadRequest("Invalid or expired confirmation link.");
+        }
+
+        user.EmailConfirmed = true;
+        user.EmailConfirmationToken = null;
+        user.EmailConfirmationTokenExpires = null;
+        await _userRepo.UpdateAsync(user);
+
+        return Ok("Email confirmed! You can now log in.");
     }
 }
