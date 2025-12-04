@@ -3,11 +3,15 @@ import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 
+// путь может отличаться, если App.tsx лежит не на уровень выше
+import type { Screen } from '../App';
+
 interface ParasatScreenProps {
-  navigateTo: (screen: any) => void;
+  navigateTo: (screen: Screen) => void;
+  openNews: (id: number) => void;
 }
 
-export default function ParasatScreen({ navigateTo }: ParasatScreenProps) {
+export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenProps) {
   const news = [
     {
       id: 1,
@@ -125,14 +129,18 @@ export default function ParasatScreen({ navigateTo }: ParasatScreenProps) {
 
           <div className="space-y-3">
             {news.map((item) => (
-              <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <Card
+                key={item.id}
+                className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                onClick={() => openNews(item.id)}
+              >
                 <div className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge 
                           variant={item.category === 'Достижение' ? 'default' : 'secondary'}
-                          className={item.category === 'Достижение' ? 'bg-green-100 text-green-700' : ''}
+                          className={item.category === 'Достижение' ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}
                         >
                           {item.badge}
                         </Badge>
@@ -141,10 +149,10 @@ export default function ParasatScreen({ navigateTo }: ParasatScreenProps) {
                           {item.date}
                         </div>
                       </div>
-                      <h3 className="text-gray-900 mb-1">{item.title}</h3>
-                      <p className="text-sm text-gray-600">{item.description}</p>
+                      <h3 className="text-gray-900 font-medium mb-1">{item.title}</h3>
+                      <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
                   </div>
                 </div>
               </Card>
