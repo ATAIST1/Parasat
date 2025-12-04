@@ -26,7 +26,6 @@ namespace Application.Mappers
                 Revenue = dto.Revenue,
                 DAU = dto.DAU,
                 GrowthPercentage = dto.GrowthPercentage,
-                TeamMembers = dto.TeamMembers,
                 PitchDeckUrl = dto.PitchDeckUrl,
                 FinancialModelUrl = dto.FinancialModelUrl,
                 ExternalLinks = dto.ExternalLinks ?? new List<string>()

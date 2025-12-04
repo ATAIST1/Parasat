@@ -36,7 +36,6 @@ namespace Core.Dtos.Startups
 
         public long? InvestmentRequested { get; set; }
 
-        public int? TeamMembers { get; set; }
         public List<string>? Stage { get; set; }
         public List<string>? Model { get; set; }
         public long? Revenue { get; set; }

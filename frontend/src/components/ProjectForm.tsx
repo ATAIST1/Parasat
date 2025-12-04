@@ -44,7 +44,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
     pitch: '',
     description: '',
     industries: [] as string[],
-    teamMembers: '',          // ✔ правильно названо
     evidence: '',
     stage: '',
     model: '',
@@ -121,9 +120,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       revenue: Number(formData.mrr.replace(/\D/g, '')) || 0,
       dau: Number(formData.users.replace(/\D/g, '')) || 0,
       growthPercentage: Number(formData.growth) || 0,
-
-      // 👉 новое поле для DTO TeamMembers
-      teamMembers: Number(formData.teamMembers.replace(/\D/g, '')) || 0,
 
       pitchDeckUrl: '',
       financialModelUrl: '',
@@ -343,22 +339,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </div>
             </div>
 
-            {/* команда — просто поле на вкладке "Основное" */}
-            <div className="space-y-2">
-              <Label htmlFor="teamMembers">Сколько человек в команде?</Label>
-              <Input
-                id="teamMembers"
-                placeholder="4"
-                value={formData.teamMembers}
-                onChange={e =>
-                  setFormData(prev => ({
-                    ...prev,
-                    teamMembers: e.target.value,
-                  }))
-                }
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="location">Город</Label>
               <Input
@@ -430,7 +410,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </Select>
             </div>
 
-            {/* 
+            {/*
             <div className="space-y-2">
               <Label htmlFor="minCheck">Минимальный чек</Label>
               <Input
