@@ -30,6 +30,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
     pitch: '',
     description: '',
     industries: [] as string[],
+    evidence: '',
     stage: '',
     model: '',
     technologies: [] as string[],
@@ -42,6 +43,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
     mrr: '',
     users: '',
     growth: '',
+    externalLink: '', // для "Другие материалы" -> externalLinks
   });
 
   const addTag = (field: 'industries' | 'technologies', value: string) => {
@@ -67,27 +69,60 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
     const city = formData.location.split(',')[0]?.trim() || 'Astana';
 
+    // ВАЖНО: ключи в camelCase, как в Swagger:
+    // ownerId, projectName, title, shortPitch, description, industry, evidence, technologies,
+    // city, country, currency, investmentRequested, stage[], model[], revenue, dau,
+    // growthPercentage, pitchDeckUrl, financialModelUrl, externalLinks[]
     const payload = {
-      ProjectName: formData.name.trim(),
-      Title: formData.slogan.trim(),
-      Description: (formData.description || formData.pitch || 'Нет описания').trim(),
-      Industry: formData.industries[0] || 'IT',
-      SubIndustry: formData.industries[1] || formData.industries[0] || 'Software',
-      Technologies: formData.technologies.length > 0 ? formData.technologies : ['Не указано'],
-      City: city,
-      Country: formData.country,
-      Currency: formData.investment.toLowerCase().includes('usd') ? 'USD' : 'KZT',
-      InvestmentRequested: Number(formData.investment.replace(/\D/g, '')) || 0,
-      SpendPlan: ['Marketing', 'Development', 'Sales'],
-      Revenue: Number(formData.mrr.replace(/\D/g, '')) || 0,
-      DAU: Number(formData.users.split('/')[0]?.replace(/\D/g, '')) || 0,
-      MAU: Number(formData.users.split('/')[1]?.replace(/\D/g, '')) || 0,
-      GrowthPercentage: Number(formData.growth) || 0,
-      PitchDeckUrl: '',
-      FinancialModelUrl: '',
-      ExternalLinks: [],
-      Status: 'published',
-      OwnerId: '666f6f2d6261722d71757578',
+      ownerId: '666f6f2d6261722d71757578', // TODO: подставить реальный OwnerId, когда будет авторизация
+
+      projectName: formData.name.trim(),
+      title: formData.slogan.trim(),
+
+      shortPitch:
+        (formData.pitch || '').trim() ||
+        (formData.slogan || '').trim() ||
+        (formData.description || '').trim(),
+
+      description: (formData.description || formData.pitch || 'Нет описания').trim(),
+
+      industry: formData.industries[0] || 'IT',
+      evidence: (formData.evidence || 'Не указано').trim(),
+
+      technologies:
+        formData.technologies.length > 0 ? formData.technologies : ['Не указано'],
+
+      city,
+      country: formData.country || 'Kazakhstan',
+
+      currency: formData.investment.toLowerCase().includes('usd') ? 'USD' : 'KZT',
+
+      investmentRequested: Number(formData.investment.replace(/\D/g, '')) || 0,
+
+      // Эти поля оставляю в форме, но БЭК их не ждёт по Swagger, поэтому из payload убрал.
+      // Если потом добавишь в DTO — просто раскомментируешь.
+      // minCheck: Number(formData.minCheck.replace(/\D/g, '')) || 0,
+      // valuation: Number(formData.valuation.replace(/\D/g, '')) || 0,
+      // dealStructure: formData.dealStructure || 'safe',
+
+      // В БД Stage и Model — массивы, Swagger тоже показывает массивы.
+      stage: formData.stage ? [formData.stage] : ['Идея'],
+      model: formData.model ? [formData.model] : ['B2B'],
+
+      revenue: Number(formData.mrr.replace(/\D/g, '')) || 0,
+      dau: Number(formData.users.replace(/\D/g, '')) || 0,
+      growthPercentage: Number(formData.growth) || 0,
+
+      pitchDeckUrl: '', // файлы не трогаем — потом через S3
+      financialModelUrl: '',
+
+      externalLinks: formData.externalLink
+        ? [formData.externalLink.trim()]
+        : [],
+
+      // Status в Swagger нет, в БД он есть как "draft".
+      // Если потом сделаешь, чтобы API принимал status — раскомментируешь.
+      // status: 'published',
     };
 
     try {
@@ -96,7 +131,10 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       onSubmit();
     } catch (err: any) {
       console.error(err);
-      toast.error('Ошибка: ' + (err.response?.data?.errors?.OwnerId?.[0] || 'Не удалось сохранить'));
+      toast.error(
+        'Ошибка: ' +
+          (err.response?.data?.errors?.OwnerId?.[0] || 'Не удалось сохранить'),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +148,10 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
     <div className="min-h-screen bg-white">
       <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <button
+            onClick={onBack}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-gray-900">Создать проект</h1>
@@ -128,40 +169,93 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
           <TabsContent value="basic" className="space-y-6 mt-6">
             <div className="space-y-2">
               <Label htmlFor="name">Название</Label>
-              <Input id="name" placeholder="Project Name" value={formData.name} onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} />
+              <Input
+                id="name"
+                placeholder="Project Name"
+                value={formData.name}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, name: e.target.value }))
+                }
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="slogan">Слоган</Label>
-              <Input id="slogan" placeholder="Одно предложение о ценности" value={formData.slogan} onChange={e => setFormData(prev => ({ ...prev, slogan: e.target.value }))} />
+              <Input
+                id="slogan"
+                placeholder="Одно предложение о ценности"
+                value={formData.slogan}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, slogan: e.target.value }))
+                }
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="pitch">Короткий питч</Label>
-              <Textarea id="pitch" placeholder="до 140 символов" value={formData.pitch} onChange={e => setFormData(prev => ({ ...prev, pitch: e.target.value }))} maxLength={140} rows={3} />
-              <p className="text-xs text-gray-500">{formData.pitch.length}/140</p>
+              <Textarea
+                id="pitch"
+                placeholder="до 140 символов"
+                value={formData.pitch}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, pitch: e.target.value }))
+                }
+                maxLength={140}
+                rows={3}
+              />
+              <p className="text-xs text-gray-500">
+                {formData.pitch.length}/140
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Описание</Label>
-              <Textarea id="description" placeholder="Расскажите подробнее о проблеме и решении" value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} rows={5} />
+              <Textarea
+                id="description"
+                placeholder="Расскажите подробнее о проблеме и решении"
+                value={formData.description}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                rows={5}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Отрасль</Label>
-              <Select onValueChange={(value: string) => addTag('industries', value)}>
-                <SelectTrigger><SelectValue placeholder="Выберите отрасль" /></SelectTrigger>
+              <Select
+                onValueChange={(value: string) =>
+                  addTag('industries', value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите отрасль" />
+                </SelectTrigger>
                 <SelectContent>
-                  {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                  {industries.map(industry => (
+                    <SelectItem key={industry} value={industry}>
+                      {industry}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.industries.map((industry) => (
-                  <Badge key={industry} variant="secondary" className="gap-1">
+                {formData.industries.map(industry => (
+                  <Badge
+                    key={industry}
+                    variant="secondary"
+                    className="gap-1"
+                  >
                     {industry}
-                    <button onClick={() => removeTag('industries', industry)}><X className="w-3 h-3" /></button>
+                    <button
+                      type="button"
+                      onClick={() => removeTag('industries', industry)}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -170,19 +264,41 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Стадия</Label>
-                <Select value={formData.stage} onValueChange={(value: any) => setFormData(prev => ({ ...prev, stage: value }))}>
-                  <SelectTrigger><SelectValue placeholder="Выберите" /></SelectTrigger>
+                <Select
+                  value={formData.stage}
+                  onValueChange={(value: any) =>
+                    setFormData(prev => ({ ...prev, stage: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {stages.map((stage) => <SelectItem key={stage} value={stage}>{stage}</SelectItem>)}
+                    {stages.map(stage => (
+                      <SelectItem key={stage} value={stage}>
+                        {stage}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Модель</Label>
-                <Select value={formData.model} onValueChange={(value: any) => setFormData(prev => ({ ...prev, model: value }))}>
-                  <SelectTrigger><SelectValue placeholder="Выберите" /></SelectTrigger>
+                <Select
+                  value={formData.model}
+                  onValueChange={(value: any) =>
+                    setFormData(prev => ({ ...prev, model: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {models.map((model) => <SelectItem key={model} value={model}>{model}</SelectItem>)}
+                    {models.map(model => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -190,17 +306,32 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
             <div className="space-y-2">
               <Label>Технологии</Label>
-              <Select onValueChange={(value: any) => addTag('technologies', value)}>
-                <SelectTrigger><SelectValue placeholder="Выберите технологии" /></SelectTrigger>
+              <Select
+                onValueChange={(value: any) =>
+                  addTag('technologies', value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите технологии" />
+                </SelectTrigger>
                 <SelectContent>
-                  {technologies.map((tech) => <SelectItem key={tech} value={tech}>{tech}</SelectItem>)}
+                  {technologies.map(tech => (
+                    <SelectItem key={tech} value={tech}>
+                      {tech}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.technologies.map((tech) => (
+                {formData.technologies.map(tech => (
                   <Badge key={tech} variant="secondary" className="gap-1">
                     {tech}
-                    <button onClick={() => removeTag('technologies', tech)}><X className="w-3 h-3" /></button>
+                    <button
+                      type="button"
+                      onClick={() => removeTag('technologies', tech)}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -208,36 +339,100 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="location">Город</Label>
-              <Input id="location" placeholder="Астана/Алматы/Шымкент или другое" value={formData.location} onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))} />
+              <Input
+                id="location"
+                placeholder="Астана/Алматы/Шымкент или другое"
+                value={formData.location}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    location: e.target.value,
+                  }))
+                }
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Страна</Label>
-              <Input id="location" placeholder="Казахстан/Узбекистан/Турция или другое" value={formData.country} onChange={e => setFormData(prev => ({ ...prev, country: e.target.value }))} />
+              <Label htmlFor="country">Страна</Label>
+              <Input
+                id="country"
+                placeholder="Казахстан/Узбекистан/Турция или другое"
+                value={formData.country}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    country: e.target.value,
+                  }))
+                }
+              />
             </div>
           </TabsContent>
 
           <TabsContent value="investment" className="space-y-6 mt-6">
             <div className="space-y-2">
               <Label htmlFor="investment">Ищу сумму</Label>
-              <Input id="investment" placeholder="25 000 000 KZT" value={formData.investment} onChange={e => setFormData(prev => ({ ...prev, investment: e.target.value }))} />
-              <p className="text-xs text-gray-500">Поддерживаем KZT и USD. Пример: 25 000 000 KZT или 50 000 USD.</p>
+              <Input
+                id="investment"
+                placeholder="25 000 000 KZT"
+                value={formData.investment}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    investment: e.target.value,
+                  }))
+                }
+              />
+              <p className="text-xs text-gray-500">
+                Поддерживаем KZT и USD. Пример: 25 000 000 KZT или 50 000 USD.
+              </p>
             </div>
 
+            {/*
             <div className="space-y-2">
               <Label htmlFor="minCheck">Минимальный чек</Label>
-              <Input id="minCheck" placeholder="KZT / USD" value={formData.minCheck} onChange={e => setFormData(prev => ({ ...prev, minCheck: e.target.value }))} />
+              <Input
+                id="minCheck"
+                placeholder="KZT / USD"
+                value={formData.minCheck}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    minCheck: e.target.value,
+                  }))
+                }
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="valuation">Оценка (pre-money)</Label>
-              <Input id="valuation" placeholder="Необязательно" value={formData.valuation} onChange={e => setFormData(prev => ({ ...prev, valuation: e.target.value }))} />
+              <Input
+                id="valuation"
+                placeholder="Необязательно"
+                value={formData.valuation}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    valuation: e.target.value,
+                  }))
+                }
+              />
             </div>
+            */}
 
             <div className="space-y-2">
               <Label>Структура сделки</Label>
-              <Select value={formData.dealStructure} onValueChange={(value: any) => setFormData(prev => ({ ...prev, dealStructure: value }))}>
-                <SelectTrigger><SelectValue placeholder="Выберите" /></SelectTrigger>
+              <Select
+                value={formData.dealStructure}
+                onValueChange={(value: any) =>
+                  setFormData(prev => ({
+                    ...prev,
+                    dealStructure: value,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="safe">SAFE</SelectItem>
                   <SelectItem value="equity">Equity</SelectItem>
@@ -247,31 +442,66 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Использование средств</Label>
+              <Label>Доказательства</Label>
               <Textarea
-                placeholder="• Маркетинг&#10;• Разработка&#10;• Продажи&#10;• Оборотка"
+                placeholder="Любые доказательства спроса или заинтересованности клиентов, партнеров или инвесторов"
                 rows={5}
+                value={formData.evidence}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    evidence: e.target.value,
+                  }))
+                }
               />
             </div>
           </TabsContent>
-
-          
 
           <TabsContent value="metrics" className="space-y-6 mt-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="mrr">MRR</Label>
-                <Input id="mrr" placeholder="KZT" value={formData.mrr} onChange={e => setFormData(prev => ({ ...prev, mrr: e.target.value }))} />
+                <Input
+                  id="mrr"
+                  placeholder="KZT"
+                  value={formData.mrr}
+                  onChange={e =>
+                    setFormData(prev => ({
+                      ...prev,
+                      mrr: e.target.value,
+                    }))
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="users">Пользователи</Label>
-                <Input id="users" placeholder="DAU/MAU" value={formData.users} onChange={e => setFormData(prev => ({ ...prev, users: e.target.value }))} />
+                <Input
+                  id="users"
+                  placeholder="DAU"
+                  value={formData.users}
+                  onChange={e =>
+                    setFormData(prev => ({
+                      ...prev,
+                      users: e.target.value,
+                    }))
+                  }
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="growth">Рост MoM</Label>
-              <Input id="growth" placeholder="%" value={formData.growth} onChange={e => setFormData(prev => ({ ...prev, growth: e.target.value }))} />
+              <Input
+                id="growth"
+                placeholder="%"
+                value={formData.growth}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    growth: e.target.value,
+                  }))
+                }
+              />
             </div>
 
             <div className="space-y-4">
@@ -303,23 +533,30 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="materials">Другие материалы</Label>
-                <Input
-                  id="materials"
-                  placeholder="Добавить ссылку"
-                />
-              </div>
+              <Label htmlFor="materials">Другие материалы</Label>
+              <Input
+                id="materials"
+                placeholder="Добавить ссылку"
+                value={formData.externalLink}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    externalLink: e.target.value,
+                  }))
+                }
+              />
+            </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-900">
-                <strong>Подсказка:</strong> Добавьте цифры тракшна — это повышает интерес инвесторов.
+                <strong>Подсказка:</strong> Добавьте цифры тракшна — это
+                повышает интерес инвесторов.
               </p>
             </div>
           </TabsContent>
-                </Tabs>
-
-      </div> {/* ← ЗАКРЫВАЕМ <div className="px-4 py-6 max-w-2xl mx-auto"> */}
-
+        </Tabs>
+      </div>{' '}
+      {/* ← ЗАКРЫВАЕМ <div className="px-4 py-6 max-w-2xl mx-auto"> */}
       {/* КНОПКИ — ВНЕ КОНТЕЙНЕРА, ВСЕГДА ВИДНЫ */}
       <div className="fixed inset-x-0 bottom-0 bg-white border-t shadow-lg z-50">
         <div className="px-4 py-4">
@@ -327,13 +564,16 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             <Button variant="outline" onClick={onBack} className="flex-1">
               Отмена
             </Button>
-            <Button onClick={handlePublish} disabled={isLoading} className="flex-1">
+            <Button
+              onClick={handlePublish}
+              disabled={isLoading}
+              className="flex-1"
+            >
               {isLoading ? 'Публикация...' : 'Опубликовать'}
             </Button>
           </div>
         </div>
       </div>
-
     </div>
   );
 }

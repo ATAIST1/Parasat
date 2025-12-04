@@ -13,13 +13,15 @@ namespace Core.Dtos.Startups
         [Required]
         public string Title { get; set; } 
 
+        public string ShortPitch { get; set; }
+
         [Required]
         public string Description { get; set; }
 
         [Required]
         public string Industry { get; set; }
 
-        public string? SubIndustry { get; set; }
+        public string? Evidence { get; set; }
 
         public List<string>? Technologies { get; set; }
 
@@ -34,11 +36,10 @@ namespace Core.Dtos.Startups
 
         public long? InvestmentRequested { get; set; }
 
-        public List<string>? SpendPlan { get; set; }
-
+        public List<string>? Stage { get; set; }
+        public List<string>? Model { get; set; }
         public long? Revenue { get; set; }
         public int? DAU { get; set; }
-        public int? MAU { get; set; }
         public double? GrowthPercentage { get; set; }
         public string? PitchDeckUrl { get; set; }
         public string? FinancialModelUrl { get; set; }

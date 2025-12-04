@@ -81,7 +81,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       SpendPlan: ['Marketing', 'Development', 'Sales'],
       Revenue: Number(formData.mrr.replace(/\D/g, '')) || 0,
       DAU: Number(formData.users.split('/')[0]?.replace(/\D/g, '')) || 0,
-      MAU: Number(formData.users.split('/')[1]?.replace(/\D/g, '')) || 0,
       GrowthPercentage: Number(formData.growth) || 0,
       PitchDeckUrl: '',
       FinancialModelUrl: '',
@@ -265,7 +264,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="users">Пользователи</Label>
-                <Input id="users" placeholder="DAU/MAU" value={formData.users} onChange={e => setFormData(prev => ({ ...prev, users: e.target.value }))} />
+                <Input id="users" placeholder="DAU" value={formData.users} onChange={e => setFormData(prev => ({ ...prev, users: e.target.value }))} />
               </div>
             </div>
 
