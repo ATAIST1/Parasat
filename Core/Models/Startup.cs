@@ -18,6 +18,7 @@ namespace Core.Models
         public string Industry { get; set; }
         public string? Evidence { get; set; }
         public List<string> Technologies { get; set; }
+        public int? TeamMembers { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
 
@@ -33,7 +34,7 @@ namespace Core.Models
         public string FinancialModelUrl { get; set; }
         public List<string> ExternalLinks { get; set; } = new();
 
-        public string Status { get; set; } = "draft";
+        public string Status { get; set; } = "published";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -4,6 +4,7 @@ namespace Core.Dtos.Startups
 {
     public class StartupResponseDto
     {
+
         public string Id { get; set; } = null!;
         public string OwnerId { get; set; } = null!;
         public string ProjectName { get; set; } = null!;
@@ -22,6 +23,7 @@ namespace Core.Dtos.Startups
         public long? Revenue { get; set; }
         public int? DAU { get; set; }
         public double? GrowthPercentage { get; set; }
+        public int? TeamMembers { get; set; }
         public string PitchDeckUrl { get; set; } = null!;
         public string FinancialModelUrl { get; set; } = null!;
         public List<string> ExternalLinks { get; set; } = null!;
@@ -46,6 +48,7 @@ namespace Core.Dtos.Startups
                 Country = model.Country,
                 Currency = model.Currency,
                 InvestmentRequested = model.InvestmentRequested,
+                TeamMembers = model.TeamMembers,
                 Stage = model.Stage,
                 Model = model.Model,
                 Revenue = model.Revenue,

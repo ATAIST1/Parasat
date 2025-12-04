@@ -21,6 +21,7 @@ namespace Application.Mappers
                 Country = dto.Country,
                 Currency = dto.Currency,
                 InvestmentRequested = dto.InvestmentRequested,
+                TeamMembers = dto.TeamMembers,
                 Stage = dto.Stage ?? new List<string>(),
                 Model = dto.Model ?? new List<string>(),
                 Revenue = dto.Revenue,
@@ -43,6 +44,7 @@ namespace Application.Mappers
             model.Technologies = dto.Technologies ?? model.Technologies;
             model.City = dto.City;
             model.Country = dto.Country;
+            model.TeamMembers = dto.TeamMembers;
             model.Currency = dto.Currency;
             model.InvestmentRequested = dto.InvestmentRequested;
             model.Stage = dto.Stage ?? model.Stage;
