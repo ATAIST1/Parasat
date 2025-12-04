@@ -15,6 +15,7 @@ namespace Core.Dtos.Startups
         public List<string> Technologies { get; set; } = null!;
         public string City { get; set; } = null!;
         public string Country { get; set; } = null!;
+        public int? TeamMembers { get; set; }
         public string Currency { get; set; } = null!;
         public long? InvestmentRequested { get; set; }
         public List<string> Stage { get; set; } = null!;
@@ -51,6 +52,7 @@ namespace Core.Dtos.Startups
                 Revenue = model.Revenue,
                 DAU = model.DAU,
                 GrowthPercentage = model.GrowthPercentage,
+                TeamMembers = model.TeamMembers,
                 PitchDeckUrl = model.PitchDeckUrl,
                 FinancialModelUrl = model.FinancialModelUrl,
                 ExternalLinks = model.ExternalLinks,

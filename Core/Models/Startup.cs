@@ -28,6 +28,7 @@ namespace Core.Models
         public long? Revenue { get; set; }
         public int? DAU { get; set; }
         public double? GrowthPercentage { get; set; }
+        public int? TeamMembers { get; set; }
 
         public string PitchDeckUrl { get; set; }
         public string FinancialModelUrl { get; set; }

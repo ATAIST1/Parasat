@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bookmark, MessageCircle, TrendingUp, Users, DollarSign, Briefcase, Star, Code, CheckCircle, Search, Filter, Building2, Target, PieChart } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -6,14 +6,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { toast } from 'sonner@2.0.3';
+// import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
+import { startupService } from '../services/startupService';
 
 interface FeedScreenProps {
   onProjectClick: (projectId: string) => void;
   navigateTo: (screen: any) => void;
 }
 
+/*
+// ⛔ Моковые стартапы — оставляю как пример, но теперь не используем
 const mockProjects = [
   {
     id: '1',
@@ -27,31 +31,9 @@ const mockProjects = [
     team: '4',
     tags: ['B2B', 'SaaS'],
   },
-  {
-    id: '2',
-    name: 'EduKZ',
-    stage: 'Рост',
-    industry: 'EdTech',
-    location: 'Астана',
-    pitch: 'Онлайн-платформа для школьников с адаптивным обучением на основе AI',
-    mrr: '1,200,000',
-    users: '15,000',
-    team: '8',
-    tags: ['B2C', 'AI/ML'],
-  },
-  {
-    id: '3',
-    name: 'AgroConnect',
-    stage: 'PMF',
-    industry: 'AgriTech',
-    location: 'Шымкент',
-    pitch: 'Маркетплейс прямых продаж от фермеров к розничным сетям',
-    mrr: '800,000',
-    users: '450',
-    team: '6',
-    tags: ['Marketplace', 'B2B'],
-  },
+  ...
 ];
+*/
 
 const mockInvestors = [
   {
@@ -167,7 +149,7 @@ const mockBusinesses = [
     name: 'FitFactory',
     industry: 'Фитнес',
     location: 'Алматы',
-    description: 'Сеть премиум фитнес-клубов с 3 действующими локациями и 2,500 активными членами. Инновационное оборудование и персональный подход.',
+    description: 'Сеть премиум фитнес-клубов с 3 действующими локациями и 2,500 активными членами.',
     revenue: '95,000,000',
     profit: '19,000,000',
     employees: '32',
@@ -211,15 +193,19 @@ const mockBusinesses = [
 
 export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenProps) {
   const [savedProjects, setSavedProjects] = useState<Set<string>>(new Set());
-  
+
+  // 🔥 Стартапы с бэка
+  const [startups, setStartups] = useState<any[]>([]);
+  const [isLoadingStartups, setIsLoadingStartups] = useState<boolean>(true);
+
   // Search and filter states
   const [startupSearch, setStartupSearch] = useState('');
   const [startupStage, setStartupStage] = useState('all');
   const [startupIndustry, setStartupIndustry] = useState('all');
-  
+
   const [investorSearch, setInvestorSearch] = useState('');
   const [investorIndustry, setInvestorIndustry] = useState('all');
-  
+
   const [developerSearch, setDeveloperSearch] = useState('');
   const [developerType, setDeveloperType] = useState('all');
   const [developerAvailability, setDeveloperAvailability] = useState('all');
@@ -227,6 +213,52 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
   const [businessSearch, setBusinessSearch] = useState('');
   const [businessIndustry, setBusinessIndustry] = useState('all');
   const [businessRevenue, setBusinessRevenue] = useState('all');
+
+  // 👇 тянем данные с бэка при загрузке ленты
+  useEffect(() => {
+    const loadStartups = async () => {
+      try {
+        const data = await startupService.getAll();
+
+        // Мапим и сортируем по дате создания (если есть)
+        const mapped = (data || []).map((s: any) => {
+          const id = s.id || s._id || s.Id || s._Id;
+          const createdAt = s.createdAt || s.CreatedAt;
+          return {
+            raw: s,
+            id,
+            name: s.projectName || s.ProjectName,
+            stage: Array.isArray(s.stage) ? s.stage[0] : s.Stage?.[0],
+            industry: s.industry || s.Industry,
+            location: s.city || s.City,
+            pitch: s.shortPitch || s.ShortPitch || '',
+            mrr: s.revenue ?? s.Revenue ?? 0,
+            users: s.dau ?? s.DAU ?? 0,
+            team: s.teamMembers ?? s.TeamMembers ?? 0,
+            tags: [
+              ...(Array.isArray(s.model) ? s.model : s.Model || []),
+              s.currency || s.Currency || '',
+            ].filter(Boolean),
+            createdAt,
+          };
+        });
+
+        mapped.sort((a: any, b: any) => {
+          if (!a.createdAt || !b.createdAt) return 0;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+
+        setStartups(mapped);
+      } catch (e) {
+        console.error(e);
+        toast('Не удалось загрузить стартапы');
+      } finally {
+        setIsLoadingStartups(false);
+      }
+    };
+
+    loadStartups();
+  }, []);
 
   const handleSave = (projectId: string) => {
     const newSaved = new Set(savedProjects);
@@ -241,44 +273,51 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
   };
 
   // Filter functions
-  const filteredProjects = mockProjects.filter((project) => {
+  const filteredProjects = startups.filter((project) => {
     const query = startupSearch.toLowerCase();
-    const matchesSearch = !query || (
-      project.name.toLowerCase().includes(query) ||
-      project.industry.toLowerCase().includes(query) ||
-      project.location.toLowerCase().includes(query) ||
-      project.pitch.toLowerCase().includes(query) ||
-      project.tags.some(tag => tag.toLowerCase().includes(query))
-    );
-    const matchesStage = startupStage === 'all' || project.stage === startupStage;
-    const matchesIndustry = startupIndustry === 'all' || project.industry === startupIndustry;
+    const matchesSearch =
+      !query ||
+      project.name?.toLowerCase().includes(query) ||
+      project.industry?.toLowerCase().includes(query) ||
+      project.location?.toLowerCase().includes(query) ||
+      project.pitch?.toLowerCase().includes(query) ||
+      project.tags?.some((tag: string) => tag.toLowerCase().includes(query));
+
+    const matchesStage =
+      startupStage === 'all' || project.stage === startupStage;
+
+    const matchesIndustry =
+      startupIndustry === 'all' || project.industry === startupIndustry;
+
     return matchesSearch && matchesStage && matchesIndustry;
   });
 
   const filteredInvestors = mockInvestors.filter((investor) => {
     const query = investorSearch.toLowerCase();
-    const matchesSearch = !query || (
+    const matchesSearch =
+      !query ||
       investor.name.toLowerCase().includes(query) ||
       investor.title.toLowerCase().includes(query) ||
       investor.location.toLowerCase().includes(query) ||
       investor.bio.toLowerCase().includes(query) ||
-      investor.industries.some(industry => industry.toLowerCase().includes(query))
-    );
-    const matchesIndustry = investorIndustry === 'all' || investor.industries.includes(investorIndustry);
+      investor.industries.some((industry) => industry.toLowerCase().includes(query));
+    const matchesIndustry =
+      investorIndustry === 'all' || investor.industries.includes(investorIndustry);
     return matchesSearch && matchesIndustry;
   });
 
   const filteredDevelopers = mockDevelopers.filter((developer) => {
     const query = developerSearch.toLowerCase();
-    const matchesSearch = !query || (
+    const matchesSearch =
+      !query ||
       developer.name.toLowerCase().includes(query) ||
       developer.type.toLowerCase().includes(query) ||
       developer.location.toLowerCase().includes(query) ||
       developer.description.toLowerCase().includes(query) ||
-      developer.stack.some(tech => tech.toLowerCase().includes(query))
-    );
+      developer.stack.some((tech: string) => tech.toLowerCase().includes(query));
     const matchesType = developerType === 'all' || developer.type === developerType;
-    const matchesAvailability = developerAvailability === 'all' || 
+    const matchesAvailability =
+      developerAvailability === 'all' ||
       (developerAvailability === 'available' && developer.available) ||
       (developerAvailability === 'busy' && !developer.available);
     return matchesSearch && matchesType && matchesAvailability;
@@ -286,18 +325,22 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
 
   const filteredBusinesses = mockBusinesses.filter((business) => {
     const query = businessSearch.toLowerCase();
-    const matchesSearch = !query || (
+    const matchesSearch =
+      !query ||
       business.name.toLowerCase().includes(query) ||
       business.industry.toLowerCase().includes(query) ||
       business.location.toLowerCase().includes(query) ||
       business.description.toLowerCase().includes(query) ||
-      business.investmentGoal.toLowerCase().includes(query)
-    );
-    const matchesIndustry = businessIndustry === 'all' || business.industry === businessIndustry;
-    const revenueNum = parseInt(business.revenue);
-    const matchesRevenue = businessRevenue === 'all' || 
+      business.investmentGoal.toLowerCase().includes(query);
+    const matchesIndustry =
+      businessIndustry === 'all' || business.industry === businessIndustry;
+    const revenueNum = parseInt(business.revenue.replace(/,/g, ''));
+    const matchesRevenue =
+      businessRevenue === 'all' ||
       (businessRevenue === 'small' && revenueNum < 100000000) ||
-      (businessRevenue === 'medium' && revenueNum >= 100000000 && revenueNum < 300000000) ||
+      (businessRevenue === 'medium' &&
+        revenueNum >= 100000000 &&
+        revenueNum < 300000000) ||
       (businessRevenue === 'large' && revenueNum >= 300000000);
     return matchesSearch && matchesIndustry && matchesRevenue;
   });
@@ -323,6 +366,7 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
           </TabsList>
         </div>
 
+        {/* СТАРТАПЫ */}
         <TabsContent value="for-you" className="mt-0">
           <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
             <div className="relative">
@@ -342,9 +386,11 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Все стадии</SelectItem>
+                  <SelectItem value="Идея">Идея</SelectItem>
                   <SelectItem value="MVP">MVP</SelectItem>
                   <SelectItem value="PMF">PMF</SelectItem>
                   <SelectItem value="Рост">Рост</SelectItem>
+                  <SelectItem value="Скалирование">Скалирование</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={startupIndustry} onValueChange={setStartupIndustry}>
@@ -354,15 +400,22 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
                 <SelectContent>
                   <SelectItem value="all">Все индустрии</SelectItem>
                   <SelectItem value="Fintech">Fintech</SelectItem>
+                  <SelectItem value="SaaS">SaaS</SelectItem>
+                  <SelectItem value="AI/ML">AI/ML</SelectItem>
                   <SelectItem value="EdTech">EdTech</SelectItem>
-                  <SelectItem value="AgriTech">AgriTech</SelectItem>
+                  <SelectItem value="HealthTech">HealthTech</SelectItem>
+                  <SelectItem value="Marketplace">Marketplace</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="p-4 space-y-4">
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
+            {isLoadingStartups ? (
+              <div className="text-center py-12 text-gray-500">
+                Загрузка стартапов…
+              </div>
+            ) : filteredProjects.length > 0 ? (
+              filteredProjects.map((project: any) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
@@ -380,6 +433,7 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
           </div>
         </TabsContent>
 
+        {/* ИНВЕСТОРЫ */}
         <TabsContent value="trends" className="mt-0">
           <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
             <div className="relative">
@@ -428,6 +482,7 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
           </div>
         </TabsContent>
 
+        {/* РАЗРАБОТЧИКИ */}
         <TabsContent value="new" className="mt-0">
           <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
             <div className="relative">
@@ -483,6 +538,7 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
           </div>
         </TabsContent>
 
+        {/* БИЗНЕСЫ */}
         <TabsContent value="businesses" className="mt-0">
           <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-3">
             <div className="relative">
@@ -547,16 +603,32 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
 }
 
 function ProjectCard({ project, isSaved, onSave, onClick }: any) {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 space-y-2">
           <h3 className="text-gray-900">{project.name}</h3>
+          {project.createdAt && (
+            <p className="text-xs text-gray-400">
+              Добавлено {formatDate(project.createdAt)}
+            </p>
+          )}
           <div className="flex flex-wrap gap-1.5">
-            <Badge variant="secondary">{project.stage}</Badge>
-            <Badge variant="outline">{project.industry}</Badge>
-            <Badge variant="outline">{project.location}</Badge>
-            {project.tags.map((tag: string) => (
+            {project.stage && <Badge variant="secondary">{project.stage}</Badge>}
+            {project.industry && <Badge variant="outline">{project.industry}</Badge>}
+            {project.location && <Badge variant="outline">{project.location}</Badge>}
+            {project.tags?.map((tag: string) => (
               <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
               </Badge>
@@ -568,7 +640,9 @@ function ProjectCard({ project, isSaved, onSave, onClick }: any) {
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
         >
           <Bookmark
-            className={`w-5 h-5 ${isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'}`}
+            className={`w-5 h-5 ${
+              isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'
+            }`}
           />
         </button>
       </div>
@@ -578,15 +652,17 @@ function ProjectCard({ project, isSaved, onSave, onClick }: any) {
       <div className="flex items-center gap-4 text-sm text-gray-600">
         <div className="flex items-center gap-1.5">
           <DollarSign className="w-4 h-4" />
-          <span>MRR {project.mrr} ₸</span>
+          <span>
+            MRR {Number(project.mrr || 0).toLocaleString('ru-RU')} ₸
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <TrendingUp className="w-4 h-4" />
-          <span>{project.users}</span>
+          <span>{Number(project.users || 0).toLocaleString('ru-RU')}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Users className="w-4 h-4" />
-          <span>{project.team}</span>
+          <span>{project.team || 0}</span>
         </div>
       </div>
 
@@ -612,6 +688,7 @@ function ProjectCard({ project, isSaved, onSave, onClick }: any) {
   );
 }
 
+// InvestorCard, DeveloperCard, BusinessCard — твои, я их не трогал (кроме импорта toast сверху)
 function InvestorCard({ investor, isSaved, onSave }: any) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
@@ -619,7 +696,10 @@ function InvestorCard({ investor, isSaved, onSave }: any) {
         <div className="flex gap-3 flex-1">
           <Avatar className="w-14 h-14">
             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              {investor.name.split(' ').map((n: string) => n[0]).join('')}
+              {investor.name
+                .split(' ')
+                .map((n: string) => n[0])
+                .join('')}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-1">
@@ -640,7 +720,9 @@ function InvestorCard({ investor, isSaved, onSave }: any) {
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
         >
           <Bookmark
-            className={`w-5 h-5 ${isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'}`}
+            className={`w-5 h-5 ${
+              isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'
+            }`}
           />
         </button>
       </div>
@@ -708,11 +790,17 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
                 {developer.location}
               </Badge>
               {developer.available ? (
-                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-green-100 text-green-700"
+                >
                   Доступны
                 </Badge>
               ) : (
-                <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-gray-100 text-gray-600"
+                >
                   Заняты
                 </Badge>
               )}
@@ -724,12 +812,16 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
         >
           <Bookmark
-            className={`w-5 h-5 ${isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'}`}
+            className={`w-5 h-5 ${
+              isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'
+            }`}
           />
         </button>
       </div>
 
-      <p className="text-gray-600 text-sm leading-relaxed">{developer.description}</p>
+      <p className="text-gray-600 text-sm leading-relaxed">
+        {developer.description}
+      </p>
 
       <div className="flex flex-wrap gap-1.5">
         {developer.stack.map((tech: string) => (
@@ -777,9 +869,7 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
 }
 
 function BusinessCard({ business, isSaved, onSave, onClick }: any) {
-  // Функция для форматирования чисел с пробелами
   const formatNumber = (num: string) => {
-    // Убираем запятые перед парсингом
     const cleanNum = num.replace(/,/g, '');
     return parseInt(cleanNum).toLocaleString('ru-RU');
   };
@@ -814,21 +904,29 @@ function BusinessCard({ business, isSaved, onSave, onClick }: any) {
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
         >
           <Bookmark
-            className={`w-5 h-5 ${isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'}`}
+            className={`w-5 h-5 ${
+              isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-400'
+            }`}
           />
         </button>
       </div>
 
-      <p className="text-gray-600 text-sm leading-relaxed">{business.description}</p>
+      <p className="text-gray-600 text-sm leading-relaxed">
+        {business.description}
+      </p>
 
       <div className="grid grid-cols-3 gap-3 p-3 bg-gray-50 rounded-xl">
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">Выручка</p>
-          <p className="text-sm text-gray-900">{formatNumber(business.revenue)} ₸</p>
+          <p className="text-sm text-gray-900">
+            {formatNumber(business.revenue)} ₸
+          </p>
         </div>
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">Прибыль</p>
-          <p className="text-sm text-gray-900">{formatNumber(business.profit)} ₸</p>
+          <p className="text-sm text-gray-900">
+            {formatNumber(business.profit)} ₸
+          </p>
         </div>
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">Сотрудники</p>
@@ -847,11 +945,15 @@ function BusinessCard({ business, isSaved, onSave, onClick }: any) {
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1.5 text-gray-600">
             <DollarSign className="w-4 h-4 text-green-600" />
-            <span className="text-green-600">{formatNumber(business.investmentNeeded)} ₸</span>
+            <span className="text-green-600">
+              {formatNumber(business.investmentNeeded)} ₸
+            </span>
           </div>
           <div className="flex items-center gap-1.5 text-gray-600">
             <PieChart className="w-4 h-4 text-purple-600" />
-            <span className="text-purple-600">{business.equity} доли</span>
+            <span className="text-purple-600">
+              {business.equity} доли
+            </span>
           </div>
         </div>
       </div>
