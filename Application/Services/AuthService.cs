@@ -16,27 +16,33 @@ public class AuthService
 {
     private readonly IUserRepository _userRepo;
     private readonly IConfiguration _config;
+    private readonly EmailService _emailService;
 
-    public AuthService(IUserRepository userRepo, IConfiguration config)
+    public AuthService(IUserRepository userRepo, IConfiguration config, EmailService emailService)
     {
         _userRepo = userRepo;
         _config = config;
+        _emailService = emailService;
     }
 
     public async Task<User?> RegisterAsync(RegisterDto dto)
     {
         var existing = await _userRepo.GetByEmailAsync(dto.Email);
         if (existing != null) throw new Exception("Email already exists");
+        var confirmToken = Guid.NewGuid().ToString();
 
         var user = new User
         {
             Name = dto.Name,
             Email = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = dto.Email.EndsWith("@admin.com") ? "Admin" : "User" // временно для теста
+            Role = dto.Email.EndsWith("@admin.com") ? "Admin" : "User",
+            EmailConfirmationToken = confirmToken,
+            EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(1)
         };
 
         await _userRepo.AddAsync(user);
+        await _emailService.SendConfirmationEmailAsync(dto.Email, confirmToken);
         return user;
     }
 
@@ -45,6 +51,8 @@ public class AuthService
         var user = await _userRepo.GetByEmailAsync(dto.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials");
+        if (!user.EmailConfirmed)
+            throw new UnauthorizedAccessException("Email not confirmed. Check your inbox.");
 
         var accessToken = GenerateJwtToken(user!);
         var refreshToken = GenerateRefreshToken();
