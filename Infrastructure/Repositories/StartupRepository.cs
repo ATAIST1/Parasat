@@ -21,7 +21,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<Startup>> GetAllAsync(
             string? search = null,
             string? industry = null,
-            string? subIndustry = null,
+            string? evidence = null,
             string? city = null)
         {
             var filter = Builders<Startup>.Filter.Empty;
@@ -33,6 +33,8 @@ namespace Infrastructure.Repositories
                     Builders<Startup>.Filter.Regex(x => x.ProjectName,
                         new MongoDB.Bson.BsonRegularExpression(search, "i")),
                     Builders<Startup>.Filter.Regex(x => x.Title,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")),
+                        Builders<Startup>.Filter.Regex(x => x.ShortPitch,
                         new MongoDB.Bson.BsonRegularExpression(search, "i")),
                     Builders<Startup>.Filter.Regex(x => x.Description,
                         new MongoDB.Bson.BsonRegularExpression(search, "i")),
@@ -47,9 +49,9 @@ namespace Infrastructure.Repositories
                 filter &= Builders<Startup>.Filter.Eq(x => x.Industry, industry);
             }
 
-            if (!string.IsNullOrWhiteSpace(subIndustry))
+            if (!string.IsNullOrWhiteSpace(evidence))
             {
-                filter &= Builders<Startup>.Filter.Eq(x => x.SubIndustry, subIndustry);
+                filter &= Builders<Startup>.Filter.Eq(x => x.Evidence, evidence);
             }
 
             if (!string.IsNullOrWhiteSpace(city))
