@@ -1,4 +1,3 @@
-// frontend/src/components/ProjectForm.tsx
 import { useState } from 'react';
 import { ArrowLeft, Upload, X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -20,6 +19,21 @@ const industries = ['Fintech', 'AI/ML', 'Marketplace', 'SaaS', 'EdTech', 'Health
 const stages = ['Идея', 'MVP', 'PMF', 'Рост', 'Скалирование'];
 const models = ['B2B', 'B2C', 'B2G', 'B2B2C', 'Marketplace', 'SaaS'];
 const technologies = ['AI/ML', 'LLM', 'Computer Vision', 'IoT', 'Blockchain/Web3', 'AR/VR', 'Big Data'];
+
+const currencies = [
+  { code: 'KZT', label: 'KZT — тенге' },
+  { code: 'USD', label: 'USD — доллар США' },
+  { code: 'RUB', label: 'RUB — российский рубль' },
+  { code: 'UZS', label: 'UZS — узбекский сум' },
+  { code: 'KGS', label: 'KGS — киргизский сом' },
+  { code: 'CNY', label: 'CNY — китайский юань' },
+  { code: 'KRW', label: 'KRW — южнокорейская вона' },
+  { code: 'TRY', label: 'TRY — турецкая лира' },
+  { code: 'EUR', label: 'EUR — евро' },
+  { code: 'BYN', label: 'BYN — белорусский рубль' },
+  { code: 'JPY', label: 'JPY — японская иена' },
+  { code: 'GBP', label: 'GBP — британский фунт стерлингов' },
+];
 
 export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +57,8 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
     mrr: '',
     users: '',
     growth: '',
-    externalLink: '', // для "Другие материалы" -> externalLinks
+    externalLink: '',
+    currency: '',
   });
 
   const addTag = (field: 'industries' | 'technologies', value: string) => {
@@ -69,12 +84,8 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
     const city = formData.location.split(',')[0]?.trim() || 'Astana';
 
-    // ВАЖНО: ключи в camelCase, как в Swagger:
-    // ownerId, projectName, title, shortPitch, description, industry, evidence, technologies,
-    // city, country, currency, investmentRequested, stage[], model[], revenue, dau,
-    // growthPercentage, pitchDeckUrl, financialModelUrl, externalLinks[]
     const payload = {
-      ownerId: '666f6f2d6261722d71757578', // TODO: подставить реальный OwnerId, когда будет авторизация
+      ownerId: '666f6f2d6261722d71757578', // Потом надо будет нам заменить тут логику после аутентификации
 
       projectName: formData.name.trim(),
       title: formData.slogan.trim(),
@@ -95,17 +106,14 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       city,
       country: formData.country || 'Kazakhstan',
 
-      currency: formData.investment.toLowerCase().includes('usd') ? 'USD' : 'KZT',
+      currency: formData.currency || 'KZT',
 
       investmentRequested: Number(formData.investment.replace(/\D/g, '')) || 0,
 
-      // Эти поля оставляю в форме, но БЭК их не ждёт по Swagger, поэтому из payload убрал.
-      // Если потом добавишь в DTO — просто раскомментируешь.
       // minCheck: Number(formData.minCheck.replace(/\D/g, '')) || 0,
       // valuation: Number(formData.valuation.replace(/\D/g, '')) || 0,
       // dealStructure: formData.dealStructure || 'safe',
 
-      // В БД Stage и Model — массивы, Swagger тоже показывает массивы.
       stage: formData.stage ? [formData.stage] : ['Идея'],
       model: formData.model ? [formData.model] : ['B2B'],
 
@@ -113,15 +121,12 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
       dau: Number(formData.users.replace(/\D/g, '')) || 0,
       growthPercentage: Number(formData.growth) || 0,
 
-      pitchDeckUrl: '', // файлы не трогаем — потом через S3
+      pitchDeckUrl: '',
       financialModelUrl: '',
 
       externalLinks: formData.externalLink
         ? [formData.externalLink.trim()]
         : [],
-
-      // Status в Swagger нет, в БД он есть как "draft".
-      // Если потом сделаешь, чтобы API принимал status — раскомментируешь.
       // status: 'published',
     };
 
@@ -203,9 +208,6 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
                 maxLength={140}
                 rows={3}
               />
-              <p className="text-xs text-gray-500">
-                {formData.pitch.length}/140
-              </p>
             </div>
 
             <div className="space-y-2">
@@ -383,8 +385,29 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
                 }
               />
               <p className="text-xs text-gray-500">
-                Поддерживаем KZT и USD. Пример: 25 000 000 KZT или 50 000 USD.
+                Поддерживаем KZT и USD и другие валюты. Пример: 25 000 000 KZT или 50 000 USD.
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Валюта</Label>
+              <Select
+                value={formData.currency}
+                onValueChange={(value: string) =>
+                  setFormData(prev => ({ ...prev, currency: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите валюту (по умолчанию KZT)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencies.map(cur => (
+                    <SelectItem key={cur.code} value={cur.code}>
+                      {cur.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/*
@@ -555,9 +578,8 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             </div>
           </TabsContent>
         </Tabs>
-      </div>{' '}
-      {/* ← ЗАКРЫВАЕМ <div className="px-4 py-6 max-w-2xl mx-auto"> */}
-      {/* КНОПКИ — ВНЕ КОНТЕЙНЕРА, ВСЕГДА ВИДНЫ */}
+      </div>
+
       <div className="fixed inset-x-0 bottom-0 bg-white border-t shadow-lg z-50">
         <div className="px-4 py-4">
           <div className="max-w-2xl mx-auto flex gap-3">
