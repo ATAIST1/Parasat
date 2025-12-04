@@ -6,9 +6,9 @@ using MongoDB.Driver;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Infrastructure; // for AddInfrastructure
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // === MongoDB — всё из secrets ===
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -35,21 +35,20 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(dbName);
 });
 
-// УДАЛИ ЭТУ СТРОКУ — она дублирует и хардкодит имя базы! 
-// builder.Services.AddScoped(sp => { ... "ParasatDb" });
-
 // === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+
+// Infrastructure (S3, etc.)
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<NewsService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ChatService>();
-builder.Services.AddScoped<AuthService>(); 
-builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
 builder.Services.AddScoped<StartupService>();
 builder.Services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
@@ -71,7 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] 
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]
                     ?? throw new InvalidOperationException("Jwt:Key is missing in configuration")))
         };
     });
@@ -116,7 +115,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -130,10 +128,12 @@ app.UseHttpsRedirection();
 // ВАЖНО: порядок именно такой!
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseCors(builder => builder
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
+
 app.MapControllers();
 
 app.Run();

@@ -14,8 +14,5 @@ namespace Core.Models
         public string Role { get; set; } = "User";
 
         public List<string>? RefreshTokens { get; set; } = new();
-        public bool EmailConfirmed { get; set; } = false;
-public string? EmailConfirmationToken { get; set; }
-public DateTime? EmailConfirmationTokenExpires { get; set; }
     }
 }

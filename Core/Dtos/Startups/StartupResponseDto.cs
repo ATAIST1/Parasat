@@ -4,23 +4,26 @@ namespace Core.Dtos.Startups
 {
     public class StartupResponseDto
     {
+
         public string Id { get; set; } = null!;
         public string OwnerId { get; set; } = null!;
         public string ProjectName { get; set; } = null!;
         public string Title { get; set; } = null!;
+        public string ShortPitch { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string Industry { get; set; } = null!;
-        public string? SubIndustry { get; set; }
+        public string? Evidence { get; set; }
         public List<string> Technologies { get; set; } = null!;
         public string City { get; set; } = null!;
         public string Country { get; set; } = null!;
         public string Currency { get; set; } = null!;
         public long? InvestmentRequested { get; set; }
-        public List<string> SpendPlan { get; set; } = null!;
+        public List<string> Stage { get; set; } = null!;
+        public List<string> Model { get; set; } = null!;
         public long? Revenue { get; set; }
         public int? DAU { get; set; }
-        public int? MAU { get; set; }
         public double? GrowthPercentage { get; set; }
+        public int? TeamMembers { get; set; }
         public string PitchDeckUrl { get; set; } = null!;
         public string FinancialModelUrl { get; set; } = null!;
         public List<string> ExternalLinks { get; set; } = null!;
@@ -35,18 +38,21 @@ namespace Core.Dtos.Startups
                 OwnerId = model.OwnerId,
                 ProjectName = model.ProjectName,
                 Title = model.Title,
+                ShortPitch = model.ShortPitch,
                 Description = model.Description,
                 Industry = model.Industry,
-                SubIndustry = model.SubIndustry,
+                Evidence = model.Evidence ?? "",
+
                 Technologies = model.Technologies,
                 City = model.City,
                 Country = model.Country,
                 Currency = model.Currency,
                 InvestmentRequested = model.InvestmentRequested,
-                SpendPlan = model.SpendPlan,
+                TeamMembers = model.TeamMembers,
+                Stage = model.Stage,
+                Model = model.Model,
                 Revenue = model.Revenue,
                 DAU = model.DAU,
-                MAU = model.MAU,
                 GrowthPercentage = model.GrowthPercentage,
                 PitchDeckUrl = model.PitchDeckUrl,
                 FinancialModelUrl = model.FinancialModelUrl,

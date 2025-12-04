@@ -13,7 +13,7 @@ namespace Core.Interfaces
          Task<IEnumerable<Startup>> GetAllAsync(
             string? search = null,
             string? industry = null,
-            string? subIndustry = null,
+            string? evidence = null,
             string? city = null);
     }
 
