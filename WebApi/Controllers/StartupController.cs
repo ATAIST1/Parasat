@@ -100,5 +100,25 @@ namespace WebApi.Controllers
 
             return NoContent();
         }
+        [HttpGet("s3-test")]
+        public async Task<IActionResult> TestS3([FromServices] IFileStorageService storage)
+        {
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("hello s3"));
+            var key = $"test/{Guid.NewGuid()}";
+
+            await storage.UploadAsync(stream, "text/plain", key);
+            var url = await storage.GetDownloadUrlAsync(key, TimeSpan.FromMinutes(5));
+
+            return Ok(new { key, url });
+        }
+        [HttpGet("{id}/pitchdeck")]
+        public async Task<IActionResult> GetPitchDeck(string id)
+        {
+            var url = await _service.GetPitchDeckUrlAsync(id);
+            if (url == null)
+                return NotFound();
+
+            return Ok(new { url });
+        }   
     }
 }

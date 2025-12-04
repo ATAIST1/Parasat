@@ -16,7 +16,7 @@ public static class DependencyInjection
         // AWS S3 client
         services.AddSingleton<IAmazonS3>(_ =>
         {
-            var region = configuration["S3:Region"] ?? "eu-central-1";
+            var region = configuration["S3:Region"] ?? "eu-north-1";
             return new AmazonS3Client(RegionEndpoint.GetBySystemName(region));
         });
 
