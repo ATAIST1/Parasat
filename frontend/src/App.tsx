@@ -15,7 +15,12 @@ import SettingsScreen from './components/SettingsScreen';
 import PricingScreen from './components/PricingScreen';
 import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
+
+import NewsDetailScreen from './components/NewsDetailScreen'; 
+
 import { Toaster } from './components/ui/sonner';
+
+
 
 export type UserRole = 'startup' | 'investor' | 'mentor' | null;
 
@@ -43,12 +48,14 @@ export type Screen =
   | 'settings'
   | 'pricing'
   | 'calculator'
-  | 'parasat';
+  | 'parasat'
+  | 'parasat-news-detail';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [user, setUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedNewsId, setSelectedNewsId] = useState<number | null>(null);
 
   const handleLogin = (email: string, role: UserRole) => {
     setUser({
@@ -192,12 +199,29 @@ function App() {
             navigateTo={navigateTo}
           />
         );
+      case 'parasat-news-detail':
+      return (
+        <NewsDetailScreen
+          newsId={selectedNewsId || 1}
+          onBack={() => setCurrentScreen('parasat')}
+        />
+      );
       case 'parasat':
         return (
+        //   <ParasatScreen
+        //     navigateTo={navigateTo}
+        //   />
+        // );
           <ParasatScreen
             navigateTo={navigateTo}
+            openNews={(id) => {
+              setSelectedNewsId(id);
+              setCurrentScreen('parasat-news-detail');
+            }}
           />
         );
+
+
       default:
         return null;
     }
