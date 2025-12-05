@@ -40,11 +40,12 @@ namespace WebApi.Controllers
         }
 
         // POST api/startup
-        // Accepts form-data: all CreateStartupDto fields + optional file "pitchDeck"
+        // form-data: CreateStartupDto поля + файлы "pitchDeck", "financialModel"
         [HttpPost]
         public async Task<IActionResult> Create(
             [FromForm] CreateStartupDto dto,
-            IFormFile? pitchDeck)
+            IFormFile? pitchDeck,
+            IFormFile? financialModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -58,18 +59,33 @@ namespace WebApi.Controllers
                 pitchDeckContentType = pitchDeck.ContentType;
             }
 
-            await _service.CreateAsync(dto, pitchDeckStream, pitchDeckContentType);
+            Stream? financialModelStream = null;
+            string? financialModelContentType = null;
+
+            if (financialModel is { Length: > 0 })
+            {
+                financialModelStream = financialModel.OpenReadStream();
+                financialModelContentType = financialModel.ContentType;
+            }
+
+            await _service.CreateAsync(
+                dto,
+                pitchDeckStream,
+                pitchDeckContentType,
+                financialModelStream,
+                financialModelContentType);
 
             return Ok(new { message = "Startup created" });
         }
 
         // PUT api/startup/{id}
-        // Accepts form-data: all UpdateStartupDto fields + optional file "pitchDeck"
+        // form-data: UpdateStartupDto поля + файлы "pitchDeck", "financialModel"
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(
             string id,
             [FromForm] UpdateStartupDto dto,
-            IFormFile? pitchDeck)
+            IFormFile? pitchDeck,
+            IFormFile? financialModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -83,7 +99,23 @@ namespace WebApi.Controllers
                 pitchDeckContentType = pitchDeck.ContentType;
             }
 
-            var success = await _service.UpdateAsync(id, dto, pitchDeckStream, pitchDeckContentType);
+            Stream? financialModelStream = null;
+            string? financialModelContentType = null;
+
+            if (financialModel is { Length: > 0 })
+            {
+                financialModelStream = financialModel.OpenReadStream();
+                financialModelContentType = financialModel.ContentType;
+            }
+
+            var success = await _service.UpdateAsync(
+                id,
+                dto,
+                pitchDeckStream,
+                pitchDeckContentType,
+                financialModelStream,
+                financialModelContentType);
+
             if (!success)
                 return NotFound();
 
@@ -100,6 +132,8 @@ namespace WebApi.Controllers
 
             return NoContent();
         }
+
+        // Тестовый эндпоинт для S3, можно удалить потом
         [HttpGet("s3-test")]
         public async Task<IActionResult> TestS3([FromServices] IFileStorageService storage)
         {
@@ -111,6 +145,8 @@ namespace WebApi.Controllers
 
             return Ok(new { key, url });
         }
+
+        // GET api/startup/{id}/pitchdeck
         [HttpGet("{id}/pitchdeck")]
         public async Task<IActionResult> GetPitchDeck(string id)
         {
@@ -119,6 +155,17 @@ namespace WebApi.Controllers
                 return NotFound();
 
             return Ok(new { url });
-        }   
+        }
+
+        // GET api/startup/{id}/financialmodel
+        [HttpGet("{id}/financialmodel")]
+        public async Task<IActionResult> GetFinancialModel(string id)
+        {
+            var url = await _service.GetFinancialModelUrlAsync(id);
+            if (url == null)
+                return NotFound();
+
+            return Ok(new { url });
+        }
     }
 }

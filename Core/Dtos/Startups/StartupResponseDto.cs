@@ -4,7 +4,6 @@ namespace Core.Dtos.Startups
 {
     public class StartupResponseDto
     {
-
         public string Id { get; set; } = null!;
         public string OwnerId { get; set; } = null!;
         public string ProjectName { get; set; } = null!;
@@ -13,20 +12,25 @@ namespace Core.Dtos.Startups
         public string Description { get; set; } = null!;
         public string Industry { get; set; } = null!;
         public string? Evidence { get; set; }
-        public List<string> Technologies { get; set; } = null!;
+
+        public List<string> Technologies { get; set; } = new();
         public string City { get; set; } = null!;
         public string Country { get; set; } = null!;
         public string Currency { get; set; } = null!;
         public long? InvestmentRequested { get; set; }
-        public List<string> Stage { get; set; } = null!;
-        public List<string> Model { get; set; } = null!;
+
+        public List<string> Stage { get; set; } = new();
+        public List<string> Model { get; set; } = new();
+
         public long? Revenue { get; set; }
         public int? DAU { get; set; }
         public double? GrowthPercentage { get; set; }
         public int? TeamMembers { get; set; }
+
         public string? PitchDeckKey { get; set; }
         public string? FinancialModelKey { get; set; }
-        public List<string> ExternalLinks { get; set; } = null!;
+        public List<string> ExternalLinks { get; set; } = new();
+
         public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
 
@@ -34,14 +38,14 @@ namespace Core.Dtos.Startups
         {
             return new StartupResponseDto
             {
-                Id = model.Id ?? "",
+                Id = model.Id,
                 OwnerId = model.OwnerId,
                 ProjectName = model.ProjectName,
                 Title = model.Title,
                 ShortPitch = model.ShortPitch,
                 Description = model.Description,
                 Industry = model.Industry,
-                Evidence = model.Evidence ?? "",
+                Evidence = model.Evidence,
 
                 Technologies = model.Technologies,
                 City = model.City,

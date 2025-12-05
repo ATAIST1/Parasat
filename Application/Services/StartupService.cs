@@ -17,13 +17,14 @@ namespace Application.Services
             _repo = repo;
             _fileStorage = fileStorage;
         }
+
         public async Task<List<StartupResponseDto>> GetAllAsync(
             string? search = null,
             string? industry = null,
-            string? subIndustry = null,
+            string? evidence = null,
             string? city = null)
         {
-            var list = await _repo.GetAllAsync(search, industry, subIndustry, city);
+            var list = await _repo.GetAllAsync(search, industry, evidence, city);
             return list.Select(StartupResponseDto.FromModel).ToList();
         }
 
@@ -34,13 +35,14 @@ namespace Application.Services
         }
 
         /// <summary>
-        /// Creates a startup, optionally uploading a pitch deck file to object storage.
-        /// The controller should pass the file stream + content type (if any).
+        /// Создание стартапа + опциональная загрузка pitch deck и financial model в сторидж.
         /// </summary>
         public async Task CreateAsync(
             CreateStartupDto dto,
             Stream? pitchDeckStream = null,
             string? pitchDeckContentType = null,
+            Stream? financialModelStream = null,
+            string? financialModelContentType = null,
             CancellationToken ct = default)
         {
             var startupId = Guid.NewGuid().ToString();
@@ -48,6 +50,16 @@ namespace Application.Services
             var model = StartupMapper.ToModel(dto);
             model.Id = startupId;
 
+            if (dto.Technologies != null)
+                model.Technologies = dto.Technologies;
+            if (dto.Stage != null)
+                model.Stage = dto.Stage;
+            if (dto.Model != null)
+                model.Model = dto.Model;
+            if (dto.ExternalLinks != null)
+                model.ExternalLinks = dto.ExternalLinks;
+
+            // Pitch deck
             if (pitchDeckStream != null && !string.IsNullOrEmpty(pitchDeckContentType))
             {
                 var key = $"startups/{startupId}/pitchdeck";
@@ -61,19 +73,33 @@ namespace Application.Services
                 model.PitchDeckKey = uploadedKey;
             }
 
+            // Financial model
+            if (financialModelStream != null && !string.IsNullOrEmpty(financialModelContentType))
+            {
+                var key = $"startups/{startupId}/financial-model";
+
+                var uploadedKey = await _fileStorage.UploadAsync(
+                    financialModelStream,
+                    financialModelContentType,
+                    key,
+                    ct);
+
+                model.FinancialModelKey = uploadedKey;
+            }
+
             await _repo.AddAsync(model);
         }
 
-
         /// <summary>
-        /// Updates a startup. Optionally replaces the pitch deck file.
-        /// If a new file is provided, the old one can be deleted (optional).
+        /// Обновление стартапа. Можно заменить pitch deck и/или financial model.
         /// </summary>
         public async Task<bool> UpdateAsync(
             string id,
             UpdateStartupDto dto,
             Stream? newPitchDeckStream = null,
             string? newPitchDeckContentType = null,
+            Stream? newFinancialModelStream = null,
+            string? newFinancialModelContentType = null,
             CancellationToken ct = default)
         {
             var model = await _repo.GetByIdAsync(id);
@@ -81,9 +107,18 @@ namespace Application.Services
 
             StartupMapper.UpdateModel(model, dto);
 
+            if (dto.Technologies != null)
+                model.Technologies = dto.Technologies;
+            if (dto.Stage != null)
+                model.Stage = dto.Stage;
+            if (dto.Model != null)
+                model.Model = dto.Model;
+            if (dto.ExternalLinks != null)
+                model.ExternalLinks = dto.ExternalLinks;
+
+            // Обновление pitch deck
             if (newPitchDeckStream != null && !string.IsNullOrEmpty(newPitchDeckContentType))
             {
-                // optional: delete old file
                 if (!string.IsNullOrEmpty(model.PitchDeckKey))
                 {
                     await _fileStorage.DeleteAsync(model.PitchDeckKey, ct);
@@ -99,18 +134,33 @@ namespace Application.Services
                 model.PitchDeckKey = uploadedKey;
             }
 
+            // Обновление financial model
+            if (newFinancialModelStream != null && !string.IsNullOrEmpty(newFinancialModelContentType))
+            {
+                if (!string.IsNullOrEmpty(model.FinancialModelKey))
+                {
+                    await _fileStorage.DeleteAsync(model.FinancialModelKey, ct);
+                }
+
+                var key = $"startups/{model.Id}/financial-model";
+                var uploadedKey = await _fileStorage.UploadAsync(
+                    newFinancialModelStream,
+                    newFinancialModelContentType,
+                    key,
+                    ct);
+
+                model.FinancialModelKey = uploadedKey;
+            }
+
             return await _repo.UpdateAsync(model);
         }
 
-
         public Task<bool> DeleteAsync(string id)
         {
-            // You might also want to:
-            // - load the startup
-            // - delete related files from storage via _fileStorage.DeleteAsync(key)
-            // - then delete startup itself
+            // по уму: достать стартап, удалить PitchDeckKey/FinancialModelKey из S3
             return _repo.DeleteAsync(id);
         }
+
         public async Task<string?> GetPitchDeckUrlAsync(string id, CancellationToken ct = default)
         {
             var startup = await _repo.GetByIdAsync(id);
@@ -121,6 +171,18 @@ namespace Application.Services
                 startup.PitchDeckKey,
                 TimeSpan.FromMinutes(10),
                 ct);
-        }   
+        }
+
+        public async Task<string?> GetFinancialModelUrlAsync(string id, CancellationToken ct = default)
+        {
+            var startup = await _repo.GetByIdAsync(id);
+            if (startup == null || string.IsNullOrEmpty(startup.FinancialModelKey))
+                return null;
+
+            return await _fileStorage.GetDownloadUrlAsync(
+                startup.FinancialModelKey,
+                TimeSpan.FromMinutes(10),
+                ct);
+        }
     }
 }
