@@ -2,7 +2,35 @@ import api from '../lib/api';
 
 export const startupService = {
   create: async (data: any) => {
-    return api.post('/api/Startup', data);
+    const formData = new FormData();
+    
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      
+      if (value === null || value === undefined) {
+        return;
+      }
+      
+      if (Array.isArray(value)) {
+        value.forEach((item: any) => {
+          if (item !== null && item !== undefined) {
+            formData.append(key, String(item));
+          }
+        });
+      } else {
+        formData.append(key, String(value));
+      }
+    });
+    
+
+    return api.post('/api/Startup', formData, {
+      transformRequest: [
+        (data, headers) => {
+          delete headers['Content-Type'];
+          return data;
+        },
+      ],
+    });
   },
 
   getAll: async () => {

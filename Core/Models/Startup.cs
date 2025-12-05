@@ -6,9 +6,9 @@ namespace Core.Models
     public class Startup
     {
         [BsonId]
-        [BsonRepresentation(BsonType.String)]
-        public string? Id { get; set; }
-
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; } = null!;
+        [BsonRepresentation(BsonType.ObjectId)]
         public string OwnerId { get; set; }
 
         public string ProjectName { get; set; }
