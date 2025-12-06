@@ -26,8 +26,23 @@ public class AuthService
 
     public async Task<Core.Models.User?> RegisterAsync(RegisterDto dto)
     {
+    // Проверка пароля  я добавила ес чо удалим
+    var password = dto.Password ?? string.Empty;
+
+    // минимум 8 символов
+    if (password.Length < 8
+        // хотя бы одна заглавная
+        || !password.Any(char.IsUpper)
+        // хотя бы один спецсимвол из набора
+        || !password.Any(ch => "!@#$%^&*()_+-=[]{};':\",.<>?/.".Contains(ch)))
+    {
+        throw new Exception("Пароль должен содержать минимум 8 символов, одну заглавную букву и один специальный символ");
+    }
+
+
+
         var existing = await _userRepo.GetByEmailAsync(dto.Email);
-        if (existing != null) throw new Exception("Email already exists");
+        if (existing != null) throw new Exception("Пользователь с таким email уже зарегистрирован");
 
         var confirmToken = Guid.NewGuid().ToString();
 
