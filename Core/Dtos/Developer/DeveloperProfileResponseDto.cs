@@ -7,18 +7,19 @@ namespace Core.Dtos.Developer
         public string Id { get; set; } = null!;
         public string UserId { get; set; } = null!;
         public string FullName { get; set; } = null!;
-        public string? Telegram { get; set; }
-        public string? Phone { get; set; }
-        public string? Linkedin { get; set; }
-        public string? Github { get; set; }
+        public int? WorkingRate { get; set; }
+        public string? Currency { get; set; }
+        public string? FirstLink { get; set; }
+        public string? SecondLink { get; set; }
 
-        public List<DevType> Types { get; set; } = new();
+        public List<string> Types { get; set; } = new();
         public string City { get; set; } = null!;
         public bool IsRemote { get; set; }
         public List<string> TechStack { get; set; } = new();
-        public ExperienceLevel Experience { get; set; }
+        public string Experience { get; set; }
         public string? About { get; set; }
         public bool IsAvailable { get; set; }
+        public int? ProjectCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
@@ -29,10 +30,10 @@ namespace Core.Dtos.Developer
                 Id = model.Id ?? "",
                 UserId = model.UserId,
                 FullName = model.FullName,
-                Telegram = model.Telegram,
-                Phone = model.Phone,
-                Linkedin = model.Linkedin,
-                Github = model.Github,
+                WorkingRate = model.WorkingRate,
+                Currency = model.Currency,
+                FirstLink = model.FirstLink,
+                SecondLink = model.SecondLink,
                 Types = model.Types,
                 City = model.City,
                 IsRemote = model.IsRemote,
@@ -40,6 +41,7 @@ namespace Core.Dtos.Developer
                 Experience = model.Experience,
                 About = model.About,
                 IsAvailable = model.IsAvailable,
+                ProjectCount = model.ProjectCount,
                 CreatedAt = model.CreatedAt,
                 UpdatedAt = model.UpdatedAt
             };

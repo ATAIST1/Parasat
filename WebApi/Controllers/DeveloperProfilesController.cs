@@ -52,11 +52,11 @@ namespace WebApi.Controllers
 
         [HttpGet("search")]
         public async Task<ActionResult<List<DeveloperProfileResponseDto>>> Search(
-            [FromQuery] List<DevType>? types = null,
+            [FromQuery] List<string>? types = null,
             [FromQuery] string? city = null,
             [FromQuery] bool? isRemote = null,
             [FromQuery] List<string>? techStack = null,
-            [FromQuery] ExperienceLevel? experience = null,
+            [FromQuery] string? experience = null,
             [FromQuery] bool? isAvailable = null)
         {
             var result = await _service.SearchAsync(types, city, isRemote, techStack, experience, isAvailable);

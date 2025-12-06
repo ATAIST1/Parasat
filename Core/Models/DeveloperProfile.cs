@@ -12,18 +12,19 @@ namespace Core.Models
         public string UserId { get; set; } = null!; // ссылка на User.Id
 
         public string FullName { get; set; } = null!;
-        public string? Telegram { get; set; }
-        public string? Phone { get; set; }
-        public string? Linkedin { get; set; }
-        public string? Github { get; set; }
+        public int? WorkingRate { get; set; }
+        public string? Currency { get; set; }
+        public string? FirstLink { get; set; }
+        public string? SecondLink { get; set; }
 
-        public List<DevType> Types { get; set; } = new(); // Full-Stack, Frontend и т.д.
+        public List<string> Types { get; set; } = new(); // Full-Stack, Frontend и т.д.
         public string City { get; set; } = null!;
         public bool IsRemote { get; set; } = false;
+        public int? ProjectCount { get; set; }
 
         public List<string> TechStack { get; set; } = new(); // React, Node.js, Python и т.д.
 
-        public ExperienceLevel Experience { get; set; }
+        public string Experience { get; set; }
 
         public string? About { get; set; }
         public bool IsAvailable { get; set; } = true;
@@ -32,23 +33,4 @@ namespace Core.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 
-    public enum DevType
-    {
-        FullStack,
-        Frontend,
-        Backend,
-        Mobile,
-        AIML,
-        DevOps,
-        UIUX,
-        QA
-    }
-
-    public enum ExperienceLevel
-    {
-        Junior,      // 1-2 года
-        Middle,      // 3-4 года
-        Senior,      // 5+ лет
-        Lead         // 10+ лет
-    }
 }

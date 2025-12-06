@@ -14,11 +14,11 @@ namespace Core.Interfaces
         Task<bool> DeleteAsync(string id);
 
         Task<List<DeveloperProfile>> SearchAsync(
-            List<DevType>? types = null,
+            List<string>? types = null,
             string? city = null,
             bool? isRemote = null,
             List<string>? techStack = null,
-            ExperienceLevel? experience = null,
+            string? experience = null,
             bool? isAvailable = null);
     }
 }
