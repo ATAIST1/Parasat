@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Services;
 using Application.Mappers;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace WebApi.Controllers;
 
@@ -89,5 +91,30 @@ public class AuthController : ControllerBase
         await _userRepo.UpdateAsync(user);
 
         return Ok("Email confirmed! You can now log in.");
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout([FromBody] LogoutDto? dto = null)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            await _authService.LogoutAsync(userId, dto?.RefreshToken);
+            return Ok(new { message = "Logged out successfully" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

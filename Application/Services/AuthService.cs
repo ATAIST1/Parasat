@@ -172,4 +172,39 @@ public class AuthService
 
         return new TokenResponse(accessToken, refreshToken);
     }
+
+    public async Task LogoutAsync(string userId, string? refreshToken = null)
+    {
+        var user = await _userRepo.GetByIdAsync(userId);
+        if (user == null)
+            throw new UnauthorizedAccessException("User not found");
+
+        if (user.RefreshTokens == null || user.RefreshTokens.Count == 0)
+        {
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new UnauthorizedAccessException("Refresh token not found or already invalidated");
+            }
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(refreshToken))
+        {
+
+            if (!user.RefreshTokens.Contains(refreshToken))
+            {
+                throw new UnauthorizedAccessException("Refresh token not found or already invalidated");
+            }
+            
+            // удалить конкретный refresh token
+            user.RefreshTokens.Remove(refreshToken);
+        }
+        else
+        {
+            // удалить все refresh tokens (выйти из всех устройств)
+            user.RefreshTokens.Clear();
+        }
+
+        await _userRepo.UpdateAsync(user);
+    }
 }
