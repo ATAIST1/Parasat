@@ -9,9 +9,6 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { developerService } from '../services/developerService';
 
-// ВАЖНО: бэк ожидает DevType и ExperienceLevel как enum-строки
-// DevType в бэке:
-// public enum DevType { FullStack, Frontend, Backend, Mobile, AIML, DevOps, UIUX, QA }
 
 const DEV_TYPE_OPTIONS = [
   { value: 'FullStack', label: 'Full-Stack разработка' },
@@ -24,10 +21,6 @@ const DEV_TYPE_OPTIONS = [
   { value: 'QA', label: 'QA/Тестирование' },
 ];
 
-// ExperienceLevel в бэке сейчас:
-// public enum ExperienceLevel { Junior, Middle, Senior, Lead }
-// РЕКОМЕНДУЮ добавить:
-// None // нет опыта
 const EXPERIENCE_OPTIONS = [
   { value: 'None', label: 'Нет опыта' },
   { value: 'Junior', label: '1–2 года' },
@@ -51,7 +44,6 @@ const CURRENCIES = [
   { code: 'GBP', label: 'GBP — британский фунт стерлингов' },
 ];
 
-// TODO: заменить на реальный userId из авторизации
 const HARDCODED_USER_ID = 'replace-with-real-user-id';
 
 interface DeveloperFormProps {
@@ -92,7 +84,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ВАЛИДАЦИЯ
     if (!formData.name || !formData.type || !formData.location || !formData.description) {
       toast('Пожалуйста, заполните все обязательные поля');
       return;
@@ -113,7 +104,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
       return;
     }
 
-    // Парсим ставку в число
     const workingRate = formData.rate
       ? Number(formData.rate.replace(/\D/g, '')) || 0
       : 0;
@@ -129,7 +119,7 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
       city: formData.location,
       isRemote: formData.isRemote === 'true',
       techStack,
-      experience: formData.experience, // "None" | "Junior" | "Middle" | "Senior" | "Lead"
+      experience: formData.experience,
       about: formData.description,
       isAvailable: formData.available === 'true',
       projectCount: formData.projectCount
@@ -163,7 +153,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
       </div>
 
       <form onSubmit={handleSubmit} className="p-4 pb-24 space-y-6">
-        {/* Блок: Основная информация */}
         <div className="bg-white rounded-2xl p-6 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="name">Название команды / Имя *</Label>
@@ -185,7 +174,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
                 <SelectValue placeholder="Выберите тип" />
               </SelectTrigger>
               <SelectContent>
-                {/* раньше были строки с русскими значениями, теперь мапим на enum-строки */}
                 {DEV_TYPE_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
@@ -197,7 +185,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
 
           <div className="space-y-2">
             <Label htmlFor="location">Локация *</Label>
-            {/* Раньше здесь был Select, теперь простой Input, чтобы можно было писать любой город */}
             <Input
               id="location"
               placeholder="Например: Астана, Пекин, Seoul"
@@ -220,7 +207,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
           </div>
         </div>
 
-        {/* Блок: Технологический стек */}
         <div className="bg-white rounded-2xl p-6 space-y-5">
           <h3 className="text-gray-900">Технологический стек</h3>
 
@@ -263,7 +249,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
           )}
         </div>
 
-        {/* Блок: Дополнительная информация */}
         <div className="bg-white rounded-2xl p-6 space-y-5">
           <h3 className="text-gray-900">Дополнительная информация</h3>
 
@@ -388,7 +373,6 @@ export default function DeveloperForm({ onBack, onSubmit }: DeveloperFormProps) 
           </div>
         </div>
 
-        {/* БЛОК ПУБЛИКАЦИИ — ВСЕГДА ВИДЕН */}
 <div className="fixed inset-x-0 bottom-0 bg-white border-t shadow-lg z-50">
   <div className="px-4 py-4">
     <div className="max-w-2xl mx-auto flex gap-3">

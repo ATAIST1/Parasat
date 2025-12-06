@@ -7,6 +7,7 @@ namespace Core.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+        
         public string? Id { get; set; }
 
         public string UserId { get; set; } = null!; // ссылка на User.Id
@@ -22,7 +23,7 @@ namespace Core.Models
         public bool IsRemote { get; set; } = false;
         public int? ProjectCount { get; set; }
 
-        public List<string> TechStack { get; set; } = new(); // React, Node.js, Python и т.д.
+        public List<string> TechStack { get; set; } = new();
 
         public string Experience { get; set; }
 
