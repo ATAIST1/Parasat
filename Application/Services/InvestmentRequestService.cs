@@ -63,12 +63,21 @@ namespace Application.Services
         {
             var request = await _repo.GetByIdAsync(id);
             if (request == null || request.UserId != userId) return false;
+
+            return await _repo.UpdateAsync(request);
+        }
+
+
+        /* public async Task<bool> PublishAsync(string id, string userId)
+        {
+            var request = await _repo.GetByIdAsync(id);
+            if (request == null || request.UserId != userId) return false;
             if (request.Status != InvestmentRequestStatus.Draft) return false;
 
             request.Status = InvestmentRequestStatus.Published;
             request.PublishedAt = DateTime.UtcNow;
 
             return await _repo.UpdateAsync(request);
-        }
+        } */
     }
 }

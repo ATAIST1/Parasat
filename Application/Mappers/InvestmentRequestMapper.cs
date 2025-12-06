@@ -18,7 +18,10 @@ namespace Application.Mappers
                 RevenueLastYear = dto.RevenueLastYear,
                 ProfitLastYear = dto.ProfitLastYear,
                 InvestmentNeeded = dto.InvestmentNeeded,
-                EquityOfferedPercent = dto.EquityOfferedPercent
+                EquityOfferedPercent = dto.EquityOfferedPercent,
+                NumberOfEmployees = dto.NumberOfEmployees,
+                YearOfFoundation = dto.YearOfFoundation,
+                InvestmentPurpose = dto.InvestmentPurpose
             };
         }
 
@@ -32,6 +35,9 @@ namespace Application.Mappers
             if (dto.ProfitLastYear.HasValue) model.ProfitLastYear = dto.ProfitLastYear.Value;
             if (dto.InvestmentNeeded.HasValue) model.InvestmentNeeded = dto.InvestmentNeeded.Value;
             if (dto.EquityOfferedPercent.HasValue) model.EquityOfferedPercent = dto.EquityOfferedPercent.Value;
+            if (dto.NumberOfEmployees.HasValue) model.NumberOfEmployees = dto.NumberOfEmployees.Value;
+            if (dto.YearOfFoundation.HasValue) model.YearOfFoundation = dto.YearOfFoundation.Value;
+            if (dto.InvestmentPurpose != null) model.InvestmentPurpose = dto.InvestmentPurpose;
         }
 
         public static InvestmentRequestResponseDto ToResponseDto(InvestmentRequest model)

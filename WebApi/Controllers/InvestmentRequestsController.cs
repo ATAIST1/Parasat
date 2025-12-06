@@ -19,7 +19,7 @@ namespace WebApi.Controllers
         }
 
         private string CurrentUserId => _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                              ?? "test-user-123";   // ← временный хардкод, пока нет авторизации
+                              ?? "test-user-123"; 
         //private string CurrentUserId => _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value 
                                       //?? throw new UnauthorizedAccessException();
 

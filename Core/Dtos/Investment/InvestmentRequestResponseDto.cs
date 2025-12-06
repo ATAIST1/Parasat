@@ -16,10 +16,11 @@ namespace Core.Dtos.Investment
         public long ProfitLastYear { get; set; }
         public long InvestmentNeeded { get; set; }
         public int EquityOfferedPercent { get; set; }
-
-        public string Status { get; set; } = null!;
+        public int NumberOfEmployees { get; set; }
+        public int? YearOfFoundation { get; set; }  
+        public string? InvestmentPurpose { get; set; }
+        //public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
-        public DateTime? PublishedAt { get; set; }
 
         public static InvestmentRequestResponseDto FromModel(InvestmentRequest model)
         {
@@ -36,9 +37,13 @@ namespace Core.Dtos.Investment
                 ProfitLastYear = model.ProfitLastYear,
                 InvestmentNeeded = model.InvestmentNeeded,
                 EquityOfferedPercent = model.EquityOfferedPercent,
-                Status = model.Status.ToString(),
+                // Status = model.Status.ToString(),
+                NumberOfEmployees = model.NumberOfEmployees,
+                YearOfFoundation = model.YearOfFoundation,
+                InvestmentPurpose = model.InvestmentPurpose,
                 CreatedAt = model.CreatedAt,
-                PublishedAt = model.PublishedAt
+
+                
             };
         }
     }

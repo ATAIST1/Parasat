@@ -11,5 +11,9 @@ namespace Core.Dtos.Investment
         public long? ProfitLastYear { get; set; }
         public long? InvestmentNeeded { get; set; }
         public int? EquityOfferedPercent { get; set; }
+        public int? NumberOfEmployees { get; set; }
+        public int? YearOfFoundation { get; set; }
+        public string? InvestmentPurpose { get; set; }
+        
     }
 }

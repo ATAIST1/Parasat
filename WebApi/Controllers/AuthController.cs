@@ -35,7 +35,23 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpPost("login")]
+    // [HttpPost("login")]
+    // public async Task<ActionResult<TokenResponse>> Login(LoginDto dto)
+    // {
+    //     try
+    //     {
+    //         var tokens = await _authService.LoginAsync(dto);
+    //         return Ok(tokens);
+    //     }
+    //     catch (UnauthorizedAccessException)
+    //     {
+    //         return Unauthorized("Invalid email or password");
+    //     }
+    // }
+
+
+// ЛИАНА ДОБАВИЛА ЕС ЧО УБЕРЕМ Улучшенный метод логина с разными ответами для неподтвержденного email и неверных данных 
+[HttpPost("login")]
     public async Task<ActionResult<TokenResponse>> Login(LoginDto dto)
     {
         try
@@ -45,7 +61,35 @@ public class AuthController : ControllerBase
         }
         catch (UnauthorizedAccessException)
         {
-            return Unauthorized("Invalid email or password");
+            // ЯВНО смотрим, что за юзер
+            var user = await _userRepo.GetByEmailAsync(dto.Email);
+
+            // 1) Юзера с таким email нет
+            if (user == null)
+            {
+                return Unauthorized(new
+                {
+                    code = "EMAIL_NOT_FOUND",
+                    message = "Пользователь с таким email не найден"
+                });
+            }
+
+            // 2) Есть, но email не подтверждён
+            if (!user.EmailConfirmed)
+            {
+                return Unauthorized(new
+                {
+                    code = "EMAIL_NOT_CONFIRMED",
+                    message = "Email не подтверждён. Проверьте почту."
+                });
+            }
+
+            // 3) Есть, подтверждён, но пароль неверный
+            return Unauthorized(new
+            {
+                code = "INVALID_CREDENTIALS",
+                message = "Неверный пароль"
+            });
         }
     }
 

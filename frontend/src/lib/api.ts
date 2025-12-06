@@ -7,4 +7,15 @@ const api = axios.create({
   },
 });
 
+
+// автоматом подставлять accessToken, если он есть 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
 export default api;

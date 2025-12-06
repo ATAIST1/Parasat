@@ -22,13 +22,15 @@ namespace Core.Models
         public long InvestmentNeeded { get; set; }
         public int EquityOfferedPercent { get; set; }
 
-        public InvestmentRequestStatus Status { get; set; } = InvestmentRequestStatus.Draft;
-
+       // public InvestmentRequestStatus Status { get; set; } = InvestmentRequestStatus.Draft;
+        public int NumberOfEmployees { get; set; }
+        public int? YearOfFoundation { get; set; }
+        public string? InvestmentPurpose { get; set; }  
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? PublishedAt { get; set; }
+        
     }
 
-    public enum InvestmentRequestStatus
+    /*{public enum InvestmentRequestStatus
     {
         Draft,
         Published,
@@ -36,4 +38,5 @@ namespace Core.Models
         Approved,
         Rejected
     }
+    }*/
 }

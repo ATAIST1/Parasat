@@ -17,76 +17,94 @@ namespace Infrastructure.Repositories
             => await _collection.Find(_ => true).ToListAsync();
 
         public async Task<List<InvestmentRequest>> GetAllAsync(
-                    string? search = null,
-                    string? industry = null,
-                    string? profitRange = null,
-                    string? equityRange = null)
+            string? search = null,
+            string? industry = null,
+            string? profitRange = null,
+            string? equityRange = null)
+        {
+            var filter = Builders<InvestmentRequest>.Filter.Empty;
+
+            // Поиск по тексту (title, description, city)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchFilter = Builders<InvestmentRequest>.Filter.Or(
+                    Builders<InvestmentRequest>.Filter.Regex(
+                        x => x.Title,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")
+                    ),
+                    Builders<InvestmentRequest>.Filter.Regex(
+                        x => x.Description,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")
+                    ),
+                    Builders<InvestmentRequest>.Filter.Regex(
+                        x => x.City,
+                        new MongoDB.Bson.BsonRegularExpression(search, "i")
+                    )
+                );
+
+                filter &= searchFilter;
+            }
+
+            // Фильтр по индустрии
+            if (!string.IsNullOrWhiteSpace(industry))
+            {
+                filter &= Builders<InvestmentRequest>.Filter.Eq(x => x.Industry, industry);
+            }
+
+            // Фильтр по прибыли
+            if (!string.IsNullOrWhiteSpace(profitRange))
+            {
+                switch (profitRange.ToLower())
                 {
-                    var filter = Builders<InvestmentRequest>.Filter.Empty;
+                    case "small":
+                        // < 100M
+                        filter &= Builders<InvestmentRequest>.Filter.Lt(x => x.ProfitLastYear, 100_000_000);
+                        break;
 
-                    filter &= Builders<InvestmentRequest>.Filter.Eq(x => x.Status, InvestmentRequestStatus.Published);
-
-                    if (!string.IsNullOrWhiteSpace(search))
-                    {
-                        var searchLower = search.ToLower();
-                        var searchFilter = Builders<InvestmentRequest>.Filter.Or(
-                            Builders<InvestmentRequest>.Filter.Regex(x => x.Title,
-                                new MongoDB.Bson.BsonRegularExpression(search, "i")),
-                            Builders<InvestmentRequest>.Filter.Regex(x => x.Description,
-                                new MongoDB.Bson.BsonRegularExpression(search, "i")),
-                            Builders<InvestmentRequest>.Filter.Regex(x => x.City,
-                                new MongoDB.Bson.BsonRegularExpression(search, "i"))
+                    case "medium":
+                        // 100M - 300M
+                        filter &= Builders<InvestmentRequest>.Filter.And(
+                            Builders<InvestmentRequest>.Filter.Gte(x => x.ProfitLastYear, 100_000_000),
+                            Builders<InvestmentRequest>.Filter.Lt(x => x.ProfitLastYear, 300_000_000)
                         );
-                        filter &= searchFilter;
-                    }
+                        break;
 
-                    if (!string.IsNullOrWhiteSpace(industry))
-                    {
-                        filter &= Builders<InvestmentRequest>.Filter.Eq(x => x.Industry, industry);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(profitRange))
-                    {
-                        switch (profitRange.ToLower())
-                        {
-                            case "small":
-                                filter &= Builders<InvestmentRequest>.Filter.Lt(x => x.ProfitLastYear, 100000000); // < 100M
-                                break;
-                            case "medium":
-                                filter &= Builders<InvestmentRequest>.Filter.And(
-                                    Builders<InvestmentRequest>.Filter.Gte(x => x.ProfitLastYear, 100000000), // >= 100M
-                                    Builders<InvestmentRequest>.Filter.Lt(x => x.ProfitLastYear, 300000000)   // < 300M
-                                );
-                                break;
-                            case "large":
-                                filter &= Builders<InvestmentRequest>.Filter.Gte(x => x.ProfitLastYear, 300000000); // >= 300M
-                                break;
-                        }
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(equityRange))
-                        {
-                            switch (equityRange.ToLower())
-                            {
-                                case "low":
-                                    filter &= Builders<InvestmentRequest>.Filter.Lt(x => x.EquityOfferedPercent, 15); // < 15%
-                                    break;
-                                case "medium":
-                                    filter &= Builders<InvestmentRequest>.Filter.And(
-                                        Builders<InvestmentRequest>.Filter.Gte(x => x.EquityOfferedPercent, 15),  // 15% - 30%
-                                        Builders<InvestmentRequest>.Filter.Lt(x => x.EquityOfferedPercent, 30)
-                                    );
-                                    break;
-                                case "high":
-                                    filter &= Builders<InvestmentRequest>.Filter.Gte(x => x.EquityOfferedPercent, 30); // ≥ 30%
-                                    break;
-                            }
-                        }
-
-                    return await _collection.Find(filter)
-                        .SortByDescending(x => x.PublishedAt)
-                        .ToListAsync();
+                    case "large":
+                        // >= 300M
+                        filter &= Builders<InvestmentRequest>.Filter.Gte(x => x.ProfitLastYear, 300_000_000);
+                        break;
                 }
+            }
+
+            // Фильтр по доле
+            if (!string.IsNullOrWhiteSpace(equityRange))
+            {
+                switch (equityRange.ToLower())
+                {
+                    case "low":
+                        // < 15%
+                        filter &= Builders<InvestmentRequest>.Filter.Lt(x => x.EquityOfferedPercent, 15);
+                        break;
+
+                    case "medium":
+                        // 15% - 30%
+                        filter &= Builders<InvestmentRequest>.Filter.And(
+                            Builders<InvestmentRequest>.Filter.Gte(x => x.EquityOfferedPercent, 15),
+                            Builders<InvestmentRequest>.Filter.Lt(x => x.EquityOfferedPercent, 30)
+                        );
+                        break;
+
+                    case "high":
+                        // >= 30%
+                        filter &= Builders<InvestmentRequest>.Filter.Gte(x => x.EquityOfferedPercent, 30);
+                        break;
+                }
+            }
+
+            return await _collection
+                .Find(filter)
+                .ToListAsync();
+        }
 
         public async Task<InvestmentRequest?> GetByIdAsync(string id)
             => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();

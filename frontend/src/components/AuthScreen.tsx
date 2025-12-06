@@ -6,6 +6,8 @@ import { Label } from './ui/label';
 import { Checkbox } from './ui/checkbox';
 import { UserRole } from '../App';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
+import { authService } from '../services/authService';
+import { toast } from 'sonner';
 
 interface AuthScreenProps {
   onLogin: (email: string, role: UserRole) => void;
@@ -15,20 +17,124 @@ interface AuthScreenProps {
 
 export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState('');        // ← для регистрации
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
-      // Mock login - в реальности проверяем credentials
-      onLogin(email, 'startup');
-    } else {
-      if (acceptTerms) {
+    if (loading) return;
+
+    try {
+      setLoading(true);
+
+      if (isLogin) {
+        // --- ВХОД ---
+        const res = await authService.login({ email, password });
+
+        const { accessToken, refreshToken } = res.data;
+
+        // сохраняем токены
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        // axios интерцептор сам подставит Authorization
+        // Можно на всякий:
+        // api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+        toast.success('Успешный вход');
+
+        onLogin(email, 'startup');
+      } else {
+        if (!acceptTerms) {
+          toast.error('Нужно принять условия');
+          return;
+        }
+
+        if (!name.trim()) {
+          toast.error('Введите имя');
+          return;
+        }
+
+
+
+
+//для проверки пароля на наличие спец символов
+        if (password.length < 8) {
+  toast.error('Пароль должен содержать минимум 8 символов');
+  return;
+}
+
+if (!/[A-Z]/.test(password)) {
+  toast.error('Пароль должен содержать хотя бы одну заглавную букву');
+  return;
+}
+
+if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
+  toast.error('Пароль должен содержать хотя бы один специальный символ');
+  return;
+}
+
+
+
+
+
+        await authService.register({ name, email, password });
+
+        // ВАЖНО: у тебя на бэке EmailConfirmed = false
+        // и вход разрешён только после подтверждения по email.
+        toast.success('Мы отправили письмо для подтверждения email. Проверьте почту.');
+
         onRegister(email);
+        setIsLogin(true); // переключим на экран входа
       }
-    }
+
+    } catch (err: any) {
+      console.error(err);
+
+      const res = err?.response;
+      const data = res?.data;
+
+      let message = '';
+      let code: string | undefined;
+
+      if (typeof data === 'string') {
+        message = data;
+      } else if (data && typeof data === 'object') {
+        message = data.message || '';
+        code = data.code;
+      }
+
+      // ----- РЕГИСТРАЦИЯ -----
+      if (!isLogin && code === 'EMAIL_EXISTS') {
+        toast.error('Пользователь с таким email уже зарегистрирован');
+        return;
+      }
+
+      // ----- ЛОГИН -----
+      if (isLogin && code === 'EMAIL_NOT_FOUND') {
+        toast.error('Пользователь с таким email не найден');
+        return;
+      }
+
+      if (isLogin && code === 'EMAIL_NOT_CONFIRMED') {
+        toast.error('Email не подтверждён. Проверьте почту и перейдите по ссылке.');
+        return;
+      }
+
+      if (isLogin && code === 'INVALID_CREDENTIALS') {
+        toast.error('Неверный пароль');
+        return;
+      }
+
+  // Фоллбек, если что-то ещё
+  toast.error(message || 'Ошибка авторизации');
+} finally {
+  setLoading(false);
+}
+
   };
 
   return (
@@ -54,6 +160,20 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Имя</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Как к вам обращаться"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -99,6 +219,10 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
                 <button
                   type="button"
                   className="text-sm text-blue-600 hover:text-blue-700"
+                  // позже сюда прикрутим "забыл пароль"
+                  onClick={() => {
+                    // TODO
+                  }}
                 >
                   Забыли пароль?
                 </button>
@@ -107,15 +231,19 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
 
             <Button
               type="submit"
+              disabled={loading}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               size="lg"
             >
-              {isLogin ? 'Войти' : 'Зарегистрироваться'}
+              {loading
+                ? (isLogin ? 'Входим...' : 'Регистрируем...')
+                : (isLogin ? 'Войти' : 'Зарегистрироваться')}
             </Button>
           </form>
 
           <div className="text-center">
             <button
+              type="button"
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-gray-600 hover:text-gray-900"
             >
