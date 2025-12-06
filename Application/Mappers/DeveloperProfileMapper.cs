@@ -11,39 +11,41 @@ namespace Application.Mappers
             {
                 UserId = dto.UserId,
                 FullName = dto.FullName,
-                Telegram = dto.Telegram,
-                Phone = dto.Phone,
-                Linkedin = dto.Linkedin,
-                Github = dto.Github,
-                Types = dto.Types.Select(t => Enum.Parse<DevType>(t, true)).ToList(),
+                WorkingRate = dto.WorkingRate,
+                Currency = dto.Currency,
+                FirstLink = dto.FirstLink,
+                SecondLink = dto.SecondLink,
+                Types = dto.Types,
                 City = dto.City,
                 IsRemote = dto.IsRemote,
                 TechStack = dto.TechStack,
-                Experience = Enum.Parse<ExperienceLevel>(dto.Experience, true),
+                Experience = dto.Experience,
                 About = dto.About,
-                IsAvailable = dto.IsAvailable
+                IsAvailable = dto.IsAvailable,
+                ProjectCount = dto.ProjectCount
             };
         }
 
         public static void UpdateModel(DeveloperProfile model, UpdateDeveloperProfileDto dto)
         {
             if (dto.FullName != null) model.FullName = dto.FullName;
-            if (dto.Telegram != null) model.Telegram = dto.Telegram;
-            if (dto.Phone != null) model.Phone = dto.Phone;
-            if (dto.Linkedin != null) model.Linkedin = dto.Linkedin;
-            if (dto.Github != null) model.Github = dto.Github;
+            if (dto.WorkingRate != null) model.WorkingRate = dto.WorkingRate;
+            if (dto.Currency != null) model.Currency = dto.Currency;
+            if (dto.FirstLink != null) model.FirstLink = dto.FirstLink;
+            if (dto.SecondLink != null) model.SecondLink = dto.SecondLink;
 
             if (dto.Types != null)
-                model.Types = dto.Types.Select(t => Enum.Parse<DevType>(t, true)).ToList();
+                model.Types = dto.Types;
             if (dto.City != null) model.City = dto.City;
             if (dto.IsRemote.HasValue) model.IsRemote = dto.IsRemote.Value;
 
             if (dto.TechStack != null) model.TechStack = dto.TechStack;
             if (dto.Experience != null)
-                model.Experience = Enum.Parse<ExperienceLevel>(dto.Experience, true);
+                model.Experience = dto.Experience;
 
             if (dto.About != null) model.About = dto.About;
             if (dto.IsAvailable.HasValue) model.IsAvailable = dto.IsAvailable.Value;
+            if (dto.ProjectCount.HasValue) model.ProjectCount = dto.ProjectCount.Value;
         }
 
         public static DeveloperProfileResponseDto ToResponseDto(DeveloperProfile model)

@@ -45,10 +45,8 @@ namespace Application.Services
             string? financialModelContentType = null,
             CancellationToken ct = default)
         {
-            var startupId = Guid.NewGuid().ToString();
 
             var model = StartupMapper.ToModel(dto);
-            model.Id = startupId;
 
             if (dto.Technologies != null)
                 model.Technologies = dto.Technologies;
@@ -58,6 +56,9 @@ namespace Application.Services
                 model.Model = dto.Model;
             if (dto.ExternalLinks != null)
                 model.ExternalLinks = dto.ExternalLinks;
+
+            await _repo.AddAsync(model);
+            var startupId = model.Id;
 
             // Pitch deck
             if (pitchDeckStream != null && !string.IsNullOrEmpty(pitchDeckContentType))
@@ -87,7 +88,11 @@ namespace Application.Services
                 model.FinancialModelKey = uploadedKey;
             }
 
-            await _repo.AddAsync(model);
+            // Update the startup with file keys if any files were uploaded
+            if (model.PitchDeckKey != null || model.FinancialModelKey != null)
+            {
+                await _repo.UpdateAsync(model);
+            }
         }
 
         /// <summary>

@@ -54,11 +54,11 @@ namespace Application.Services
             => await _repo.DeleteAsync(id);
 
         public async Task<List<DeveloperProfileResponseDto>> SearchAsync(
-            List<DevType>? types = null,
+            List<string>? types = null,
             string? city = null,
             bool? isRemote = null,
             List<string>? techStack = null,
-            ExperienceLevel? experience = null,
+            string? experience = null,
             bool? isAvailable = null)
         {
             var profiles = await _repo.SearchAsync(types, city, isRemote, techStack, experience, isAvailable);

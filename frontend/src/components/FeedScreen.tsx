@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { toast } from 'sonner';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import { startupService } from '../services/startupService';
+import { developerService } from '../services/developerService';
+
 
 interface FeedScreenProps {
   onProjectClick: (projectId: string) => void;
@@ -191,13 +193,72 @@ const mockBusinesses = [
   },
 ];
 
+const DEV_TYPE_LABELS: Record<string, string> = {
+  FullStack: 'Full-Stack разработка',
+  Frontend: 'Frontend разработка',
+  Backend: 'Backend разработка',
+  Mobile: 'Мобильная разработка',
+  AIML: 'AI/ML разработка',
+  DevOps: 'DevOps',
+  UIUX: 'UI/UX дизайн',
+  QA: 'QA/Тестирование',
+};
+
+const EXPERIENCE_LABELS: Record<string, string> = {
+  None: 'Нет опыта',
+  Junior: '1–2 года',
+  Middle: '3–4 года',
+  Senior: '5+ лет',
+  Lead: '10+ лет',
+};
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  KZT: '₸',
+  USD: '$',
+  RUB: '₽',
+  EUR: '€',
+  UZS: 'сум',
+  KGS: 'сом',
+  CNY: '¥',
+  KRW: '₩',
+  TRY: '₺',
+  BYN: 'Br',
+  JPY: '¥',
+  GBP: '£',
+};
+
+const formatRate = (workingRate?: number, currencyCode?: string) => {
+  if (!workingRate) return '';
+  const amount = Number(workingRate).toLocaleString('ru-RU');
+  const symbol = currencyCode && CURRENCY_SYMBOLS[currencyCode];
+  if (symbol) return `${amount} ${symbol}/месяц`;
+  if (currencyCode) return `${amount} ${currencyCode}/месяц`;
+  return `${amount} /месяц`;
+};
+
+const formatDateRu = (dateStr?: string) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
+
 export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenProps) {
   const [savedProjects, setSavedProjects] = useState<Set<string>>(new Set());
 
-  // 🔥 Стартапы с бэка
+  // Стартапы с бэка
   const [startups, setStartups] = useState<any[]>([]);
   const [isLoadingStartups, setIsLoadingStartups] = useState<boolean>(true);
-
+  
+  // Разработчики с бэка
+const [developers, setDevelopers] = useState<any[]>([]);
+const [isLoadingDevelopers, setIsLoadingDevelopers] = useState<boolean>(true);
+  
   // Search and filter states
   const [startupSearch, setStartupSearch] = useState('');
   const [startupStage, setStartupStage] = useState('all');
@@ -214,13 +275,11 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
   const [businessIndustry, setBusinessIndustry] = useState('all');
   const [businessRevenue, setBusinessRevenue] = useState('all');
 
-  // 👇 тянем данные с бэка при загрузке ленты
   useEffect(() => {
     const loadStartups = async () => {
       try {
         const data = await startupService.getAll();
 
-        // Мапим и сортируем по дате создания (если есть)
         const mapped = (data || []).map((s: any) => {
           const id = s.id || s._id || s.Id || s._Id;
           const createdAt = s.createdAt || s.CreatedAt;
@@ -257,7 +316,57 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
       }
     };
 
+
+      const loadDevelopers = async () => {
+    try {
+      const data = await developerService.getAll();
+
+      const mapped = (data || []).map((d: any) => {
+        const id = d.id || d._id || d.Id || d._Id;
+        const types = d.types || d.Types || [];
+        const typeEnum = Array.isArray(types) && types.length ? types[0] : '';
+        const currency = d.currency || d.Currency;
+        const workingRate = d.workingRate ?? d.WorkingRate;
+
+        return {
+          raw: d,
+          id,
+          name: d.fullName || d.FullName || '',
+          typeEnum,
+          typeLabel: DEV_TYPE_LABELS[typeEnum] || typeEnum || 'Тип не указан',
+          location: d.city || d.City || '',
+          description: d.about || d.About || '',
+          stack: d.techStack || d.TechStack || [],
+          projects: d.projectCount ?? d.ProjectCount ?? 0,
+          experienceEnum: d.experience || d.Experience || '',
+          experienceLabel:
+            EXPERIENCE_LABELS[d.experience || d.Experience] ||
+            d.experience ||
+            d.Experience ||
+            '',
+          rate: formatRate(workingRate, currency),
+          workingRate,
+          currency,
+          available: d.isAvailable ?? d.IsAvailable ?? false,
+          isRemote: d.isRemote ?? d.IsRemote ?? false,
+          firstLink: d.firstLink || d.FirstLink || '',
+          secondLink: d.secondLink || d.SecondLink || '',
+          createdAt: d.createdAt || d.CreatedAt || '',
+        };
+      });
+
+      setDevelopers(mapped);
+ } catch (e: any) {
+      console.error('Ошибка загрузки разработчиков:', e);
+      console.log('Ответ бэка:', e?.response?.status, e?.response?.data);
+      toast('Не удалось загрузить разработчиков');
+    } finally {
+      setIsLoadingDevelopers(false);
+    }
+  };
+
     loadStartups();
+    loadDevelopers();
   }, []);
 
   const handleSave = (projectId: string) => {
@@ -306,22 +415,29 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
     return matchesSearch && matchesIndustry;
   });
 
-  const filteredDevelopers = mockDevelopers.filter((developer) => {
-    const query = developerSearch.toLowerCase();
-    const matchesSearch =
-      !query ||
-      developer.name.toLowerCase().includes(query) ||
-      developer.type.toLowerCase().includes(query) ||
-      developer.location.toLowerCase().includes(query) ||
-      developer.description.toLowerCase().includes(query) ||
-      developer.stack.some((tech: string) => tech.toLowerCase().includes(query));
-    const matchesType = developerType === 'all' || developer.type === developerType;
-    const matchesAvailability =
-      developerAvailability === 'all' ||
-      (developerAvailability === 'available' && developer.available) ||
-      (developerAvailability === 'busy' && !developer.available);
-    return matchesSearch && matchesType && matchesAvailability;
-  });
+const filteredDevelopers = developers.filter((developer) => {
+  const query = developerSearch.toLowerCase();
+
+  const matchesSearch =
+    !query ||
+    developer.name.toLowerCase().includes(query) ||
+    developer.typeLabel.toLowerCase().includes(query) ||
+    developer.location.toLowerCase().includes(query) ||
+    developer.description.toLowerCase().includes(query) ||
+    developer.stack.some((tech: string) => tech.toLowerCase().includes(query));
+
+  const matchesType =
+    developerType === 'all' ||
+    developer.typeEnum === developerType;
+
+  const matchesAvailability =
+    developerAvailability === 'all' ||
+    (developerAvailability === 'available' && developer.available) ||
+    (developerAvailability === 'busy' && !developer.available);
+
+  return matchesSearch && matchesType && matchesAvailability;
+});
+
 
   const filteredBusinesses = mockBusinesses.filter((business) => {
     const query = businessSearch.toLowerCase();
@@ -497,16 +613,19 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
             </div>
             <div className="flex gap-2">
               <Select value={developerType} onValueChange={setDeveloperType}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Тип" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все типы</SelectItem>
-                  <SelectItem value="Full-Stack разработка">Full-Stack</SelectItem>
-                  <SelectItem value="AI/ML разработка">AI/ML</SelectItem>
-                  <SelectItem value="Мобильная разработка">Мобильная</SelectItem>
-                </SelectContent>
-              </Select>
+  <SelectTrigger className="flex-1">
+    <SelectValue placeholder="Тип" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="all">Все типы</SelectItem>
+    <SelectItem value="FullStack">Full-Stack</SelectItem>
+    <SelectItem value="AIML">AI/ML</SelectItem>
+    <SelectItem value="Mobile">Мобильная</SelectItem>
+    <SelectItem value="Frontend">Frontend</SelectItem>
+    <SelectItem value="Backend">Backend</SelectItem>
+  </SelectContent>
+</Select>
+
               <Select value={developerAvailability} onValueChange={setDeveloperAvailability}>
                 <SelectTrigger className="flex-1">
                   <SelectValue placeholder="Доступность" />
@@ -779,16 +898,21 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
     <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="flex gap-3 flex-1">
+          {/* зелёная картинка как на скрине */}
           <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
             <Code className="w-7 h-7 text-white" />
           </div>
           <div className="flex-1 space-y-1">
             <h3 className="text-gray-900">{developer.name}</h3>
-            <p className="text-sm text-gray-600">{developer.type}</p>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                {developer.location}
-              </Badge>
+            <p className="text-sm text-gray-600">{developer.typeLabel}</p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {developer.location && (
+                <Badge variant="outline" className="text-xs">
+                  {developer.location}
+                </Badge>
+              )}
+
               {developer.available ? (
                 <Badge
                   variant="secondary"
@@ -804,9 +928,25 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
                   Заняты
                 </Badge>
               )}
+
+              {developer.isRemote && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-blue-50 text-blue-700"
+                >
+                  Удалённо
+                </Badge>
+              )}
             </div>
+
+            {developer.createdAt && (
+              <p className="text-xs text-gray-400">
+                Добавлено {formatDateRu(developer.createdAt)}
+              </p>
+            )}
           </div>
         </div>
+
         <button
           onClick={() => onSave(developer.id)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
@@ -823,28 +963,80 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
         {developer.description}
       </p>
 
-      <div className="flex flex-wrap gap-1.5">
-        {developer.stack.map((tech: string) => (
-          <Badge key={tech} variant="outline" className="text-xs">
-            {tech}
-          </Badge>
-        ))}
-      </div>
+      {/* стек технологий */}
+      {developer.stack?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {developer.stack.map((tech: string) => (
+            <Badge key={tech} variant="outline" className="text-xs">
+              {tech}
+            </Badge>
+          ))}
+        </div>
+      )}
 
-      <div className="flex items-center gap-4 text-sm text-gray-600">
+      {/* проекты / опыт / ставка */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
         <div className="flex items-center gap-1.5">
           <Briefcase className="w-4 h-4" />
-          <span>{developer.projects} проектов</span>
+          <span>
+            {developer.projects || 0} проектов
+          </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <TrendingUp className="w-4 h-4" />
-          <span>{developer.experience}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <DollarSign className="w-4 h-4" />
-          <span>{developer.rate}</span>
-        </div>
+        {developer.experienceLabel && (
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="w-4 h-4" />
+            <span>{developer.experienceLabel}</span>
+          </div>
+        )}
+        {developer.rate && (
+          <div className="flex items-center gap-1.5">
+            <DollarSign className="w-4 h-4" />
+            <span>{developer.rate}</span>
+          </div>
+        )}
       </div>
+
+      {/* ссылки, если есть */}
+{(developer.firstLink || developer.secondLink) && (
+  <div className="mt-2 space-y-1">
+    <p className="text-xs text-gray-500">Больше можете узнать здесь:</p>
+
+    <div className="flex flex-wrap gap-2 text-sm">
+      {developer.firstLink && (
+        <button
+          onClick={() =>
+            window.open(
+              developer.firstLink.startsWith('http')
+                ? developer.firstLink
+                : `https://${developer.firstLink}`,
+              '_blank'
+            )
+          }
+          className="underline text-blue-600 hover:text-blue-800"
+        >
+          {developer.firstLink.replace(/^https?:\/\//, '')}
+        </button>
+      )}
+
+      {developer.secondLink && (
+        <button
+          onClick={() =>
+            window.open(
+              developer.secondLink.startsWith('http')
+                ? developer.secondLink
+                : `https://${developer.secondLink}`,
+              '_blank'
+            )
+          }
+          className="underline text-blue-600 hover:text-blue-800"
+        >
+          {developer.secondLink.replace(/^https?:\/\//, '')}
+        </button>
+      )}
+    </div>
+  </div>
+)}
+
 
       <div className="flex gap-2">
         <Button
@@ -867,6 +1059,7 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
     </div>
   );
 }
+
 
 function BusinessCard({ business, isSaved, onSave, onClick }: any) {
   const formatNumber = (num: string) => {

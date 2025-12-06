@@ -40,11 +40,11 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<List<DeveloperProfile>> SearchAsync(
-            List<DevType>? types = null,
+            List<string>? types = null,
             string? city = null,
             bool? isRemote = null,
             List<string>? techStack = null,
-            ExperienceLevel? experience = null,
+            string? experience = null,
             bool? isAvailable = null)
         {
             var filter = Builders<DeveloperProfile>.Filter.Empty;
@@ -61,8 +61,8 @@ namespace Infrastructure.Repositories
             if (techStack?.Count > 0)
                 filter &= Builders<DeveloperProfile>.Filter.All(x => x.TechStack, techStack);
 
-            if (experience.HasValue)
-                filter &= Builders<DeveloperProfile>.Filter.Eq(x => x.Experience, experience.Value);
+            if (!string.IsNullOrEmpty(experience))
+                filter &= Builders<DeveloperProfile>.Filter.Eq(x => x.Experience, experience);
 
             if (isAvailable.HasValue)
                 filter &= Builders<DeveloperProfile>.Filter.Eq(x => x.IsAvailable, isAvailable.Value);
