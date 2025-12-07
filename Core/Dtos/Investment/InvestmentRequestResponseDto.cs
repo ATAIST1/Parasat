@@ -1,5 +1,4 @@
 using Core.Models;
-
 namespace Core.Dtos.Investment
 {
     public class InvestmentRequestResponseDto
@@ -17,10 +16,16 @@ namespace Core.Dtos.Investment
         public long InvestmentNeeded { get; set; }
         public int EquityOfferedPercent { get; set; }
         public int NumberOfEmployees { get; set; }
-        public int? YearOfFoundation { get; set; }  
+        public int? YearOfFoundation { get; set; }
         public string? InvestmentPurpose { get; set; }
-        //public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
+
+        // S3 keys
+        public string? InvestmentMemorandumKey { get; set; }
+        public string? FinancialReportKey { get; set; }
+        public string? BusinessPlanKey { get; set; }
+        public string? PresentationKey { get; set; }
+        public List<string> OtherDocumentsKeys { get; set; } = new();
 
         public static InvestmentRequestResponseDto FromModel(InvestmentRequest model)
         {
@@ -37,13 +42,16 @@ namespace Core.Dtos.Investment
                 ProfitLastYear = model.ProfitLastYear,
                 InvestmentNeeded = model.InvestmentNeeded,
                 EquityOfferedPercent = model.EquityOfferedPercent,
-                // Status = model.Status.ToString(),
                 NumberOfEmployees = model.NumberOfEmployees,
                 YearOfFoundation = model.YearOfFoundation,
                 InvestmentPurpose = model.InvestmentPurpose,
                 CreatedAt = model.CreatedAt,
 
-                
+                InvestmentMemorandumKey = model.InvestmentMemorandumKey,
+                FinancialReportKey = model.FinancialReportKey,
+                BusinessPlanKey = model.BusinessPlanKey,
+                PresentationKey = model.PresentationKey,
+                OtherDocumentsKeys = model.OtherDocumentsKeys
             };
         }
     }

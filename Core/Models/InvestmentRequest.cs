@@ -1,6 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-
+using System;
+using System.Collections.Generic;
 namespace Core.Models
 {
     public class InvestmentRequest
@@ -27,6 +28,13 @@ namespace Core.Models
         public int? YearOfFoundation { get; set; }
         public string? InvestmentPurpose { get; set; }  
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+         // --- S3 документы ---
+        public string? InvestmentMemorandumKey { get; set; }
+        public string? FinancialReportKey { get; set; }
+        public string? BusinessPlanKey { get; set; }
+        public string? PresentationKey { get; set; }
+        public List<string> OtherDocumentsKeys { get; set; } = new();
         
     }
 

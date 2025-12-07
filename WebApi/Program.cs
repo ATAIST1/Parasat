@@ -57,6 +57,8 @@ builder.Services.AddScoped<DeveloperProfileService>();
 builder.Services.AddScoped<IInvestmentRequestRepository, InvestmentRequestRepository>();
 builder.Services.AddScoped<InvestmentRequestService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IInvestorProfileRepository, InvestorProfileRepository>();
+builder.Services.AddScoped<InvestorProfileService>();
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
