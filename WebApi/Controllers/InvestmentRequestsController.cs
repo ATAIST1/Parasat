@@ -43,10 +43,26 @@ namespace WebApi.Controllers
             => await _service.GetByIdAsync(id) is {} r ? Ok(r) : NotFound();
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateInvestmentRequestDto dto)
+        [RequestSizeLimit(100_000_000)] // опционально, если файлы большие
+        public async Task<IActionResult> Create(
+            [FromForm] CreateInvestmentRequestDto dto,
+            IFormFile? investmentMemorandum,
+            IFormFile? financialReport,
+            IFormFile? businessPlan,
+            IFormFile? presentation,
+            List<IFormFile>? otherDocuments)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _service.CreateAsync(dto, CurrentUserId);
+
+            await _service.CreateAsync(
+                dto,
+                CurrentUserId,
+                investmentMemorandum,
+                financialReport,
+                businessPlan,
+                presentation,
+                otherDocuments ?? new List<IFormFile>());
+
             return Ok(new { message = "Запрос на инвестиции создан (черновик)" });
         }
 
@@ -73,5 +89,6 @@ namespace WebApi.Controllers
                 ? Ok(new { message = "Запрос опубликован и виден инвесторам!" }) 
                 : BadRequest("Нельзя опубликовать: либо не ваш, либо уже опубликован");
         }
+        
     }
 }
