@@ -1,107 +1,16 @@
+import { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
+import { newsService, type NewsDto } from '../services/newsService';
 
 interface NewsDetailScreenProps {
-  newsId: number;
+  newsId: string;
   onBack: () => void;
-  onOpenNews: (id: number) => void;
+  onOpenNews: (id: string) => void;
 }
 
-const newsData = [
-  {
-    id: 1,
-    title: 'Запуск платформы Parasat Invest',
-    date: '15 октября 2024',
-    badge: 'Новое',
-    badgeVariant: 'secondary' as const,
-    category: 'Новость',
-    fullText: `
-      Дорогие друзья и участники сообщества!
-
-      Мы рады объявить о долгожданном запуске инвестиционной платформы Parasat Invest — первого в СНГ закрытого клуба для стартаперов, инвесторов и разработчиков.
-
-      Теперь вы можете:
-      • Размещать свои проекты и привлекать инвестиции от проверенных бизнес-ангелов
-      • Инвестировать в перспективные стартапы на ранних стадиях
-      • Находить сооснователей и ключевых специалистов в команду
-      • Получать менторскую поддержку от успешных предпринимателей СНГ
-
-      За первый день после запуска к платформе подключились более 300 активных пользователей. Это лучшее подтверждение того, что мы движемся в правильном направлении.
-
-      Спасибо всем, кто был с нами с самого начала! Впереди — ещё больше сделок, роста и успеха!
-    `.trim(),
-  },
-  {
-    id: 2,
-    title: 'Первая успешная сделка на $500K',
-    date: '8 ноября 2024',
-    badge: 'Сделка',
-    badgeVariant: 'default' as const,
-    category: 'Достижение',
-    fullText: `
-      У нас отличные новости!
-
-      Всего через три недели после запуска платформы состоялась первая инвестиционная сделка на $500,000.
-
-      FinTech-стартап из Казахстана, разрабатывающий решение для микрокредитования малого бизнеса, успешно привлек раунд от двух бизнес-ангелов из нашего сообщества.
-
-      Сделка прошла полностью через Parasat Invest:
-      • Презентация проекта в закрытом разделе
-      • Due Diligence при поддержке наших экспертов
-      • Подписание SAFE через платформу
-
-      Это только начало. В ближайшие месяцы мы планируем закрыть ещё минимум 10 сделок на общую сумму более $3M.
-
-      Если у вас есть проект или вы ищете инвестиции — сейчас лучшее время войти в Parasat!
-    `.trim(),
-  },
-  {
-    id: 3,
-    title: '1000+ пользователей за первый месяц',
-    date: '20 ноября 2024',
-    badge: 'Рост',
-    badgeVariant: 'default' as const,
-    category: 'Достижение',
-    fullText: `
-      Мы преодолели важную отметку — более 1000 активных пользователей за первый месяц работы платформы!
-
-      Среди участников:
-      • 650+ основателей стартапов
-      • 250+ частных инвесторов и бизнес-ангелов
-      • 100+ разработчиков и технических специалистов
-
-      Это результат, который показывает реальную потребность рынка в закрытом профессиональном сообществе для основателей и инвесторов.
-
-      Спасибо каждому из вас за доверие и активность! Вместе мы строим сильную предпринимательскую экосистему СНГ.
-    `.trim(),
-  },
-  {
-    id: 4,
-    title: 'Партнерство с ведущими акселераторами',
-    date: '2 декабря 2024',
-    badge: 'Партнерство',
-    badgeVariant: 'secondary' as const,
-    category: 'Новость',
-    fullText: `
-      Рады сообщить о стратегическом партнёрстве с тремя ведущими акселераторами СНГ:
-
-      • Astana Hub (Казахстан)
-      • IT Park Uzbekistan
-      • Technopark St. Petersburg (Россия)
-
-      Теперь выпускники и резиденты этих акселераторов получают:
-      • Приоритетный доступ к инвесторам Parasat
-      • Бесплатное размещение проектов на платформе
-      • Юридическую и менторскую поддержку на всех этапах
-
-      Это партнёрство открывает новые возможности как для стартапов, так и для инвесторов нашего сообщества.
-
-      Ждём ещё больше сильных проектов и успешных сделок в 2025 году!
-    `.trim(),
-  },
-];
 
 // как на ParasatScreen: для "Достижение" — зелёный бейдж
 function getBadgeProps(category: string) {
@@ -123,10 +32,80 @@ export default function NewsDetailScreen({
   onBack,
   onOpenNews,
 }: NewsDetailScreenProps) {
-  const item = newsData.find((n) => n.id === newsId);
+  const [item, setItem] = useState<NewsDto | null>(null);
+  const [otherNews, setOtherNews] = useState<NewsDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      if (!newsId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const currentNews = await newsService.getById(newsId);
+        setItem(currentNews);
+
+        const allNews = await newsService.getRecent(10);
+        const filtered = allNews.filter(n => n.id !== newsId);
+        setOtherNews(filtered);
+      } catch (err: any) {
+        console.error('Error fetching news:', err);
+        setError('Не удалось загрузить новость');
+        setItem(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, [newsId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <header className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 pt-6 pb-6 shadow-sm">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-gray-300 hover:text-white text-sm mb-4 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Назад к новостям</span>
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-xl p-2 shadow">
+              <img
+                src={logo}
+                alt="Parasat Invest"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div>
+              <p className="text-xs text-gray-300 uppercase tracking-wide">
+                Parasat Business Club
+              </p>
+              <h1 className="text-white text-lg font-semibold mt-0.5">
+                Загрузка...
+              </h1>
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 px-4 pt-4 pb-16 flex items-center justify-center">
+          <Card className="max-w-md w-full rounded-2xl shadow-md border border-gray-100 p-6 text-center">
+            <p className="text-gray-700 text-base">Загрузка новости...</p>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   // "Новость не найдена"
-  if (!item) {
+  if (!item || error) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 pt-6 pb-6 shadow-sm">
@@ -176,13 +155,50 @@ export default function NewsDetailScreen({
     );
   }
 
-  const paragraphs = item.fullText
-    .split('\n')
-    .map((p) => p.trim())
-    .filter(Boolean);
+  // Парсим контент для булет поинтов
+  const parseContent = (content: string) => {
+    const lines = content.split('\n').map((p) => p.trim()).filter(Boolean);
+    const elements: Array<{ type: 'text' | 'bullet'; content: string }> = [];
 
-  const otherNews = newsData.filter((n) => n.id !== item.id);
+    lines.forEach((line) => {
+      if (line.includes('•')) {
+
+        const trimmedLine = line.trim();
+        const startsWithBullet = trimmedLine.startsWith('•');
+        
+        const parts = trimmedLine.split(/\s*•\s+/);
+        
+        parts.forEach((part, index) => {
+          const trimmed = part.trim();
+          if (!trimmed) return;
+
+          if (index === 0) {
+            if (startsWithBullet) {
+              elements.push({ type: 'bullet', content: trimmed });
+            } else {
+              elements.push({ type: 'text', content: trimmed });
+            }
+          } else {
+            elements.push({ type: 'bullet', content: trimmed });
+          }
+        });
+      } else {
+        elements.push({ type: 'text', content: line });
+      }
+    });
+
+    return elements;
+  };
+
+  const contentElements = parseContent(item.content);
   const badgeProps = getBadgeProps(item.category);
+  
+  const displayDate = item.formattedDate || 
+    (item.date ? new Date(item.date).toLocaleDateString('ru-RU', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    }) : '');
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -233,7 +249,7 @@ export default function NewsDetailScreen({
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <Calendar className="w-3 h-3" />
-                <span>{item.date}</span>
+                <span>{displayDate}</span>
               </div>
             </div>
 
@@ -244,24 +260,22 @@ export default function NewsDetailScreen({
 
             {/* Текст новости */}
             <div className="space-y-4 text-[16px] sm:text-[18px] leading-relaxed text-gray-800">
-              {paragraphs.map((text, i) => {
-                const isBullet = text.startsWith('•');
-
-                if (isBullet) {
+              {contentElements.map((element, i) => {
+                if (element.type === 'bullet') {
                   return (
                     <div
                       key={i}
                       className="flex items-start gap-3 text-[16px] sm:text-[18px] text-gray-800"
                     >
-                      <span className="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-slate-900" />
-                      <span>{text.replace(/^•\s*/, '')}</span>
+                      <span className="mt-2 inline-block w-1.5 h-1.5 rounded-full bg-slate-900 flex-shrink-0" />
+                      <span>{element.content}</span>
                     </div>
                   );
                 }
 
                 return (
                   <p key={i} className="text-gray-800">
-                    {text}
+                    {element.content}
                   </p>
                 );
               })}
@@ -278,6 +292,12 @@ export default function NewsDetailScreen({
             <div className="space-y-2">
               {otherNews.map((news) => {
                 const bp = getBadgeProps(news.category);
+                const newsDate = news.formattedDate || 
+                  (news.date ? new Date(news.date).toLocaleDateString('ru-RU', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                  }) : '');
 
                 return (
                   <Card
@@ -289,7 +309,7 @@ export default function NewsDetailScreen({
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs text-gray-500 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {news.date}
+                          {newsDate}
                         </span>
                         {/* Бейдж как на главной странице новостей — без text-[10px] и прочего */}
                         <Badge

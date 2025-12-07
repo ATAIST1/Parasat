@@ -1,55 +1,40 @@
+import { useState, useEffect } from 'react';
 import { TrendingUp, Award, Users, Briefcase, ChevronRight, Calendar, Star } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
+import { newsService, type NewsDto } from '../services/newsService';
 
-// путь может отличаться, если App.tsx лежит не на уровень выше
 import type { Screen } from '../App';
 
 interface ParasatScreenProps {
   navigateTo: (screen: Screen) => void;
-  openNews: (id: number) => void;
+  openNews: (id: string) => void;
 }
 
 export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenProps) {
-  const news = [
-    {
-      id: 1,
-      title: 'Запуск платформы Parasat Invest',
-      date: '15 октября 2024',
-      category: 'Новость',
-      description: 'Parasat Business Club запустил инвестиционную платформу для стартаперов и инвесторов СНГ',
-      image: 'platform launch',
-      badge: 'Новое',
-    },
-    {
-      id: 2,
-      title: 'Первая успешная сделка на $500K',
-      date: '8 ноября 2024',
-      category: 'Достижение',
-      description: 'Стартап в сфере FinTech привлек инвестиции через нашу платформу',
-      image: 'business success',
-      badge: 'Сделка',
-    },
-    {
-      id: 3,
-      title: '1000+ пользователей за первый месяц',
-      date: '20 ноября 2024',
-      category: 'Достижение',
-      description: 'Наше сообщество растет! Спасибо за доверие',
-      image: 'community growth',
-      badge: 'Рост',
-    },
-    {
-      id: 4,
-      title: 'Партнерство с ведущими акселераторами',
-      date: '2 декабря 2024',
-      category: 'Новость',
-      description: 'Подписаны соглашения о сотрудничестве с крупнейшими акселераторами региона',
-      image: 'business partnership',
-      badge: 'Партнерство',
-    },
-  ];
+  const [news, setNews] = useState<NewsDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const fetchedNews = await newsService.getRecent(10);
+        setNews(fetchedNews);
+      } catch (err: any) {
+        console.error('Error fetching news:', err);
+        setError('Не удалось загрузить новости');
+        setNews([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
 
   const achievements = [
     {
@@ -127,37 +112,60 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
             <Badge variant="secondary">Все актуально</Badge>
           </div>
 
-          <div className="space-y-3">
-            {news.map((item) => (
-              <Card
-                key={item.id}
-                className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
-                onClick={() => openNews(item.id)}
-              >
-                <div className="p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge 
-                          variant={item.category === 'Достижение' ? 'default' : 'secondary'}
-                          className={item.category === 'Достижение' ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}
-                        >
-                          {item.badge}
-                        </Badge>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <Calendar className="w-3 h-3" />
-                          {item.date}
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">
+              Загрузка новостей...
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-500">
+              {error}
+            </div>
+          ) : news.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              Новостей пока нет
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {news.map((item) => {
+                const displayDate = item.formattedDate || 
+                  (item.date ? new Date(item.date).toLocaleDateString('ru-RU', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                  }) : '');
+                
+                return (
+                  <Card
+                    key={item.id}
+                    className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                    onClick={() => openNews(item.id)}
+                  >
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge 
+                              variant={item.category === 'Достижение' ? 'default' : 'secondary'}
+                              className={item.category === 'Достижение' ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}
+                            >
+                              {item.badge}
+                            </Badge>
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              <Calendar className="w-3 h-3" />
+                              {displayDate}
+                            </div>
+                          </div>
+                          <h3 className="text-gray-900 font-medium mb-1">{item.title}</h3>
+                          <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
                         </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
                       </div>
-                      <h3 className="text-gray-900 font-medium mb-1">{item.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">

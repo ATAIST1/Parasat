@@ -55,7 +55,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [user, setUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [selectedNewsId, setSelectedNewsId] = useState<number | null>(null);
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
 
   const handleLogin = (email: string, role: UserRole) => {
     setUser({
@@ -202,8 +202,12 @@ function App() {
       case 'parasat-news-detail':
       return (
         <NewsDetailScreen
-          newsId={selectedNewsId || 1}
+          newsId={selectedNewsId || ''}
           onBack={() => setCurrentScreen('parasat')}
+          onOpenNews={(id) => {
+            setSelectedNewsId(id);
+            setCurrentScreen('parasat-news-detail');
+          }}
         />
       );
       case 'parasat':
@@ -214,7 +218,7 @@ function App() {
         // );
           <ParasatScreen
             navigateTo={navigateTo}
-            openNews={(id) => {
+            openNews={(id: string) => {
               setSelectedNewsId(id);
               setCurrentScreen('parasat-news-detail');
             }}
