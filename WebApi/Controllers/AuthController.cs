@@ -161,4 +161,18 @@ public class AuthController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationDto dto)
+    {
+        try
+        {
+            await _authService.ResendConfirmationEmailAsync(dto);
+            return Ok(new { message = "Confirmation email has been sent. Please check your inbox." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

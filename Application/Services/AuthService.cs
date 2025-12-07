@@ -222,4 +222,22 @@ public class AuthService
 
         await _userRepo.UpdateAsync(user);
     }
+
+    public async Task ResendConfirmationEmailAsync(ResendConfirmationDto dto)
+    {
+        var user = await _userRepo.GetByEmailAsync(dto.Email);
+        if (user == null)
+            throw new Exception("Пользователь с таким email не найден");
+
+        if (user.EmailConfirmed)
+            throw new Exception("Email уже подтверждён");
+
+        // новый токен
+        var confirmToken = Guid.NewGuid().ToString();
+        user.EmailConfirmationToken = confirmToken;
+        user.EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(1);
+
+        await _userRepo.UpdateAsync(user);
+        await _emailService.SendConfirmationEmailAsync(dto.Email, confirmToken);
+    }
 }
