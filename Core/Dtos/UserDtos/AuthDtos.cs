@@ -6,3 +6,4 @@ public record TokenResponse(string AccessToken, string RefreshToken);
 public record RefreshTokenRequest(string RefreshToken);
 public record LogoutDto(string? RefreshToken = null);
 public record ResendConfirmationDto(string Email);
+public record ChangePasswordDto(string CurrentPassword, string NewPassword);

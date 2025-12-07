@@ -240,4 +240,22 @@ public class AuthService
         await _userRepo.UpdateAsync(user);
         await _emailService.SendConfirmationEmailAsync(dto.Email, confirmToken);
     }
+
+    public async Task ChangePasswordAsync(string userId, ChangePasswordDto dto)
+    {
+        var user = await _userRepo.GetByIdAsync(userId);
+        if (user == null)
+            throw new UnauthorizedAccessException("User not found");
+        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+            throw new UnauthorizedAccessException("Current password is incorrect");
+        var newPassword = dto.NewPassword ?? string.Empty;
+        if (newPassword.Length < 8
+            || !newPassword.Any(char.IsUpper)
+            || !newPassword.Any(ch => "!@#$%^&*()_+-=[]{};':\",.<>?/.".Contains(ch)))
+        {
+            throw new Exception("Пароль должен содержать минимум 8 символов, одну заглавную букву и один специальный символ");
+        }
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _userRepo.UpdateAsync(user);
+    }
 }
