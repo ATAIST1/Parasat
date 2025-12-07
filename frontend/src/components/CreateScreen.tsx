@@ -1,10 +1,11 @@
-import { Rocket, TrendingUp, Code, Building2 } from 'lucide-react';
+import { Rocket, TrendingUp, Code, Building2, UserCircle2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState } from 'react';
 import ProjectForm from './ProjectForm';
 import InvestorMandateForm from './InvestorMandateForm';
 import DeveloperForm from './DeveloperForm';
 import BusinessForm from './BusinessForm';
+import InvestorsForm from './InvestorsForm';
 
 interface CreateScreenProps {
   userRole: 'startup' | 'investor' | 'mentor' | null;
@@ -12,12 +13,24 @@ interface CreateScreenProps {
 }
 
 export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps) {
-  const [selectedType, setSelectedType] = useState<'project' | 'mandate' | 'developer' | 'business' | null>(null);
+  const [selectedType, setSelectedType] = useState<
+    'project' | 'investorProfile' | 'mandate' | 'developer' | 'business' | null
+  >(null);
 
-  // ЭТО ГЛАВНОЕ ИЗМЕНЕНИЕ — ПЕРЕДАЁМ ПРОПСЫ ПРАВИЛЬНО!
   if (selectedType === 'project') {
     return (
       <ProjectForm
+        onBack={() => setSelectedType(null)}
+        onSubmit={() => {
+          setSelectedType(null);
+          navigateTo('feed');
+        }}
+      />
+    );
+  }
+  if (selectedType === 'investorProfile') {
+    return (
+      <InvestorsForm
         onBack={() => setSelectedType(null)}
         onSubmit={() => {
           setSelectedType(null);
@@ -63,10 +76,9 @@ export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps
     );
   }
 
-  // Остальное — без изменений
   return (
     <div className="min-h-screen bg-white p-6">
-      <div className="max-w-md mx-auto space-y-8 pt-8">
+      <div className="max-w-md mx-auto space-y-5 pt-2">
         <div className="text-center">
           <h1 className="text-gray-900 mb-2">Что вы хотите создать?</h1>
         </div>
@@ -89,7 +101,26 @@ export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps
             </Button>
           </div>
 
-          {(userRole === 'investor' || userRole === null) && (
+<div className="border border-gray-200 rounded-2xl p-5 space-y-4 hover:border-blue-300 hover:shadow-md transition-all">
+  <div className="flex items-start gap-4">
+    <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+      <TrendingUp className="w-6 h-6 text-green-600" />
+    </div>
+    <div className="flex-1">
+      <h3 className="text-gray-900 mb-1">Профиль инвестора</h3>
+      <p className="text-gray-600 text-sm">
+        Опубликуйте ваш профиль и параметры инвестиций
+      </p>
+    </div>
+  </div>
+  <Button onClick={() => setSelectedType('investorProfile')} className="w-full">
+    Создать профиль инвестора
+  </Button>
+</div>
+
+
+          {/*Инвесторский мандат с фигмы который, пока не знаю есть ли смысл его добавлять*/}
+          {false && (userRole === 'investor' || userRole === null) && (
             <div className="border border-gray-200 rounded-2xl p-6 space-y-4 hover:border-blue-300 hover:shadow-md transition-all">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">

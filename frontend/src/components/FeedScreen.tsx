@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import { startupService } from '../services/startupService';
 import { developerService } from '../services/developerService';
+import { investorService } from '../services/investorService';
+import type { InvestorProfileResponseDto } from '../types/investor';
 
 
 interface FeedScreenProps {
@@ -37,7 +39,7 @@ const mockProjects = [
 ];
 */
 
-const mockInvestors = [
+/*const mockInvestors = [
   {
     id: 'inv1',
     name: 'Кайрат Сатыбалды',
@@ -75,6 +77,7 @@ const mockInvestors = [
     verified: true,
   },
 ];
+*/
 
 const mockDevelopers = [
   {
@@ -258,6 +261,10 @@ export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenPro
   // Разработчики с бэка
 const [developers, setDevelopers] = useState<any[]>([]);
 const [isLoadingDevelopers, setIsLoadingDevelopers] = useState<boolean>(true);
+
+// Инвесторы с бэка
+const [investors, setInvestors] = useState<any[]>([]);
+const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
   
   // Search and filter states
   const [startupSearch, setStartupSearch] = useState('');
@@ -365,8 +372,37 @@ const [isLoadingDevelopers, setIsLoadingDevelopers] = useState<boolean>(true);
     }
   };
 
+    const loadInvestors = async () => {
+    try {
+      const data = await investorService.getAll();
+
+      const mapped = (data || []).map((i: InvestorProfileResponseDto) => ({
+        raw: i,
+        id: i.id,
+        name: i.fullName,
+        title: i.about,
+        location: i.city,
+        bio: i.description,
+        checkSize: i.investmentRange,
+        industries: i.industries || [],
+        deals: i.dealCount ?? 0,
+        verified: true, // пока просто показываем галочку всегда
+      }));
+
+      setInvestors(mapped);
+    } catch (e: any) {
+      console.error('Ошибка загрузки инвесторов:', e);
+      console.log('Ответ бэка:', e?.response?.status, e?.response?.data);
+      toast('Не удалось загрузить инвесторов');
+    } finally {
+      setIsLoadingInvestors(false);
+    }
+  };
+
+
     loadStartups();
     loadDevelopers();
+    loadInvestors();
   }, []);
 
   const handleSave = (projectId: string) => {
@@ -401,19 +437,26 @@ const [isLoadingDevelopers, setIsLoadingDevelopers] = useState<boolean>(true);
     return matchesSearch && matchesStage && matchesIndustry;
   });
 
-  const filteredInvestors = mockInvestors.filter((investor) => {
-    const query = investorSearch.toLowerCase();
-    const matchesSearch =
-      !query ||
-      investor.name.toLowerCase().includes(query) ||
-      investor.title.toLowerCase().includes(query) ||
-      investor.location.toLowerCase().includes(query) ||
-      investor.bio.toLowerCase().includes(query) ||
-      investor.industries.some((industry) => industry.toLowerCase().includes(query));
-    const matchesIndustry =
-      investorIndustry === 'all' || investor.industries.includes(investorIndustry);
-    return matchesSearch && matchesIndustry;
-  });
+const filteredInvestors = investors.filter((investor) => {
+  const query = investorSearch.toLowerCase();
+
+  const matchesSearch =
+    !query ||
+    investor.name.toLowerCase().includes(query) ||
+    investor.title.toLowerCase().includes(query) ||
+    investor.location.toLowerCase().includes(query) ||
+    investor.bio.toLowerCase().includes(query) ||
+    investor.industries.some((industry: string) =>
+      industry.toLowerCase().includes(query)
+    );
+
+  const matchesIndustry =
+    investorIndustry === 'all' ||
+    investor.industries.includes(investorIndustry);
+
+  return matchesSearch && matchesIndustry;
+});
+
 
 const filteredDevelopers = developers.filter((developer) => {
   const query = developerSearch.toLowerCase();
@@ -579,23 +622,28 @@ const filteredDevelopers = developers.filter((developer) => {
               </Select>
             </div>
           </div>
-          <div className="p-4 space-y-4">
-            {filteredInvestors.length > 0 ? (
-              filteredInvestors.map((investor) => (
-                <InvestorCard
-                  key={investor.id}
-                  investor={investor}
-                  isSaved={savedProjects.has(investor.id)}
-                  onSave={handleSave}
-                />
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                <p>Ничего не найдено</p>
-                <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
-              </div>
-            )}
-          </div>
+            <div className="p-4 space-y-4">
+    {isLoadingInvestors ? (
+      <div className="text-center py-12 text-gray-500">
+        Загрузка инвесторов…
+      </div>
+    ) : filteredInvestors.length > 0 ? (
+      filteredInvestors.map((investor) => (
+        <InvestorCard
+          key={investor.id}
+          investor={investor}
+          isSaved={savedProjects.has(investor.id)}
+          onSave={handleSave}
+        />
+      ))
+    ) : (
+      <div className="text-center py-12 text-gray-500">
+        <p>Ничего не найдено</p>
+        <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
+      </div>
+    )}
+  </div>
+
         </TabsContent>
 
         {/* РАЗРАБОТЧИКИ */}
@@ -865,11 +913,8 @@ function InvestorCard({ investor, isSaved, onSave }: any) {
           <Briefcase className="w-4 h-4" />
           <span>{investor.deals} сделок</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Star className="w-4 h-4" />
-          <span>{investor.exits} выходов</span>
-        </div>
       </div>
+
 
       <div className="flex gap-2">
         <Button
@@ -996,7 +1041,6 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
         )}
       </div>
 
-      {/* ссылки, если есть */}
 {(developer.firstLink || developer.secondLink) && (
   <div className="mt-2 space-y-1">
     <p className="text-xs text-gray-500">Больше можете узнать здесь:</p>
