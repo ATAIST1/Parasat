@@ -23,7 +23,7 @@ interface ProjectDetailScreenProps {
 }
 
 /*
-// ⛔ Старый моковый стартап — оставляю на память, но не используем
+//
 const mockProject = {
   id: '1',
   name: 'PayFlow',
@@ -65,7 +65,6 @@ const mockProject = {
 */
 
 const mockBusinesses: any = {
-  // ... как у тебя выше, я не трогаю
   biz1: { /* ... */ },
   biz2: { /* ... */ },
 };
@@ -76,11 +75,9 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
   const [interestMessage, setInterestMessage] = useState('');
   const [shareMandate, setShareMandate] = useState(false);
 
-  // Определяем тип контента - бизнес или стартап
   const isBusiness = projectId.startsWith('biz');
   const currentBusiness = isBusiness ? mockBusinesses[projectId] : null;
 
-  // 🔥 Текущее состояние стартапа (если это НЕ бизнес)
   const [project, setProject] = useState<any | null>(null);
   const [isLoadingProject, setIsLoadingProject] = useState<boolean>(!isBusiness);
 
@@ -121,17 +118,42 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
     setShareMandate(false);
   };
 
-  // ===================== БИЗНЕС =====================
+    const handleOpenPitchDeck = async () => {
+    try {
+      const { url } = await startupService.getPitchDeckUrl(projectId);
+      if (!url) {
+        toast('Питч-дек пока не загружен');
+        return;
+      }
+      window.open(url, '_blank');
+    } catch (e) {
+      console.error(e);
+      toast('Питч-дек пока не доступен');
+    }
+  };
+
+  const handleOpenFinancialModel = async () => {
+    try {
+      const { url } = await startupService.getFinancialModelUrl(projectId);
+      if (!url) {
+        toast('Финмодель пока не загружена');
+        return;
+      }
+      window.open(url, '_blank');
+    } catch (e) {
+      console.error(e);
+      toast('Финмодель пока не доступна');
+    }
+  };
+
+
   if (isBusiness && currentBusiness) {
-    // (твой код для бизнеса я почти не трогаю, только форматNumber переиспользую)
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* ... весь твой блок бизнес-деталей как был ... */}
       </div>
     );
   }
 
-  // ===================== СТАРТАП =====================
 
   if (isLoadingProject) {
     return (
@@ -287,7 +309,7 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
           </div>
         </div>
 
-        {/* Команда — ты сказал можно пока закомментить, так и сделаем
+        {/*
         <div className="bg-white rounded-2xl p-6 space-y-4">
           <h2 className="text-gray-900">Команда</h2>
           ...
@@ -309,38 +331,39 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
           </div>
         )}
 
-        {/* Документы / ссылки */}
-        {externalLinks.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 space-y-4">
-            <h2 className="text-gray-900">Документы / ссылки</h2>
-            <div className="space-y-2">
-              {externalLinks.map((link: string, index: number) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <p className="text-gray-900">
-                        {link.length > 40 ? `${link.slice(0, 40)}…` : link}
-                      </p>
-                      <p className="text-xs text-gray-500">LINK</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(link, '_blank')}
-                  >
-                    Открыть
-                  </Button>
+        {/* Документы из S3 */}
+        <div className="bg-white rounded-2xl p-6 space-y-4">
+          <h2 className="text-gray-900">Документы</h2>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-gray-400" />
+                <div>
+                  <p className="text-gray-900">Питч-дек</p>
+                  <p className="text-xs text-gray-500">PDF, хранится в S3</p>
                 </div>
-              ))}
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleOpenPitchDeck}>
+                Открыть
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-gray-400" />
+                <div>
+                  <p className="text-gray-900">Финмодель</p>
+                  <p className="text-xs text-gray-500">XLSX, хранится в S3</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleOpenFinancialModel}>
+                Открыть
+              </Button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+
+        </div>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 space-y-2">
         <Button
