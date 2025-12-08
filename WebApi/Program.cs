@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Infrastructure; // for AddInfrastructure
+using WebApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,12 +44,12 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
 // Infrastructure (S3, etc.)
 builder.Services.AddInfrastructure(builder.Configuration);
-
+builder.Services.AddSignalR();
 builder.Services.AddScoped<NewsService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
 builder.Services.AddScoped<StartupService>();
@@ -138,5 +139,6 @@ app.UseCors(builder => builder
     .AllowAnyHeader());
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
