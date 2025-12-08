@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Settings,
   CreditCard,
@@ -16,6 +16,7 @@ import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 
 import MyProjectsScreen from './MyProjectsScreen';
 import FavoritesScreen from './FavoritesScreen';
+import { bookmarkService } from '../services/bookmarkService';
 
 interface ProfileScreenProps {
   user: any;
@@ -24,9 +25,15 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) {
   const [currentScreen, setCurrentScreen] = useState<'profile' | 'my-projects' | 'favorites'>('profile');
+  const [favoritesCount, setFavoritesCount] = useState(0);
+
+  useEffect(() => {
+    bookmarkService.getAll().then(bookmarks => {
+      setFavoritesCount(bookmarks.length);
+    });
+  }, []);
 
   const myProjectsCount = 2;
-  const favoritesCount = 7;
 
   if (currentScreen === 'my-projects') {
     return (
@@ -40,15 +47,20 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
   }
 
   if (currentScreen === 'favorites') {
-  return (
-    <FavoritesScreen
-      navigateTo={(screen) => {
-        if (screen === 'back') setCurrentScreen('profile');
-        else navigateTo(screen);
-      }}
-    />
-  );
-}
+    return (
+      <FavoritesScreen
+        navigateTo={(screen) => {
+          if (screen === 'back') {
+            bookmarkService.getAll().then(bookmarks => {
+              setFavoritesCount(bookmarks.length);
+            });
+            setCurrentScreen('profile');
+          }
+          else navigateTo(screen);
+        }}
+      />
+    );
+  }
 
   const menuItems = [
     {

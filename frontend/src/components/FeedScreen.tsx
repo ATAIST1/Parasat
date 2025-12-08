@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from 'react';
 import { Bookmark, MessageCircle, TrendingUp, Users, DollarSign, Briefcase, Star, Code, CheckCircle, Search, Filter, Building2, Target, PieChart } from 'lucide-react';
 import { Badge } from './ui/badge';
@@ -12,6 +13,7 @@ import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import { startupService } from '../services/startupService';
 import { developerService } from '../services/developerService';
 import { investorService } from '../services/investorService';
+import { bookmarkService, BookmarkItemType } from '../services/bookmarkService';
 import type { InvestorProfileResponseDto } from '../types/investor';
 
 
@@ -252,7 +254,8 @@ const formatDateRu = (dateStr?: string) => {
 
 
 export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenProps) {
-  const [savedProjects, setSavedProjects] = useState<Set<string>>(new Set());
+  const [savedBookmarks, setSavedBookmarks] = useState<Map<string, BookmarkItemType>>(new Map());
+  const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
   // Стартапы с бэка
   const [startups, setStartups] = useState<any[]>([]);
@@ -283,6 +286,16 @@ const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
   const [businessRevenue, setBusinessRevenue] = useState('all');
 
   useEffect(() => {
+    setLoadingBookmarks(true);
+    bookmarkService.getAll()
+      .then((bookmarks) => {
+        const m = new Map<string, BookmarkItemType>();
+        bookmarks.forEach(b => m.set(b.itemId, b.itemType));
+        setSavedBookmarks(m);
+      })
+      .catch(() => toast('Не удалось получить избранное'))
+      .finally(() => setLoadingBookmarks(false));
+
     const loadStartups = async () => {
       try {
         const data = await startupService.getAll();
@@ -405,16 +418,29 @@ const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
     loadInvestors();
   }, []);
 
-  const handleSave = (projectId: string) => {
-    const newSaved = new Set(savedProjects);
-    if (newSaved.has(projectId)) {
-      newSaved.delete(projectId);
-      toast('Удалено из избранного');
-    } else {
-      newSaved.add(projectId);
-      toast('Сохранено в избранное');
+  const handleBookmarkToggle = async (itemId: string, itemType: BookmarkItemType) => {
+    if (loadingBookmarks) return;
+    const key = itemId;
+    const isSaved = savedBookmarks.has(key) && savedBookmarks.get(key) === itemType;
+    setLoadingBookmarks(true);
+    try {
+      if (isSaved) {
+        await bookmarkService.remove(itemId, itemType);
+      } else {
+        await bookmarkService.add({ itemId, itemType });
+      }
+      setSavedBookmarks(prev => {
+        const m = new Map(prev);
+        if (isSaved) m.delete(key);
+        else m.set(key, itemType);
+        return m;
+      });
+      toast(isSaved ? 'Удалено из избранного' : 'Добавлено в избранное');
+    } catch (e) {
+      toast('Произошла ошибка. Попробуйте ещё раз');
+    } finally {
+      setLoadingBookmarks(false);
     }
-    setSavedProjects(newSaved);
   };
 
   // Filter functions
@@ -578,8 +604,8 @@ const filteredDevelopers = developers.filter((developer) => {
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  isSaved={savedProjects.has(project.id)}
-                  onSave={handleSave}
+                  isSaved={savedBookmarks.has(project.id) && savedBookmarks.get(project.id) === BookmarkItemType.Startup}
+                  onSave={() => handleBookmarkToggle(project.id, BookmarkItemType.Startup)}
                   onClick={onProjectClick}
                 />
               ))
@@ -632,8 +658,8 @@ const filteredDevelopers = developers.filter((developer) => {
         <InvestorCard
           key={investor.id}
           investor={investor}
-          isSaved={savedProjects.has(investor.id)}
-          onSave={handleSave}
+          isSaved={savedBookmarks.has(investor.id) && savedBookmarks.get(investor.id) === BookmarkItemType.Investor}
+          onSave={() => handleBookmarkToggle(investor.id, BookmarkItemType.Investor)}
         />
       ))
     ) : (
@@ -692,8 +718,8 @@ const filteredDevelopers = developers.filter((developer) => {
                 <DeveloperCard
                   key={developer.id}
                   developer={developer}
-                  isSaved={savedProjects.has(developer.id)}
-                  onSave={handleSave}
+                  isSaved={savedBookmarks.has(developer.id) && savedBookmarks.get(developer.id) === BookmarkItemType.Developer}
+                  onSave={() => handleBookmarkToggle(developer.id, BookmarkItemType.Developer)}
                 />
               ))
             ) : (
@@ -751,8 +777,8 @@ const filteredDevelopers = developers.filter((developer) => {
                 <BusinessCard
                   key={business.id}
                   business={business}
-                  isSaved={savedProjects.has(business.id)}
-                  onSave={handleSave}
+                  isSaved={savedBookmarks.has(business.id) && savedBookmarks.get(business.id) === BookmarkItemType.Business}
+                  onSave={() => handleBookmarkToggle(business.id, BookmarkItemType.Business)}
                   onClick={onProjectClick}
                 />
               ))
