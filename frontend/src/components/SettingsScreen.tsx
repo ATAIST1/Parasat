@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Separator } from './ui/separator';
 import { useState } from 'react';
 import { toast } from 'sonner@2.0.3';
+import ChangePasswordScreen from './ChangePasswordScreen';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -17,10 +18,15 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
   const [digestEnabled, setDigestEnabled] = useState(false);
   const [privacy, setPrivacy] = useState('all');
   const [language, setLanguage] = useState('ru');
+  const [changePassword, setChangePassword] = useState(false);
 
   const handleSave = () => {
     toast('Изменения сохранены');
   };
+
+  if (changePassword) {
+    return <ChangePasswordScreen onBack={() => setChangePassword(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -146,7 +152,7 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
         <div className="space-y-4">
           <h2 className="text-gray-900">Безопасность</h2>
           <div className="space-y-3">
-            <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+            <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors" onClick={() => setChangePassword(true)}>
               <p className="text-gray-900">Изменить пароль</p>
             </button>
             <button className="w-full text-left p-3 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
