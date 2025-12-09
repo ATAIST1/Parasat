@@ -45,4 +45,37 @@ public class EmailService
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
     }
+
+    public async Task SendTwoFactorCodeEmailAsync(string email, string code)
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(
+            _config["Email:FromName"] ?? "Parasat",
+            _config["Email:From"] ?? throw new InvalidOperationException("Email:From is not configured")
+        ));
+        message.To.Add(new MailboxAddress(email, email));
+        message.Subject = "Код входа в Parasat";
+
+        var bodyBuilder = new BodyBuilder
+        {
+            HtmlBody = $@"
+                <h2>Вход в Parasat</h2>
+                <p>Ваш одноразовый код для входа:</p>
+                <p style='font-size:24px;font-weight:bold;'>{code}</p>
+                <p>Код действителен 10 минут.</p>"
+        };
+
+        message.Body = bodyBuilder.ToMessageBody();
+
+        var smtpServer = _config["Email:SmtpServer"];
+        var port = int.Parse(_config["Email:Port"] ?? "587");
+        var username = _config["Email:Username"];
+        var password = _config["Email:Password"];
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(smtpServer, port, MailKit.Security.SecureSocketOptions.StartTls);
+        await client.AuthenticateAsync(username, password);
+        await client.SendAsync(message);
+        await client.DisconnectAsync(true);
+    }
 }

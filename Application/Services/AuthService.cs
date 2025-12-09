@@ -61,7 +61,7 @@ public class AuthService
         return user;
     }
 
-    public async Task<TokenResponse> LoginAsync(LoginDto dto)
+    public async Task<LoginResponse> LoginAsync(LoginDto dto)
     {
         var user = await _userRepo.GetByEmailAsync(dto.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
@@ -70,16 +70,44 @@ public class AuthService
         if (!user.EmailConfirmed)
             throw new UnauthorizedAccessException("Email not confirmed. Check your inbox.");
 
-        var accessToken = GenerateJwtToken(user);
-        var refreshToken = GenerateRefreshToken();
+        // Если 2FA выключен — старое поведение: сразу выдаём токены
+        if (!user.IsTwoFactorEnabled)
+        {
+            var accessToken = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
 
-        user.RefreshTokens ??= new List<string>();
-        user.RefreshTokens.Add(refreshToken);
+            user.RefreshTokens ??= new List<string>();
+            user.RefreshTokens.Add(refreshToken);
+            await _userRepo.UpdateAsync(user);
+
+            return new LoginResponse(
+                RequiresTwoFactor: false,
+                AccessToken: accessToken,
+                RefreshToken: refreshToken,
+                TemporaryToken: null
+            );
+        }
+
+        // 2FA включен: генерим код, сохраняем и шлём по почте
+        var code = GenerateOneTimeCode();
+
+        user.TwoFactorCodeHash = BCrypt.Net.BCrypt.HashPassword(code);
+        user.TwoFactorCodeExpiresAt = DateTime.UtcNow.AddMinutes(10);
+        user.TwoFactorTempToken = Guid.NewGuid().ToString();
 
         await _userRepo.UpdateAsync(user);
 
-        return new TokenResponse(accessToken, refreshToken);
+        await _emailService.SendTwoFactorCodeEmailAsync(user.Email, code);
+
+        return new LoginResponse(
+            RequiresTwoFactor: true,
+            AccessToken: null,
+            RefreshToken: null,
+            TemporaryToken: user.TwoFactorTempToken
+        );
     }
+
+
 
     public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
@@ -258,4 +286,67 @@ public class AuthService
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         await _userRepo.UpdateAsync(user);
     }
+
+    private static string GenerateOneTimeCode()
+    {
+        // 6-значный код: 100000–999999
+        var bytes = new byte[4];
+        RandomNumberGenerator.Fill(bytes);
+        var value = BitConverter.ToUInt32(bytes, 0) % 900000 + 100000;
+        return value.ToString();
+    }
+    public async Task<TokenResponse> VerifyTwoFactorAsync(TwoFactorVerifyDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.TemporaryToken))
+            throw new UnauthorizedAccessException("Invalid 2FA session");
+
+        // этот метод нужно будет добавить в IUserRepository и UserRepository
+        var user = await _userRepo.GetByTwoFactorTempTokenAsync(dto.TemporaryToken);
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid or expired 2FA session");
+
+        if (user.TwoFactorCodeHash == null || user.TwoFactorCodeExpiresAt == null)
+            throw new UnauthorizedAccessException("2FA code not generated");
+
+        if (user.TwoFactorCodeExpiresAt < DateTime.UtcNow)
+            throw new UnauthorizedAccessException("2FA code expired");
+
+        var isValid = BCrypt.Net.BCrypt.Verify(dto.Code, user.TwoFactorCodeHash);
+        if (!isValid)
+            throw new UnauthorizedAccessException("Invalid 2FA code");
+
+        // очистка состояния 2FA
+        user.TwoFactorCodeHash = null;
+        user.TwoFactorCodeExpiresAt = null;
+        user.TwoFactorTempToken = null;
+
+        // генерим новые токены как в LoginAsync / RefreshTokenAsync
+        var accessToken = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        user.RefreshTokens ??= new List<string>();
+        user.RefreshTokens.Add(refreshToken);
+
+        await _userRepo.UpdateAsync(user);
+
+        return new TokenResponse(accessToken, refreshToken);
+    }
+    public async Task ToggleTwoFactorAsync(string userId, bool enabled)
+    {
+        var user = await _userRepo.GetByIdAsync(userId)
+            ?? throw new Exception("User not found");
+
+        user.IsTwoFactorEnabled = enabled;
+
+        // Когда 2FA выключается — очищаем возможные старые состояния
+        if (!enabled)
+        {
+            user.TwoFactorCodeHash = null;
+            user.TwoFactorCodeExpiresAt = null;
+            user.TwoFactorTempToken = null;
+        }
+
+        await _userRepo.UpdateAsync(user);
+    }
+
 }

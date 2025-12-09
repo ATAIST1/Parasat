@@ -17,6 +17,19 @@ namespace Core.Models
         public bool EmailConfirmed { get; set; } = false;
         public string? EmailConfirmationToken { get; set; }
         public DateTime? EmailConfirmationTokenExpires { get; set; }   
+
+        // === НОВОЕ: 2FA ===
+        /// <summary>Включён ли у пользователя 2FA.</summary>
+        public bool IsTwoFactorEnabled { get; set; } = false;
+
+        /// <summary>Хэш одноразового 2FA-кода.</summary>
+        public string? TwoFactorCodeHash { get; set; }
+
+        /// <summary>Время истечения одноразового кода.</summary>
+        public DateTime? TwoFactorCodeExpiresAt { get; set; }
+
+        /// <summary>Временный токен для связки "логин → ожидание кода".</summary>
+        public string? TwoFactorTempToken { get; set; }
          
     }
 }

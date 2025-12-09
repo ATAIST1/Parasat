@@ -197,4 +197,34 @@ public class AuthController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+    [HttpPost("2fa/verify")]
+    [AllowAnonymous]
+    public async Task<ActionResult<TokenResponse>> VerifyTwoFactor([FromBody] TwoFactorVerifyDto dto)
+    {
+        try
+        {
+            var tokens = await _authService.VerifyTwoFactorAsync(dto);
+            return Ok(tokens);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    [Authorize] // чтобы нельзя было менять 2FA без логина
+    [HttpPost("2fa/toggle")]
+    public async Task<IActionResult> ToggleTwoFactor([FromBody] TwoFactorToggleDto dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+            return Unauthorized();
+
+        await _authService.ToggleTwoFactorAsync(userId, dto.Enabled);
+
+        return Ok(new { message = $"Two-factor authentication {(dto.Enabled ? "enabled" : "disabled")}." });
+    }
 }

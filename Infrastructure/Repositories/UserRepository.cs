@@ -34,4 +34,12 @@ public class UserRepository : IUserRepository
         return await _users.Find(x => x.RefreshTokens != null && x.RefreshTokens.Contains(refreshToken))
                         .FirstOrDefaultAsync();
     }
+
+    // НОВОЕ: поиск пользователя по временной 2FA-сессии
+    public async Task<User?> GetByTwoFactorTempTokenAsync(string tempToken)
+    {
+        return await _users
+            .Find(x => x.TwoFactorTempToken == tempToken)
+            .FirstOrDefaultAsync();
+    }
 }
