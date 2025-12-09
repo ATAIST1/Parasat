@@ -94,7 +94,7 @@ public class EmailService
 
         // Ссылка на фронт (подгони под свой фронт)
         var resetLink =
-            $"http://localhost:5173/reset-password?token={token}&email={Uri.EscapeDataString(email)}";
+            $"http://localhost:3000/reset-password?token={token}&email={Uri.EscapeDataString(email)}";
 
         message.Body = new TextPart("html")
         {
