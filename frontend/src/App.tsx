@@ -18,6 +18,9 @@ import ParasatScreen from './components/ParasatScreen';
 
 import NewsDetailScreen from './components/NewsDetailScreen'; 
 
+// Новый импорт экрана сброса пароля Л
+import ResetPasswordScreen from './components/ResetPasswordScreen';
+
 import { Toaster } from './components/ui/sonner';
 
 
@@ -52,6 +55,19 @@ export type Screen =
   | 'parasat-news-detail';
 
 function App() {
+  //Л
+  const path = window.location.pathname;
+
+  if (path === '/reset-password') {
+    // на странице сброса пароля тоже нужен Toaster
+    return (
+      <div className="min-h-screen bg-white">
+        <ResetPasswordScreen />
+        <Toaster />
+      </div>
+    );
+  }
+
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [user, setUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
