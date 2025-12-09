@@ -4,13 +4,19 @@ import type {
   CreateInvestmentRequestDto,
   UpdateInvestmentRequestDto,
   InvestmentRequestResponseDto,
-} from '../types/investment';
+} from '../types/investment.ts';
 
 export const investmentRequestService = {
-  // создать запрос на инвестиции
-  create: async (data: CreateInvestmentRequestDto) => {
-    const res = await api.post('/api/InvestmentRequests', data);
-    return res.data as { message: string };
+  // ⬇ именно так
+  create: async (formData: FormData) => {
+    return api.post('/api/InvestmentRequests', formData, {
+      transformRequest: [
+        (data, headers) => {
+          delete headers['Content-Type']; // multipart/form-data сам проставится
+          return data;
+        },
+      ],
+    });
   },
 
   // получить все запросы (с фильтрами или без)
