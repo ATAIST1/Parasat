@@ -227,4 +227,31 @@ public class AuthController : ControllerBase
 
         return Ok(new { message = $"Two-factor authentication {(dto.Enabled ? "enabled" : "disabled")}." });
     }
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+    {
+        // Всегда возвращаем 200, даже если email не найден – не палим наличие аккаунта
+        await _authService.RequestPasswordResetAsync(dto);
+        return Ok(new { message = "Если такой email существует, на него отправлено письмо для восстановления пароля." });
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        try
+        {
+            await _authService.ResetPasswordAsync(dto);
+            return Ok(new { message = "Пароль успешно изменён" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

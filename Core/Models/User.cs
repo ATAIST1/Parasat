@@ -30,6 +30,10 @@ namespace Core.Models
 
         /// <summary>Временный токен для связки "логин → ожидание кода".</summary>
         public string? TwoFactorTempToken { get; set; }
+
+        // === НОВОЕ: восстановление пароля ===
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpires { get; set; }
          
     }
 }

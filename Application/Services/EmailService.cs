@@ -78,4 +78,46 @@ public class EmailService
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
     }
+
+    public async Task SendPasswordResetEmailAsync(string email, string token)
+    {
+        var from = _config["Email:From"] ?? "no-reply@parasat.kz";
+        var smtpServer = _config["Email:SmtpServer"] ?? "smtp.gmail.com";
+        var port = int.Parse(_config["Email:Port"] ?? "587");
+        var username = _config["Email:Username"];
+        var password = _config["Email:Password"];
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Parasat", from));
+        message.To.Add(new MailboxAddress(email, email));
+        message.Subject = "Восстановление пароля Parasat";
+
+        // Ссылка на фронт (подгони под свой фронт)
+        var resetLink =
+            $"http://localhost:5173/reset-password?token={token}&email={Uri.EscapeDataString(email)}";
+
+        message.Body = new TextPart("html")
+        {
+            Text = $@"
+                <h2>Восстановление пароля</h2>
+                <p>Ты запросил(а) сброс пароля для аккаунта Parasat.</p>
+                <p>Нажми на кнопку ниже, чтобы задать новый пароль:</p>
+                <p>
+                    <a href='{resetLink}'
+                       style='padding:15px;background:#007bff;color:white;
+                              text-decoration:none;border-radius:5px;'>
+                        СБРОСИТЬ ПАРОЛЬ
+                    </a>
+                </p>
+                <p>Или перейди по ссылке: {resetLink}</p>
+                <p>Ссылка действительна 1 час.</p>
+            "
+        };
+
+        using var client = new SmtpClient();
+        await client.ConnectAsync(smtpServer, port, MailKit.Security.SecureSocketOptions.StartTls);
+        await client.AuthenticateAsync(username, password);
+        await client.SendAsync(message);
+        await client.DisconnectAsync(true);
+    }
 }

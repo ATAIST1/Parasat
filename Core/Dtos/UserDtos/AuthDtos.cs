@@ -21,3 +21,6 @@ public record ChangePasswordDto(string CurrentPassword, string NewPassword);
 public record TwoFactorVerifyDto(string TemporaryToken, string Code);
 
 public record TwoFactorToggleDto(bool Enabled);
+
+public record ForgotPasswordDto(string Email);
+public record ResetPasswordDto(string Email, string Token, string NewPassword);

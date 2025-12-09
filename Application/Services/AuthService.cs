@@ -348,5 +348,57 @@ public class AuthService
 
         await _userRepo.UpdateAsync(user);
     }
+    public async Task RequestPasswordResetAsync(ForgotPasswordDto dto)
+    {
+        var user = await _userRepo.GetByEmailAsync(dto.Email);
+
+        // По безопасности лучше не палить, существует ли email
+        if (user == null)
+            return;
+
+        var token = Guid.NewGuid().ToString();
+
+        user.PasswordResetToken = token;
+        user.PasswordResetTokenExpires = DateTime.UtcNow.AddHours(1);
+
+        await _userRepo.UpdateAsync(user);
+        await _emailService.SendPasswordResetEmailAsync(user.Email, token);
+    }
+    public async Task ResetPasswordAsync(ResetPasswordDto dto)
+    {
+        var user = await _userRepo.GetByEmailAsync(dto.Email);
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid reset token");
+
+        if (string.IsNullOrEmpty(user.PasswordResetToken) ||
+            user.PasswordResetToken != dto.Token ||
+            user.PasswordResetTokenExpires == null ||
+            user.PasswordResetTokenExpires < DateTime.UtcNow)
+        {
+            throw new UnauthorizedAccessException("Invalid or expired reset token");
+        }
+
+        var newPassword = dto.NewPassword ?? string.Empty;
+
+        // Тот же валидатор, что и в ChangePasswordAsync
+        if (newPassword.Length < 8
+            || !newPassword.Any(char.IsUpper)
+            || !newPassword.Any(ch => "!@#$%^&*()_+-=[]{};':\",.<>?/.".Contains(ch)))
+        {
+            throw new Exception("Пароль должен содержать минимум 8 символов, одну заглавную букву и один специальный символ");
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+        // Чистим токен сброса, чтобы им нельзя было пользоваться повторно
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpires = null;
+
+        // По-хорошему можно инвалидировать все refresh токены, чтобы выкинуть юзера изо всех устройств
+        user.RefreshTokens = new List<string>();
+
+        await _userRepo.UpdateAsync(user);
+    }
+
 
 }
