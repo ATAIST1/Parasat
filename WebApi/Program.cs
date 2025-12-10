@@ -36,6 +36,11 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(dbName);
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
 // === DI для репозиториев и сервисов ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
@@ -51,6 +56,7 @@ builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<Core.Interfaces.IStartupRepository, Infrastructure.Repositories.StartupRepository>();
 builder.Services.AddScoped<StartupService>();
 builder.Services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
