@@ -35,20 +35,6 @@ public class AuthController : ControllerBase
         }
     }
 
-    // [HttpPost("login")]
-    // public async Task<ActionResult<TokenResponse>> Login(LoginDto dto)
-    // {
-    //     try
-    //     {
-    //         var tokens = await _authService.LoginAsync(dto);
-    //         return Ok(tokens);
-    //     }
-    //     catch (UnauthorizedAccessException)
-    //     {
-    //         return Unauthorized("Invalid email or password");
-    //     }
-    // }
-
 
 // ЛИАНА ДОБАВИЛА ЕС ЧО УБЕРЕМ Улучшенный метод логина с разными ответами для неподтвержденного email и неверных данных 
 [HttpPost("login")]

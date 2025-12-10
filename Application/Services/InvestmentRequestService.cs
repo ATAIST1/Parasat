@@ -1,134 +1,156 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Application.Mappers;
 using Core.Dtos.Investment;
 using Core.Interfaces;
 using Core.Models;
-using Microsoft.AspNetCore.Http;
-using System.Threading;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
 {
     public class InvestmentRequestService
     {
         private readonly IInvestmentRequestRepository _repo;
-        private readonly IFileStorageService _fileStorage;
+        private readonly IFileStorageService _storage;
 
         public InvestmentRequestService(
             IInvestmentRequestRepository repo,
-            IFileStorageService fileStorage)
+            IFileStorageService storage)
         {
             _repo = repo;
-            _fileStorage = fileStorage;
+            _storage = storage;
+        }
+
+        public async Task CreateAsync(
+            CreateInvestmentRequestDto dto,
+            string userId,
+            Stream? investmentMemorandumStream,
+            string? investmentMemorandumContentType,
+            Stream? financialReportStream,
+            string? financialReportContentType,
+            Stream? businessPlanStream,
+            string? businessPlanContentType,
+            Stream? presentationStream,
+            string? presentationContentType,
+            List<(Stream Stream, string ContentType, string FileName)> otherDocuments)
+        {
+            var entity = InvestmentRequestMapper.ToModel(dto, userId);
+            entity.CreatedAt = DateTime.UtcNow;
+
+            await _repo.AddAsync(entity);
+
+            var basePrefix = $"investment-requests/{entity.Id}";
+
+            if (investmentMemorandumStream != null &&
+                !string.IsNullOrEmpty(investmentMemorandumContentType))
+            {
+                using (investmentMemorandumStream)
+                {
+                    var key = $"{basePrefix}/memorandum";
+                    await _storage.UploadAsync(investmentMemorandumStream, investmentMemorandumContentType, key);
+                    entity.InvestmentMemorandumKey = key;
+                }
+            }
+
+            if (financialReportStream != null &&
+                !string.IsNullOrEmpty(financialReportContentType))
+            {
+                using (financialReportStream)
+                {
+                    var key = $"{basePrefix}/financial-report";
+                    await _storage.UploadAsync(financialReportStream, financialReportContentType, key);
+                    entity.FinancialReportKey = key;
+                }
+            }
+
+            if (businessPlanStream != null &&
+                !string.IsNullOrEmpty(businessPlanContentType))
+            {
+                using (businessPlanStream)
+                {
+                    var key = $"{basePrefix}/business-plan";
+                    await _storage.UploadAsync(businessPlanStream, businessPlanContentType, key);
+                    entity.BusinessPlanKey = key;
+                }
+            }
+
+            if (presentationStream != null &&
+                !string.IsNullOrEmpty(presentationContentType))
+            {
+                using (presentationStream)
+                {
+                    var key = $"{basePrefix}/presentation";
+                    await _storage.UploadAsync(presentationStream, presentationContentType, key);
+                    entity.PresentationKey = key;
+                }
+            }
+
+            if (otherDocuments != null && otherDocuments.Count > 0)
+            {
+                entity.OtherDocumentsKeys ??= new List<string>();
+
+                foreach (var doc in otherDocuments)
+                {
+                    using (doc.Stream)
+                    {
+                        var key = $"{basePrefix}/other/{Guid.NewGuid()}-{doc.FileName}";
+                        await _storage.UploadAsync(doc.Stream, doc.ContentType, key);
+                        entity.OtherDocumentsKeys.Add(key);
+                    }
+                }
+            }
+
+            await _repo.UpdateAsync(entity);
         }
 
         public async Task<List<InvestmentRequestResponseDto>> GetAllAsync(
-            string? search = null,
-            string? industry = null,
-            string? profitRange = null,
-            string? equityRange = null)
+            string? search,
+            string? industry,
+            string? profitRange,
+            string? equityRange)
         {
-            var requests = await _repo.GetAllAsync(search, industry, profitRange, equityRange);
-            return requests.Select(InvestmentRequestMapper.ToResponseDto).ToList();
-        }
-
-        public async Task<List<InvestmentRequestResponseDto>> GetAllAsync()
-        {
-            var requests = await _repo.GetAllAsync();
-            return requests.Select(InvestmentRequestMapper.ToResponseDto).ToList();
+            var items = await _repo.GetAllAsync(search, industry, profitRange, equityRange);
+            return items.Select(InvestmentRequestMapper.ToResponseDto).ToList();
         }
 
         public async Task<InvestmentRequestResponseDto?> GetByIdAsync(string id)
         {
-            var request = await _repo.GetByIdAsync(id);
-            return request == null ? null : InvestmentRequestMapper.ToResponseDto(request);
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null) return null;
+
+            return InvestmentRequestMapper.ToResponseDto(entity);
         }
+
         public async Task<bool> UpdateAsync(string id, UpdateInvestmentRequestDto dto, string userId)
         {
-            var existing = await _repo.GetByIdAsync(id);
-            if (existing == null || existing.UserId != userId) return false;
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null) return false;
+            if (entity.UserId != userId) return false;
 
-            InvestmentRequestMapper.UpdateModel(existing, dto);
-            return await _repo.UpdateAsync(existing);
+            InvestmentRequestMapper.UpdateModel(entity, dto);
+
+            return await _repo.UpdateAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(string id, string userId)
         {
-            var existing = await _repo.GetByIdAsync(id);
-            if (existing == null || existing.UserId != userId) return false;
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null) return false;
+            if (entity.UserId != userId) return false;
 
             return await _repo.DeleteAsync(id);
         }
 
         public async Task<bool> PublishAsync(string id, string userId)
         {
-            var request = await _repo.GetByIdAsync(id);
-            if (request == null || request.UserId != userId) return false;
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null) return false;
+            if (entity.UserId != userId) return false;
 
-            return await _repo.UpdateAsync(request);
+
+            return true;
         }
-        public async Task CreateAsync(
-            CreateInvestmentRequestDto dto,
-            string userId,
-            IFormFile? investmentMemorandum,
-            IFormFile? financialReport,
-            IFormFile? businessPlan,
-            IFormFile? presentation,
-            List<IFormFile>? otherDocuments,
-            CancellationToken ct = default)
-        {
-            // генерим Id сразу, чтобы использовать в ключах S3
-            var id = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
-
-            var request = InvestmentRequestMapper.ToModel(dto, userId);
-            request.Id = id;
-
-            // базовый префикс
-            var prefix = $"investment_requests/{id}/";
-
-            // helper
-            async Task<string?> UploadIfNotNull(IFormFile? file, string subfolder)
-            {
-                if (file == null || file.Length == 0) return null;
-
-                var key = $"{prefix}{subfolder}/{Guid.NewGuid()}_{file.FileName}";
-
-                await using var stream = file.OpenReadStream();
-                await _fileStorage.UploadAsync(stream, file.ContentType, key, ct);
-                return key;
-            }
-
-            request.InvestmentMemorandumKey = await UploadIfNotNull(investmentMemorandum, "memorandum");
-            request.FinancialReportKey = await UploadIfNotNull(financialReport, "financial-report");
-            request.BusinessPlanKey = await UploadIfNotNull(businessPlan, "business-plan");
-            request.PresentationKey = await UploadIfNotNull(presentation, "presentation");
-
-            if (otherDocuments != null && otherDocuments.Count > 0)
-            {
-                foreach (var file in otherDocuments)
-                {
-                    if (file == null || file.Length == 0) continue;
-
-                    var key = $"{prefix}other/{Guid.NewGuid()}_{file.FileName}";
-                    await using var stream = file.OpenReadStream();
-                    await _fileStorage.UploadAsync(stream, file.ContentType, key, ct);
-                    request.OtherDocumentsKeys.Add(key);
-                }
-            }
-
-            await _repo.AddAsync(request);
-        }
-
-
-        /* public async Task<bool> PublishAsync(string id, string userId)
-        {
-            var request = await _repo.GetByIdAsync(id);
-            if (request == null || request.UserId != userId) return false;
-            if (request.Status != InvestmentRequestStatus.Draft) return false;
-
-            request.Status = InvestmentRequestStatus.Published;
-            request.PublishedAt = DateTime.UtcNow;
-
-            return await _repo.UpdateAsync(request);
-        } */
     }
 }

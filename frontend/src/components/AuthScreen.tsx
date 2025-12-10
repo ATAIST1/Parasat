@@ -17,7 +17,9 @@ interface AuthScreenProps {
 
 export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState('');        // ← для регистрации
+  const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
+
+  const [name, setName] = useState('');        // для регистрации
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -30,24 +32,75 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
     try {
       setLoading(true);
 
+      // === РЕЖИМ "ЗАБЫЛИ ПАРОЛЬ" ===
+      // if (isForgotPasswordMode) {
+      //   if (!email) {
+      //     toast.error('Введите email');
+      //     return;
+      //   }
+
+      //   await authService.forgotPassword({ email });
+
+      //   toast.success(
+      //     'Если такой email существует, мы отправили письмо для восстановления пароля'
+      //   );
+
+      //   // возвращаемся к обычному логину
+      //   setIsForgotPasswordMode(false);
+      //   setIsLogin(true);
+      //   return;
+      // }
+
+
+      if (isForgotPasswordMode) {
+  if (!email) {
+    toast.error('Введите email');
+    return;
+  }
+
+  try {
+    await authService.login({ email, password: '__FORGOT_CHECK__' });
+  } catch (checkErr: any) {
+    const data = checkErr?.response?.data;
+    const code = typeof data === 'object' ? data.code : undefined;
+
+    if (code === 'EMAIL_NOT_CONFIRMED') {
+      toast.error(
+        'Email не подтверждён. Сначала подтвердите email, затем попробуйте восстановить пароль.'
+      );
+      return; 
+    }
+
+    
+  }
+
+  
+  await authService.forgotPassword({ email });
+
+  toast.success(
+    'Мы отправили Вам письмо для восстановления пароля. Пожалуйста, проверьте свою почту.'
+  );
+
+  setIsForgotPasswordMode(false);
+  setIsLogin(true);
+  return;
+}
+
+
+      // === ВХОД ===
       if (isLogin) {
-        // --- ВХОД ---
         const res = await authService.login({ email, password });
 
         const { accessToken, refreshToken } = res.data;
 
-        // сохраняем токены
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
-
-        // axios интерцептор сам подставит Authorization
-        // Можно на всякий:
-        // api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
         toast.success('Успешный вход');
 
         onLogin(email, 'startup');
       } else {
+        // === РЕГИСТРАЦИЯ ===
         if (!acceptTerms) {
           toast.error('Нужно принять условия');
           return;
@@ -58,37 +111,28 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
           return;
         }
 
-
-
-
-//для проверки пароля на наличие спец символов
+        // проверки пароля
         if (password.length < 8) {
-  toast.error('Пароль должен содержать минимум 8 символов');
-  return;
-}
+          toast.error('Пароль должен содержать минимум 8 символов');
+          return;
+        }
 
-if (!/[A-Z]/.test(password)) {
-  toast.error('Пароль должен содержать хотя бы одну заглавную букву');
-  return;
-}
+        if (!/[A-Z]/.test(password)) {
+          toast.error('Пароль должен содержать хотя бы одну заглавную букву');
+          return;
+        }
 
-if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
-  toast.error('Пароль должен содержать хотя бы один специальный символ');
-  return;
-}
-
-
-
-
+        if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
+          toast.error('Пароль должен содержать хотя бы один специальный символ');
+          return;
+        }
 
         await authService.register({ name, email, password });
 
-        // ВАЖНО: у тебя на бэке EmailConfirmed = false
-        // и вход разрешён только после подтверждения по email.
         toast.success('Мы отправили письмо для подтверждения email. Проверьте почту.');
 
         onRegister(email);
-        setIsLogin(true); // переключим на экран входа
+        setIsLogin(true);
       }
 
     } catch (err: any) {
@@ -108,33 +152,32 @@ if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
       }
 
       // ----- РЕГИСТРАЦИЯ -----
-      if (!isLogin && code === 'EMAIL_EXISTS') {
+      if (!isLogin && !isForgotPasswordMode && code === 'EMAIL_EXISTS') {
         toast.error('Пользователь с таким email уже зарегистрирован');
         return;
       }
 
       // ----- ЛОГИН -----
-      if (isLogin && code === 'EMAIL_NOT_FOUND') {
+      if (isLogin && !isForgotPasswordMode && code === 'EMAIL_NOT_FOUND') {
         toast.error('Пользователь с таким email не найден');
         return;
       }
 
-      if (isLogin && code === 'EMAIL_NOT_CONFIRMED') {
+      if (isLogin && !isForgotPasswordMode && code === 'EMAIL_NOT_CONFIRMED') {
         toast.error('Email не подтверждён. Проверьте почту и перейдите по ссылке.');
         return;
       }
 
-      if (isLogin && code === 'INVALID_CREDENTIALS') {
+      if (isLogin && !isForgotPasswordMode && code === 'INVALID_CREDENTIALS') {
         toast.error('Неверный пароль');
         return;
       }
 
-  // Фоллбек, если что-то ещё
-  toast.error(message || 'Ошибка авторизации');
-} finally {
-  setLoading(false);
-}
-
+      // для forgot-password бэк всегда 200, так что сюда почти не попадём
+      toast.error(message || 'Ошибка авторизации');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -155,12 +198,17 @@ if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
               <img src={logo} alt="Parasat Invest" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-gray-900 mb-2">
-              {isLogin ? 'Войти' : 'Создать аккаунт'}
+              {isForgotPasswordMode
+                ? 'Восстановление пароля'
+                : isLogin
+                  ? 'Войти'
+                  : 'Создать аккаунт'}
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+            {/* Имя только при регистрации */}
+            {!isLogin && !isForgotPasswordMode && (
               <div className="space-y-2">
                 <Label htmlFor="name">Имя</Label>
                 <Input
@@ -186,19 +234,23 @@ if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* Пароль не нужен в режиме "забыли пароль" */}
+            {!isForgotPasswordMode && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Пароль</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
-            {!isLogin && (
+            {/* Чекбокс условий — только при регистрации */}
+            {!isLogin && !isForgotPasswordMode && (
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="terms"
@@ -214,14 +266,14 @@ if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
               </div>
             )}
 
-            {isLogin && (
+            {/* Ссылка "Забыли пароль?" — только в обычном логине */}
+            {isLogin && !isForgotPasswordMode && (
               <div className="text-right">
                 <button
                   type="button"
                   className="text-sm text-blue-600 hover:text-blue-700"
-                  // позже сюда прикрутим "забыл пароль"
                   onClick={() => {
-                    // TODO
+                    setIsForgotPasswordMode(true);
                   }}
                 >
                   Забыли пароль?
@@ -236,19 +288,40 @@ if (!/[!@#$%^&*()_\-+\[\]{};':",.<>?/]/.test(password)) {
               size="lg"
             >
               {loading
-                ? (isLogin ? 'Входим...' : 'Регистрируем...')
-                : (isLogin ? 'Войти' : 'Зарегистрироваться')}
+                ? isForgotPasswordMode
+                  ? 'Отправляем...'
+                  : isLogin
+                    ? 'Входим...'
+                    : 'Регистрируем...'
+                : isForgotPasswordMode
+                  ? 'Отправить ссылку для сброса'
+                  : isLogin
+                    ? 'Войти'
+                    : 'Зарегистрироваться'}
             </Button>
           </form>
 
           <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              {isLogin ? 'Создать новый аккаунт' : 'У меня уже есть аккаунт'}
-            </button>
+            {isForgotPasswordMode ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsForgotPasswordMode(false);
+                  setIsLogin(true);
+                }}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Назад к входу
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                {isLogin ? 'Создать новый аккаунт' : 'У меня уже есть аккаунт'}
+              </button>
+            )}
           </div>
         </div>
       </div>

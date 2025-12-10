@@ -5,9 +5,7 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
-import { useState } from 'react';
-// СТАРЫЙ ИМПОРТ ОСТАВЛЯЮ, НО КОММЕНТИРУЮ
-// import { toast } from 'sonner@2.0.3';
+import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { toast } from 'sonner';
 import { investmentRequestService } from '../services/investmentRequestService';
 import type { CreateInvestmentRequestDto } from '../types/investment';
@@ -15,7 +13,6 @@ import type { CreateInvestmentRequestDto } from '../types/investment';
 interface BusinessFormProps {
   onBack: () => void;
   onSubmit: () => void;
-  // НОВОЕ: id стартапа, к которому относится запрос
   startupId: string;
 }
 
@@ -55,38 +52,87 @@ export default function BusinessForm({ onBack, onSubmit, startupId = "just-testi
     presentation: null,
     other: [],
   });
+  
+
+    const [documentFiles, setDocumentFiles] = useState<{
+    memorandum: File | null;
+    financialReport: File | null;
+    businessPlan: File | null;
+    presentation: File | null;
+    other: File[];
+  }>({
+    memorandum: null,
+    financialReport: null,
+    businessPlan: null,
+    presentation: null,
+    other: [],
+  });
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+const handleFileUpload = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  docType: keyof DocumentFiles
+) => {
+  const files = e.target.files;
+  if (!files || !files[0]) return;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, docType: keyof DocumentFiles) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const file = files[0];
-      const newDoc: Document = {
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(1) + ' MB',
-        type: file.type.split('/')[1]?.toUpperCase() || 'FILE',
-      };
+  const file = files[0];
 
-      if (docType === 'other') {
-        setDocuments({ ...documents, other: [...documents.other, newDoc] });
-      } else {
-        setDocuments({ ...documents, [docType]: newDoc });
-      }
-      toast('Документ добавлен');
-    }
+  const newDoc: Document = {
+    name: file.name,
+    size: (file.size / 1024 / 1024).toFixed(1) + ' MB',
+    type: file.type.split('/')[1]?.toUpperCase() || 'FILE',
   };
 
-  const handleRemoveDocument = (docType: keyof DocumentFiles, index?: number) => {
-    if (docType === 'other' && index !== undefined) {
-      setDocuments({
-        ...documents,
-        other: documents.other.filter((_, i) => i !== index),
-      });
-    } else {
-      setDocuments({ ...documents, [docType]: null });
-    }
-  };
+  if (docType === 'other') {
+    setDocuments(prev => ({
+      ...prev,
+      other: [...prev.other, newDoc],
+    }));
+    setDocumentFiles(prev => ({
+      ...prev,
+      other: [...prev.other, file],
+    }));
+  } else {
+    setDocuments(prev => ({
+      ...prev,
+      [docType]: newDoc,
+    }));
+    setDocumentFiles(prev => ({
+      ...prev,
+      [docType]: file,
+    }));
+  }
+
+  toast('Документ добавлен');
+};
+
+
+
+const handleRemoveDocument = (docType: keyof DocumentFiles, index?: number) => {
+  if (docType === 'other' && index !== undefined) {
+    setDocuments(prev => ({
+      ...prev,
+      other: prev.other.filter((_, i) => i !== index),
+    }));
+    setDocumentFiles(prev => ({
+      ...prev,
+      other: prev.other.filter((_, i) => i !== index),
+    }));
+  } else {
+    setDocuments(prev => ({
+      ...prev,
+      [docType]: null,
+    }));
+    setDocumentFiles(prev => ({
+      ...prev,
+      [docType]: null,
+    }));
+  }
+};
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,12 +178,49 @@ const payload: CreateInvestmentRequestDto = {
 };
 
 
-    try {
-      setIsSubmitting(true);
-      await investmentRequestService.create(payload);
-      toast.success('Инвестиционный запрос создан (черновик)');
-      onSubmit();
-    } catch (error: any) {
+try {
+  setIsSubmitting(true);
+
+  const formDataToSend = new FormData();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === null || value === undefined) return;
+    formDataToSend.append(key, String(value));
+  });
+
+  // IFormFile? investmentMemorandum,
+  // IFormFile? financialReport,
+  // IFormFile? businessPlan,
+  // IFormFile? presentation,
+  // List<IFormFile>? otherDocuments
+
+  if (documentFiles.memorandum) {
+    formDataToSend.append('investmentMemorandum', documentFiles.memorandum);
+  }
+
+  if (documentFiles.financialReport) {
+    formDataToSend.append('financialReport', documentFiles.financialReport);
+  }
+
+  if (documentFiles.businessPlan) {
+    formDataToSend.append('businessPlan', documentFiles.businessPlan);
+  }
+
+  if (documentFiles.presentation) {
+    formDataToSend.append('presentation', documentFiles.presentation);
+  }
+
+  if (documentFiles.other.length > 0) {
+    documentFiles.other.forEach((file) => {
+      formDataToSend.append('otherDocuments', file);
+    });
+  }
+
+  await investmentRequestService.create(formDataToSend);
+
+  toast.success('Инвестиционный запрос создан (черновик)');
+  onSubmit();
+} catch (error: any) {
   console.error('Create investment error raw:', error);
   console.error('Validation errors:', error?.response?.data?.errors);
 
@@ -160,6 +243,7 @@ const payload: CreateInvestmentRequestDto = {
 } finally {
   setIsSubmitting(false);
 }
+
 
 
   };
