@@ -1,17 +1,17 @@
 import api from '../lib/api';
 
-export interface NewsDto {
+export type NewsDto = {
   id: string;
   title: string;
   content: string;
   description: string;
   date: string;
   category: string;
-  imageUrl: string;
   badge: string;
   isFeatured: boolean;
+  imageKey: string;
   formattedDate?: string;
-}
+};
 
 export const newsService = {
   // получить все новости
@@ -221,4 +221,12 @@ export const newsService = {
     }
   },
 };
+
+export async function getNewsImageUrl(news: NewsDto): Promise<string> {
+    if (!news.imageKey) return '';
+    const res = await fetch(`/api/news/${news.id}/image`);
+    if (!res.ok) throw new Error('Could not fetch image URL');
+    const data = await res.json();
+    return data.url;
+}
 

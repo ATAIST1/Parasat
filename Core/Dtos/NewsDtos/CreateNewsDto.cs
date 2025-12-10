@@ -21,10 +21,6 @@ namespace Core.Dtos
         public string Category { get; set; } = null!;
         
         [Required]
-        [Url]
-        public string ImageUrl { get; set; } = null!;
-        
-        [Required]
         public string Badge { get; set; } = null!;
         
         public bool IsFeatured { get; set; }
