@@ -2,16 +2,31 @@
 
 :root {
   --font-size: 16px;
-  --background: #fffbf0;
-  --foreground: #1a1a1a;
+
+  /* === PARASAT palette === */
+  --color_a: #081a5f;   /* фон */
+  --color_b: #0967D6;   /* акцентный синий */
+  --color_c: #5f678c;   /* серо-синий */
+  --color_d: #9fa5c1;   /* светло-серый */
+  --color_e: #e2e6f3;   /* почти белый-серый */
+  --color_f: #ffffff;   /* белый */
+  --color_g: #005CFA;   /* ярко-синий акцент */
+
+  /* Tailwind theme tokens завязываем на нашу палитру */
+  --background: var(--color_a);      /* ⬅ больше НЕ бежевый */
+  --foreground: var(--color_e);
+
   --card: #ffffff;
   --card-foreground: #1a1a1a;
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
-  --primary: #f59e0b;
+
+  --primary: var(--color_g);
   --primary-foreground: #ffffff;
+
   --secondary: #fef3c7;
   --secondary-foreground: #92400e;
+
   --muted: #fef9e7;
   --muted-foreground: #6b7280;
   --accent: #fed7aa;
@@ -24,8 +39,8 @@
   --switch-background: #e5e7eb;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #f59e0b;
-  --chart-1: #f59e0b;
+  --ring: var(--color_g);
+  --chart-1: var(--color_g);
   --chart-2: #f97316;
   --chart-3: #eab308;
   --chart-4: #84cc16;
@@ -33,13 +48,14 @@
   --radius: 1rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #f59e0b;
+  --sidebar-primary: var(--color_g);
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #fef9e7;
   --sidebar-accent-foreground: #374151;
   --sidebar-border: #f3e8ff;
-  --sidebar-ring: #f59e0b;
+  --sidebar-ring: var(--color_g);
 }
+
 
 .dark {
   --background: oklch(0.145 0 0);
