@@ -26,12 +26,50 @@ interface ParasatScreenProps {
   openNews: (id: string) => void;
 }
 
-export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenProps) {
+export default function ParasatScreen({
+  navigateTo,
+  openNews,
+}: {
+  navigateTo: (screen: Screen) => void;
+  openNews: (id: string) => void;
+}) {
   const [news, setNews] = useState<NewsDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // текст, который сейчас "напечатан"
+  const [typedText, setTypedText] = useState('');
+
   useEffect(() => {
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let timeoutId: number;
+
+    const typeNext = () => {
+      const phrase = MISSION_LINES[phraseIndex];
+
+      if (charIndex <= phrase.length) {
+        setTypedText(phrase.slice(0, charIndex));
+        charIndex += 1;
+        timeoutId = window.setTimeout(typeNext, 40); // скорость печатания
+      } else {
+        // пауза на полной фразе и переключаемся на следующую
+        timeoutId = window.setTimeout(() => {
+          charIndex = 0;
+          phraseIndex = (phraseIndex + 1) % MISSION_LINES.length;
+          typeNext();
+        }, 1500);
+      }
+    };
+
+    typeNext();
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+    useEffect(() => {
     const fetchNews = async () => {
       try {
         setIsLoading(true);
@@ -50,6 +88,16 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
     fetchNews();
   }, []);
 
+  const joinSteps = [
+    'Претендент должен принимать и понимать главные ценности клуба.',
+    'Соблюдать устав клуба.',
+    'Платить членские взносы.',
+    'Принимать активное участие в делах клуба.',
+    'Участвовать в форумах внутри клуба.',
+    'Поддерживать связь с членами клуба.',
+    'Состоять в чатах клуба для получения информации о мероприятиях и активностях клуба.',
+  ];
+  
   const achievements = [
     {
       icon: Users,
@@ -123,9 +171,14 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
     },
   ];
 
+  const MISSION_LINES = [
+  'МИССИЯ: Формирование новой бизнес-элиты Казахстана',
+  'ЦЕЛЬ: Концентрация и развитие бизнес-лидеров по всей республике',
+  'PARASAT: Объединяет успешных людей',
+];
+
   return (
     <div className="parasat-page">
-      {/* Верхний блок с логотипом и миссией */}
       <div className="parasat-hero">
         <div className="parasat-hero-inner">
           <header className="parasat-header">
@@ -154,17 +207,19 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
             </button>
           </header>
 
-          {/* Миссия */}
-          <section className="parasat-mission">
-            <h1 className="parasat-mission-title">
-              МИССИЯ: Формирование новой бизнес-элиты Казахстана
+        <div className="space-y-4 mb-12">
+          <div className="parasat-typing-wrapper">
+            <h1 className="parasat-typing-text">
+              {typedText}
+              <span className="parasat-typing-cursor" />
             </h1>
-            <p className="parasat-mission-text">
-              Сообщество успешных бизнесменов, которые стремятся к развитию и росту.
-              Мы объединяем людей, которые хотят достигать своих целей и реализовывать
-              свой потенциал.
-            </p>
-          </section>
+          </div>
+          <p className="text-sm md:text-base text-[var(--color_e)] max-w-2xl">
+            Сообщество успешных бизнесменов, которые стремятся к развитию и
+            росту. Мы объединяем людей, которые хотят достигать своих целей и
+            реализовывать свой потенциал.
+          </p>
+        </div>
 
           {/* Основатели */}
           <section className="parasat-founders">
@@ -251,6 +306,8 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
             </div>
           </section>
 
+          
+
           {/* Резиденты клуба */}
           <section className="parasat-section">
             <h2 className="parasat-section-title">РЕЗИДЕНТЫ КЛУБА</h2>
@@ -265,6 +322,7 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
           </section>
         </div>
       </div>
+      
 
       <div className="parasat-bottom">
         <div className="parasat-bottom-inner">
@@ -296,6 +354,8 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
               })}
             </div>
           </section>
+
+
 
           {/* Новости */}
           <section>
@@ -375,30 +435,30 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
             )}
           </section>
 
-          {/* О клубе / платформе */}
+          {/* О клубе – с отступом от новостей */}
           <section className="parasat-about-card">
-  <h3>О Parasat Business Club</h3>
-  <p>
-    Мы создаём экосистему для развития предпринимательства в Казахстане и
-    странах СНГ. Наша платформа помогает стартапам находить инвесторов,
-    разработчиков и менторов, а инвесторам — перспективные проекты.
-  </p>
-  <div className="parasat-about-list">
-    <div className="parasat-about-item">
-      <div className="parasat-about-dot" />
-      <span>Прозрачные условия — 2,5% от сделки</span>
-    </div>
-    <div className="parasat-about-item">
-      <div className="parasat-about-dot" />
-      <span>Проверенные участники платформы</span>
-    </div>
-    <div className="parasat-about-item">
-      <div className="parasat-about-dot" />
-      <span>Поддержка на всех этапах сделки</span>
-    </div>
-  </div>
-</section>
-
+            <h3>О Parasat Business Club</h3>
+            <p>
+              Мы создаём экосистему для развития предпринимательства в
+              Казахстане и странах СНГ. Наша платформа помогает стартапам
+              находить инвесторов, разработчиков и менторов, а инвесторам —
+              перспективные проекты.
+            </p>
+            <div className="parasat-about-list">
+              <div className="parasat-about-item">
+                <div className="parasat-about-dot" />
+                <span>Прозрачные условия — 2,5% от сделки</span>
+              </div>
+              <div className="parasat-about-item">
+                <div className="parasat-about-dot" />
+                <span>Проверенные участники платформы</span>
+              </div>
+              <div className="parasat-about-item">
+                <div className="parasat-about-dot" />
+                <span>Поддержка на всех этапах сделки</span>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>

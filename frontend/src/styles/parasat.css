@@ -351,11 +351,149 @@
   }
 }
 
+.parasat-typing-wrapper {
+  max-width: 36rem;
+}
+
+.parasat-typing-text {
+  font-size: clamp(1.6rem, 2.4vw + 1rem, 2.6rem);
+  font-weight: 900;
+  line-height: 1.25;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.12rem;
+  min-height: 3.1rem;
+}
+
+.parasat-typing-cursor {
+  width: 2px;
+  align-self: stretch;
+  background-color: #ffffff;
+  display: inline-block;
+  margin-bottom: 0.15em;
+  animation: parasat-cursor-blink 1s steps(2, start) infinite;
+}
+
+@keyframes parasat-cursor-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+
+
+
+.parasat-values-ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.parasat-values-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.parasat-values-circle {
+  min-width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: #005cfa;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  box-shadow: 0 0 20px rgba(0, 92, 250, 0.45);
+}
+
+.parasat-values-pill {
+  position: relative;
+  flex: 1;
+  border-radius: 999px;
+  padding: 0.7rem 1.3rem;
+  background: rgba(4, 25, 90, 0.9);
+  border: 1px solid rgba(159, 165, 193, 0.4);
+}
+
+.parasat-values-title {
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.parasat-values-text {
+  font-size: 0.8rem;
+  color: #e2e6f3;
+  margin-top: 0.15rem;
+}
+
+
+.parasat-join-section {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.parasat-join-section h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.parasat-steps-ladder {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.parasat-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.parasat-step-circle {
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background-color: #005cfa;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(0, 92, 250, 0.4);
+}
+
+.parasat-step-pill {
+  flex: 1;
+  border-radius: 999px;
+  padding: 0.7rem 1.1rem;
+  background-color: #f5f7ff;
+  border: 1px solid #d5defa;
+}
+
+.parasat-step-pill p {
+  font-size: 0.88rem;
+  color: #111827;
+}
+
 
 .parasat-about-card {
+  margin-top: 1.75rem;
   border-radius: 1.5rem;
-  padding: 1.5rem;
-  background: radial-gradient(circle at top left #081a5f 100%);
+  padding: 1.5rem 1.6rem;
+  background: radial-gradient(
+    circle at top left,
+    #081a5f 100%
+  );
   border: 1px solid rgba(159, 165, 193, 0.6);
   color: #e2e6f3;
 }
@@ -373,7 +511,7 @@
 }
 
 .parasat-about-list {
-  margin-top: 0.75rem;
+  margin-top: 0.7rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
