@@ -12,28 +12,32 @@
   --color_f: #ffffff;   /* белый */
   --color_g: #005CFA;   /* ярко-синий акцент */
 
-  /* Tailwind theme tokens завязываем на нашу палитру */
-  --background: var(--color_a);      /* ⬅ больше НЕ бежевый */
-  --foreground: var(--color_e);
+  /* БАЗОВЫЕ ТОКЕНЫ */
+  --background: var(--color_a);       /* как и было */
+  --foreground: #111827;             /* ЧЁТКИЙ ТЁМНЫЙ ТЕКСТ */
 
   --card: #ffffff;
-  --card-foreground: #1a1a1a;
+  --card-foreground: #111827;
   --popover: #ffffff;
-  --popover-foreground: #1a1a1a;
+  --popover-foreground: #111827;
 
   --primary: var(--color_g);
   --primary-foreground: #ffffff;
 
-  --secondary: #fef3c7;
-  --secondary-foreground: #92400e;
+  /* убираем весь оранжевый */
+  --secondary: #e2e6f3;              /* светло-синий фон для табов */
+  --secondary-foreground: #081a5f;   /* тёмно-синий текст */
 
-  --muted: #fef9e7;
-  --muted-foreground: #6b7280;
-  --accent: #fed7aa;
-  --accent-foreground: #9a3412;
+  --muted: #e2e6f3;                  /* фон TabsList по умолчанию */
+  --muted-foreground: #111827;       /* НОРМАЛЬНЫЙ ЧЁРНЫЙ ТЕКСТ */
+
+  --accent: #e2e6f3;
+  --accent-foreground: #081a5f;
+
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #f3e8ff;
+
+  --border: #e2e6f3;
   --input: transparent;
   --input-background: #ffffff;
   --switch-background: #e5e7eb;
@@ -47,14 +51,15 @@
   --chart-5: #06b6d4;
   --radius: 1rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1a1a1a;
+  --sidebar-foreground: #111827;
   --sidebar-primary: var(--color_g);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fef9e7;
+  --sidebar-accent: #e2e6f3;
   --sidebar-accent-foreground: #374151;
-  --sidebar-border: #f3e8ff;
+  --sidebar-border: #e2e6f3;
   --sidebar-ring: var(--color_g);
 }
+
 
 
 .dark {

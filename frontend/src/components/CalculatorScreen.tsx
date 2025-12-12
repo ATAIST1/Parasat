@@ -115,7 +115,8 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
                 value={investmentAmount}
                 onChange={(e) => setInvestmentAmount(e.target.value)}
                 placeholder="10 000 000"
-                className="text-base"
+                className="text-base text-gray-900 placeholder:text-gray-400"
+
               />
             </div>
 
@@ -126,7 +127,8 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
                 value={equityPercent}
                 onChange={handleEquityChange}
                 placeholder="10"
-                className="text-base"
+                className="text-base text-gray-900 placeholder:text-gray-400"
+
               />
             </div>
 
@@ -137,7 +139,8 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
                 value={currentValuation}
                 onChange={(e) => setCurrentValuation(e.target.value)}
                 placeholder="100 000 000"
-                className="text-base"
+                className="text-base text-gray-900 placeholder:text-gray-400"
+
               />
             </div>
 
@@ -148,7 +151,8 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
                 value={futureValuation}
                 onChange={(e) => setFutureValuation(e.target.value)}
                 placeholder="500 000 000"
-                className="text-base"
+                className="text-base text-gray-900 placeholder:text-gray-400"
+
               />
             </div>
 
@@ -159,7 +163,8 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
                 value={investmentPeriod}
                 onChange={(e) => setInvestmentPeriod(e.target.value)}
                 placeholder="5"
-                className="text-base"
+                className="text-base text-gray-900 placeholder:text-gray-400"
+
               />
             </div>
           </div>
@@ -235,33 +240,59 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
           </div>
         )}
 
-        <div className="bg-white rounded-2xl p-6">
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 space-y-2">
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">Как пользоваться:</span>
-            </p>
-            <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-              <li>Укажите сумму, которую планируете инвестировать</li>
-              <li>Введите долю в компании, которую получите</li>
-              <li>Укажите текущую и прогнозную оценку компании</li>
-              <li>Выберите горизонт инвестиций в годах</li>
-            </ul>
+<div className="bg-white rounded-2xl p-6 space-y-4">
+  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 space-y-2">
+    <p className="text-sm text-gray-700">
+      <span className="font-medium">Как пользоваться:</span>
+    </p>
+    <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+      <li>Укажите сумму, которую планируете инвестировать</li>
+      <li>Введите долю в компании, которую получите</li>
+      <li>Укажите текущую и прогнозную оценку компании</li>
+      <li>Выберите горизонт инвестиций в годах</li>
+    </ul>
+  </div>
 
+  <div className="bg-slate-50 rounded-xl p-4 space-y-2 border border-slate-200">
+    <p className="space-y-1 text-xl sm:text-sm font-mono text-gray-900">
+      Формулы расчёта
+    </p>
 
-            {/* Все формулы рассчета на всякий пожарный */}
-        {/*
-          1. Стоимость доли при выходе = Прогноз оценки × Доля (%) / 100
-          2. Прибыль (gross) = Стоимость доли − Сумма инвестиций
-          3. Комиссия платформы = Сумма инвестиций × 2.5%
-          4. Чистая прибыль = Прибыль − Комиссия
-          5. ROI = (Прибыль / Инвестиции) × 100%
-          6. Чистый ROI = (Чистая прибыль / Инвестиции) × 100%
-          7. Множитель (MOIC) = Стоимость доли / Инвестиции
-          8. CAGR = (Множитель ^ (1 / лет)) − 1 × 100%
-          9. Pre-money оценка = (Инвестиции / Доля%) × 100 − Инвестиции
-        */}
-          </div>
-        </div>
+    <div className="space-y-1 text-xs sm:text-sm font-mono text-gray-700">
+      <p>
+        1. <span className="font-semibold">Стоимость доли при выходе</span> = Прогноз оценки × Доля (%) / 100
+      </p>
+      <p>
+        2. <span className="font-semibold">Прибыль (gross)</span> = Стоимость доли − Сумма инвестиций
+      </p>
+      <p>
+        3. <span className="font-semibold">Комиссия платформы</span> = Сумма инвестиций × 2,5%
+      </p>
+      <p>
+        4. <span className="font-semibold">Чистая прибыль</span> = Прибыль − Комиссия платформы
+      </p>
+      <p>
+        5. <span className="font-semibold">ROI</span> = (Прибыль / Инвестиции) × 100%
+      </p>
+      <p>
+        6. <span className="font-semibold">Чистый ROI</span> = (Чистая прибыль / Инвестиции) × 100%
+      </p>
+      <p>
+        7. <span className="font-semibold">Множитель (MOIC)</span> = Стоимость доли / Инвестиции
+      </p>
+      <p>
+        8. <span className="font-semibold">CAGR</span> = (Множитель<sup>1 / лет</sup> − 1) × 100%
+      </p>
+      <p>
+        9. <span className="font-semibold">Pre-money оценка</span> = (Инвестиции / Доля%) × 100 − Инвестиции
+      </p>
+    </div>
+
+    <p className="mt-2 text-[11px] sm:text-xs text-gray-500">
+      Эти формулы используются калькулятором выше для расчёта всех показателей.
+    </p>
+  </div>
+</div>
       </div>
     </div>
   );

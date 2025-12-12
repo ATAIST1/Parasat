@@ -18,28 +18,40 @@ import type { Screen } from '../App';
 import baitasovImg from '../assets/parasat-baitasov.png';
 import jakishevImg from '../assets/parasat-jakishev.png';
 
+// члены клуба
+import memberSatpaev from '../assets/parasat-member-satpaev.png';
+import memberIndira from '../assets/parasat-member-indira.png';
+import memberZhumman from '../assets/parasat-member-zhuman.png';
+import memberZhazira from '../assets/parasat-member-zhazira.png';
+import memberKurmashev from '../assets/parasat-member-kurmashev.png';
+import memberMirat from '../assets/parasat-member-mirat.png';
+
+// карта филиалов
+import branchesMap from '../assets/parasat-branches-map.png';
+
 // Локальные стили страницы
 import '../styles/parasat.css';
+
+const MISSION_LINES = [
+  'МИССИЯ: Формирование новой бизнес-элиты Казахстана',
+  'ЦЕЛЬ: Концентрация и развитие бизнес-лидеров по всей республике',
+  'PARASAT: Объединяет успешных людей',
+];
 
 interface ParasatScreenProps {
   navigateTo: (screen: Screen) => void;
   openNews: (id: string) => void;
 }
 
-export default function ParasatScreen({
-  navigateTo,
-  openNews,
-}: {
-  navigateTo: (screen: Screen) => void;
-  openNews: (id: string) => void;
-}) {
+export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenProps) {
   const [news, setNews] = useState<NewsDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // текст, который сейчас "напечатан"
+  // текст текущей фразы (анимация печати)
   const [typedText, setTypedText] = useState('');
 
+  // анимация печати трёх фраз
   useEffect(() => {
     let phraseIndex = 0;
     let charIndex = 0;
@@ -51,9 +63,8 @@ export default function ParasatScreen({
       if (charIndex <= phrase.length) {
         setTypedText(phrase.slice(0, charIndex));
         charIndex += 1;
-        timeoutId = window.setTimeout(typeNext, 40); // скорость печатания
+        timeoutId = window.setTimeout(typeNext, 40);
       } else {
-        // пауза на полной фразе и переключаемся на следующую
         timeoutId = window.setTimeout(() => {
           charIndex = 0;
           phraseIndex = (phraseIndex + 1) % MISSION_LINES.length;
@@ -63,13 +74,11 @@ export default function ParasatScreen({
     };
 
     typeNext();
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
-    useEffect(() => {
+  // загрузка новостей
+  useEffect(() => {
     const fetchNews = async () => {
       try {
         setIsLoading(true);
@@ -88,16 +97,6 @@ export default function ParasatScreen({
     fetchNews();
   }, []);
 
-  const joinSteps = [
-    'Претендент должен принимать и понимать главные ценности клуба.',
-    'Соблюдать устав клуба.',
-    'Платить членские взносы.',
-    'Принимать активное участие в делах клуба.',
-    'Участвовать в форумах внутри клуба.',
-    'Поддерживать связь с членами клуба.',
-    'Состоять в чатах клуба для получения информации о мероприятиях и активностях клуба.',
-  ];
-  
   const achievements = [
     {
       icon: Users,
@@ -171,16 +170,31 @@ export default function ParasatScreen({
     },
   ];
 
-  const MISSION_LINES = [
-  'МИССИЯ: Формирование новой бизнес-элиты Казахстана',
-  'ЦЕЛЬ: Концентрация и развитие бизнес-лидеров по всей республике',
-  'PARASAT: Объединяет успешных людей',
-];
+  const joinSteps = [
+    'Претендент должен принимать и понимать главные ценности клуба.',
+    'Соблюдать устав клуба.',
+    'Платить членские взносы.',
+    'Принимать активное участие в делах клуба.',
+    'Участвовать в форумах внутри клуба.',
+    'Поддерживать связь с членами клуба.',
+    'Состоять в чатах клуба для получения информации о мероприятиях и активностях клуба.',
+  ];
+
+  const members = [
+    { name: 'Досым Сатпаев', image: memberSatpaev },
+    { name: 'Адиль Индира', image: memberIndira },
+    { name: 'Марат Жуман', image: memberZhumman },
+    { name: 'Жумагулова Жазира', image: memberZhazira },
+    { name: 'Эрнар Курмашев', image: memberKurmashev },
+    { name: 'Мират Ахметсадыков', image: memberMirat },
+  ];
 
   return (
     <div className="parasat-page">
+      {/* ВЕРХНЯЯ ЧАСТЬ */}
       <div className="parasat-hero">
         <div className="parasat-hero-inner">
+          {/* Хедер */}
           <header className="parasat-header">
             <div className="parasat-logo-block">
               <div className="parasat-logo-wrapper">
@@ -207,19 +221,20 @@ export default function ParasatScreen({
             </button>
           </header>
 
-        <div className="space-y-4 mb-12">
-          <div className="parasat-typing-wrapper">
-            <h1 className="parasat-typing-text">
-              {typedText}
-              <span className="parasat-typing-cursor" />
-            </h1>
+          {/* Миссия с анимацией печати */}
+          <div className="space-y-4 mb-12">
+            <div className="parasat-typing-wrapper">
+              <h1 className="parasat-typing-text">
+                {typedText}
+                <span className="parasat-typing-cursor" />
+              </h1>
+            </div>
+            <p className="parasat-mission-text">
+              Сообщество успешных бизнесменов, которые стремятся к развитию и
+              росту. Мы объединяем людей, которые хотят достигать своих целей и
+              реализовывать свой потенциал.
+            </p>
           </div>
-          <p className="text-sm md:text-base text-[var(--color_e)] max-w-2xl">
-            Сообщество успешных бизнесменов, которые стремятся к развитию и
-            росту. Мы объединяем людей, которые хотят достигать своих целей и
-            реализовывать свой потенциал.
-          </p>
-        </div>
 
           {/* Основатели */}
           <section className="parasat-founders">
@@ -228,7 +243,7 @@ export default function ParasatScreen({
             </h2>
 
             <div className="parasat-founders-grid">
-              {/* Байтасов */}
+              {/* Байтасов слева */}
               <div className="parasat-founder-card">
                 <div className="parasat-founder-image-wrap">
                   <img
@@ -241,8 +256,8 @@ export default function ParasatScreen({
                   <p className="parasat-founder-name-top">Арманжан</p>
                   <p className="parasat-founder-name-main">Байтасов</p>
                   <p className="parasat-founder-description">
-                    Известный казахстанский медиа-менеджер, профессиональный журналист,
-                    владелец Tan Media Group.
+                    Известный казахстанский медиа-менеджер, профессиональный
+                    журналист, владелец Tan Media Group.
                   </p>
                   <p className="parasat-founder-instagram">
                     Instagram: <span>@armanzhan</span>
@@ -250,7 +265,7 @@ export default function ParasatScreen({
                 </div>
               </div>
 
-              {/* Джакишев */}
+              {/* Джакишев справа */}
               <div className="parasat-founder-card parasat-founder-card--right">
                 <div className="parasat-founder-image-wrap">
                   <img
@@ -306,30 +321,105 @@ export default function ParasatScreen({
             </div>
           </section>
 
-          
-
-          {/* Резиденты клуба */}
+          {/* Резиденты клуба (текст) */}
           <section className="parasat-section">
             <h2 className="parasat-section-title">РЕЗИДЕНТЫ КЛУБА</h2>
             <div className="parasat-residents-card">
-              <p>
-                Администрацией клуба рассматриваются все заявки, поступающие от
-                потенциальных резидентов. Заявка должна включать две рекомендации от
-                действующих членов клуба. После обработки заявки администрацией будет
-                выслана ссылка на анкету и приглашение на собеседование.
-              </p>
+              Администрацией клуба рассматриваются все заявки, поступающие от
+              потенциальных резидентов. Заявка должна включать две рекомендации
+              от действующих членов клуба. После обработки заявки администрацией
+              будет выслана ссылка на анкету и приглашение на собеседование.
+            </div>
+          </section>
+
+          {/* Члены бизнес-клуба */}
+          <section className="parasat-section">
+            <h2 className="parasat-section-title">
+              ЧЛЕНЫ БИЗНЕС-КЛУБА PARASAT
+            </h2>
+            <div className="parasat-members-row">
+              {members.map((member) => (
+                <div key={member.name} className="parasat-member-card">
+                  <div className="parasat-member-avatar-wrap">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="parasat-member-avatar"
+                    />
+                  </div>
+                  <p className="parasat-member-name">{member.name}</p>
+                  <p className="parasat-member-role">Член бизнес-клуба</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Как вступить в клуб – лестница */}
+          <section className="parasat-join-section">
+            <h2 className="parasat-section-title text-center">
+              КАК ВСТУПИТЬ В КЛУБ
+            </h2>
+            <div className="parasat-join-timeline">
+              {joinSteps.map((step, index) => {
+                const isLeft = index % 2 === 0;
+                return (
+                  <div key={index} className="parasat-join-row">
+                    {/* левая карточка */}
+                    <div className="parasat-join-side">
+                      {isLeft && (
+                        <div className="parasat-join-card">
+                          {step}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* центр */}
+                    <div className="parasat-join-center">
+                      <div className="parasat-join-dot">
+                        <span>{index + 1}</span>
+                      </div>
+                    </div>
+
+                    {/* правая карточка */}
+                    <div className="parasat-join-side">
+                      {!isLeft && (
+                        <div className="parasat-join-card">
+                          {step}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Филиалы клуба */}
+          <section className="parasat-section">
+            <h2 className="parasat-section-title text-center">
+              Филиалы клуба
+            </h2>
+            <div className="parasat-branches-card">
+              <img
+                src={branchesMap}
+                alt="Филиалы клуба"
+                className="parasat-branches-map"
+              />
             </div>
           </section>
         </div>
       </div>
-      
 
+      {/* НИЖНЯЯ ЧАСТЬ: показатели, новости, О клубе */}
       <div className="parasat-bottom">
         <div className="parasat-bottom-inner">
+          {/* Ключевые показатели */}
           <section className="bg-white rounded-2xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-              <h2 className="text-gray-900 font-semibold">Ключевые показатели</h2>
+              <h2 className="text-gray-900 font-semibold">
+                Ключевые показатели
+              </h2>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -348,32 +438,33 @@ export default function ParasatScreen({
                     <p className="text-xl md:text-2xl text-gray-900 font-semibold">
                       {achievement.value}
                     </p>
-                    <p className="text-xs text-gray-600">{achievement.label}</p>
+                    <p className="text-xs text-gray-600">
+                      {achievement.label}
+                    </p>
                   </div>
                 );
               })}
             </div>
           </section>
 
-
-
           {/* Новости */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              {/* <h2 className="text-gray-900 font-semibold">Последние новости</h2> */}
-              {/*<Badge variant="secondary">Все актуально</Badge>*/}
-            </div>
+            {/* если надо заголовок — раскомментируй */}
+            {/* <div className="flex items-center justify-between mb-4">
+              <h2 className="text-gray-100 font-semibold">
+                Последние новости
+              </h2>
+              <Badge variant="secondary">Все актуально</Badge>
+            </div> */}
 
             {isLoading ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-300">
                 Загрузка новостей...
               </div>
             ) : error ? (
-              <div className="text-center py-8 text-red-500">
-                {error}
-              </div>
+              <div className="text-center py-8 text-red-300">{error}</div>
             ) : news.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-300">
                 Новостей пока нет
               </div>
             ) : (
@@ -392,7 +483,7 @@ export default function ParasatScreen({
                   return (
                     <Card
                       key={item.id}
-                      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-white/95"
                       onClick={() => openNews(item.id)}
                     >
                       <div className="p-4 space-y-3">
@@ -435,7 +526,7 @@ export default function ParasatScreen({
             )}
           </section>
 
-          {/* О клубе – с отступом от новостей */}
+          {/* О клубе */}
           <section className="parasat-about-card">
             <h3>О Parasat Business Club</h3>
             <p>
