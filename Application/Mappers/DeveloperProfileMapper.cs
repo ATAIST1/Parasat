@@ -5,11 +5,12 @@ namespace Application.Mappers
 {
     public static class DeveloperProfileMapper
     {
-        public static DeveloperProfile ToModel(CreateDeveloperProfileDto dto)
+        // ✅ userId приходит из JWT (контроллера/сервиса), не из dto
+        public static DeveloperProfile ToModel(string userId, CreateDeveloperProfileDto dto)
         {
             return new DeveloperProfile
             {
-                UserId = dto.UserId,
+                UserId = userId,
                 FullName = dto.FullName,
                 WorkingRate = dto.WorkingRate,
                 Currency = dto.Currency,
@@ -34,14 +35,12 @@ namespace Application.Mappers
             if (dto.FirstLink != null) model.FirstLink = dto.FirstLink;
             if (dto.SecondLink != null) model.SecondLink = dto.SecondLink;
 
-            if (dto.Types != null)
-                model.Types = dto.Types;
+            if (dto.Types != null) model.Types = dto.Types;
             if (dto.City != null) model.City = dto.City;
             if (dto.IsRemote.HasValue) model.IsRemote = dto.IsRemote.Value;
 
             if (dto.TechStack != null) model.TechStack = dto.TechStack;
-            if (dto.Experience != null)
-                model.Experience = dto.Experience;
+            if (dto.Experience != null) model.Experience = dto.Experience;
 
             if (dto.About != null) model.About = dto.About;
             if (dto.IsAvailable.HasValue) model.IsAvailable = dto.IsAvailable.Value;

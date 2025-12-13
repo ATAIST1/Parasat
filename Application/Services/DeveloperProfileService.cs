@@ -34,25 +34,37 @@ namespace Application.Services
             return profile == null ? null : DeveloperProfileMapper.ToResponseDto(profile);
         }
 
-        public async Task CreateAsync(CreateDeveloperProfileDto dto)
+        public async Task CreateAsync(string userId, CreateDeveloperProfileDto dto)
         {
-            var profile = DeveloperProfileMapper.ToModel(dto);
+            var profile = DeveloperProfileMapper.ToModel(userId, dto);
+            profile.UserId = userId;
             await _repo.AddAsync(profile);
         }
 
-        public async Task<bool> UpdateAsync(string id, UpdateDeveloperProfileDto dto)
+
+        public async Task<bool> UpdateAsync(string currentUserId, string id, UpdateDeveloperProfileDto dto)
         {
             var existing = await _repo.GetByIdAsync(id);
             if (existing == null) return false;
+
+            if (existing.UserId != currentUserId)
+                throw new UnauthorizedAccessException("Not owner");
 
             DeveloperProfileMapper.UpdateModel(existing, dto);
             existing.UpdatedAt = DateTime.UtcNow;
             return await _repo.UpdateAsync(existing);
         }
 
-        public async Task<bool> DeleteAsync(string id)
-            => await _repo.DeleteAsync(id);
+        public async Task<bool> DeleteAsync(string currentUserId, string id)
+        {
+            var existing = await _repo.GetByIdAsync(id);
+            if (existing == null) return false;
 
+            if (existing.UserId != currentUserId)
+                throw new UnauthorizedAccessException("Not owner");
+
+            return await _repo.DeleteAsync(id);
+        }
         public async Task<List<DeveloperProfileResponseDto>> SearchAsync(
             List<string>? types = null,
             string? city = null,
@@ -64,5 +76,6 @@ namespace Application.Services
             var profiles = await _repo.SearchAsync(types, city, isRemote, techStack, experience, isAvailable);
             return profiles.Select(DeveloperProfileMapper.ToResponseDto).ToList();
         }
+
     }
 }

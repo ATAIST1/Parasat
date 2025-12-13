@@ -5,7 +5,6 @@ namespace Core.Dtos.Developer
 {
     public class CreateDeveloperProfileDto
     {
-        [Required] public string UserId { get; set; } = null!;
         [Required] public string FullName { get; set; } = null!;
         public int? WorkingRate { get; set; }
         public string? Currency { get; set; }
