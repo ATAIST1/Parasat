@@ -13,7 +13,8 @@ namespace Core.Models
         public string PasswordHash { get; set; } = null!;   // ← теперь хеш, а не пароль
         public string Role { get; set; } = "User";
 
-        public List<string>? RefreshTokens { get; set; } = new();
+        public List<string>? RefreshTokenHashes { get; set; } = new();
+
         public bool EmailConfirmed { get; set; } = false;
         public string? EmailConfirmationToken { get; set; }
         public DateTime? EmailConfirmationTokenExpires { get; set; }   
@@ -34,6 +35,14 @@ namespace Core.Models
         // === НОВОЕ: восстановление пароля ===
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpires { get; set; }
+
+        public DateTime? InvestorContactsSubscriptionExpiresAt { get; set; }
+
+        public string? Phone { get; set; }
+        public string? Telegram { get; set; }
+
+        public bool IsBanned { get; set; } = false;
+        public DateTime? BannedUntil { get; set; } 
          
     }
 }
