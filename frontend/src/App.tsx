@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { Home, Search, PlusCircle, MessageCircle, User, Building2 } from 'lucide-react';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -112,6 +113,13 @@ function App() {
     setCurrentScreen('project-detail');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+    setCurrentScreen('welcome');
+  };
+
   const navigateTo = (screen: Screen) => {
     setCurrentScreen(screen);
   };
@@ -124,6 +132,8 @@ function App() {
             onLogin={() => setCurrentScreen('auth')}
             onRegister={() => setCurrentScreen('auth')}
             onContinueAsGuest={() => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
               setUser({ id: 'guest', email: '', role: null });
               setCurrentScreen('feed');
             }}
