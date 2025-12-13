@@ -42,7 +42,7 @@ public class BookmarkController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(string id)
     {
-        var deleted = await _bookmarkService.DeleteAsync(id);
+        var deleted = await _bookmarkService.DeleteAsync(id, CurrentUserId);
         return deleted ? NoContent() : NotFound();
     }
 

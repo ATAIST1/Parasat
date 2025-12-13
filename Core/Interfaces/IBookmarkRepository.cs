@@ -10,7 +10,8 @@ public interface IBookmarkRepository
     Task<Bookmark?> GetByIdAsync(string id);
     Task<Bookmark?> GetByUserAndItemAsync(string userId, string itemId, BookmarkItemType itemType);
     Task CreateAsync(Bookmark bookmark);
-    Task DeleteAsync(string id);
+    Task<bool> DeleteAsync(string id, string userId);
+
     Task DeleteByUserAndItemAsync(string userId, string itemId, BookmarkItemType itemType);
 }
 

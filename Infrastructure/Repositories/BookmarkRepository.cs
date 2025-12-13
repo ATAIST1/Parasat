@@ -28,8 +28,11 @@ public class BookmarkRepository : IBookmarkRepository
     public async Task CreateAsync(Bookmark bookmark)
         => await _bookmarks.InsertOneAsync(bookmark);
 
-    public async Task DeleteAsync(string id)
-        => await _bookmarks.DeleteOneAsync(b => b.Id == id);
+    public async Task<bool> DeleteAsync(string id, string userId)
+    {
+        var res = await _bookmarks.DeleteOneAsync(b => b.Id == id && b.UserId == userId);
+        return res.DeletedCount == 1;
+    }
 
     public async Task DeleteByUserAndItemAsync(string userId, string itemId, BookmarkItemType itemType)
         => await _bookmarks.DeleteOneAsync(b => b.UserId == userId && b.ItemId == itemId && b.ItemType == itemType);
