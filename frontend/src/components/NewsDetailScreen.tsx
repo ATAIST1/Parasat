@@ -1,9 +1,9 @@
+import * as React from "react";
 import { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
-import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
-import { newsService, type NewsDto } from '../services/newsService';
+import { newsService, type NewsDto, getNewsImageUrl } from '../services/newsService';
 
 interface NewsDetailScreenProps {
   newsId: string;
@@ -36,35 +36,56 @@ export default function NewsDetailScreen({
   const [otherNews, setOtherNews] = useState<NewsDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchNews = async () => {
-      if (!newsId) {
-        setIsLoading(false);
-        return;
+  const fetchNews = async () => {
+    if (!newsId) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // 1. Получаем новость
+      const currentNews = await newsService.getById(newsId);
+      if (!currentNews) {
+        throw new Error('News not found');
+      }
+      setItem(currentNews);
+      
+      // 2. Получаем URL изображения через newsService.getImageUrl()
+      if (currentNews.imageKey) {
+        try {
+          const url = await newsService.getImageUrl(newsId);
+          setImageUrl(url);
+        } catch (imgError: any) {
+          console.warn('Could not load image:', imgError);
+          setImageUrl(null);
+        }
+      } else {
+        console.log('No imageKey for news:', currentNews.id);
+        setImageUrl(null);
       }
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const currentNews = await newsService.getById(newsId);
-        setItem(currentNews);
+      // 3. Получаем другие новости
+      const allNews = await newsService.getRecent(10);
+      const filtered = allNews.filter(n => n.id !== newsId);
+      setOtherNews(filtered);
+    } catch (err: any) {
+      console.error('Error fetching news:', err);
+      setError('Не удалось загрузить новость');
+      setItem(null);
+      setImageUrl(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        const allNews = await newsService.getRecent(10);
-        const filtered = allNews.filter(n => n.id !== newsId);
-        setOtherNews(filtered);
-      } catch (err: any) {
-        console.error('Error fetching news:', err);
-        setError('Не удалось загрузить новость');
-        setItem(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, [newsId]);
+  fetchNews();
+}, [newsId]);
 
   if (isLoading) {
     return (
@@ -78,12 +99,7 @@ export default function NewsDetailScreen({
             <span>Назад к новостям</span>
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl p-2 shadow">
-              <img
-                src={logo}
-                alt="Parasat Invest"
-                className="w-full h-full object-contain"
-              />
+            <div className="w-10 h-10 bg-gray-200 rounded-xl p-2 shadow">
             </div>
             <div>
               <p className="text-xs text-gray-300 uppercase tracking-wide">
@@ -118,12 +134,7 @@ export default function NewsDetailScreen({
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl p-2 shadow">
-              <img
-                src={logo}
-                alt="Parasat Invest"
-                className="w-full h-full object-contain"
-              />
+            <div className="w-10 h-10 bg-gray-200 rounded-xl p-2 shadow">
             </div>
             <div>
               <p className="text-xs text-gray-300 uppercase tracking-wide">
@@ -213,12 +224,7 @@ export default function NewsDetailScreen({
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-xl p-2 shadow">
-            <img
-              src={logo}
-              alt="Parasat Invest"
-              className="w-full h-full object-contain"
-            />
+          <div className="w-10 h-10 bg-gray-200 rounded-xl p-2 shadow">
           </div>
           <div>
             <p className="text-xs text-gray-300 uppercase tracking-wide">
@@ -235,6 +241,15 @@ export default function NewsDetailScreen({
       {/* убрал -mt-4, добавил pt-4 и больше pb */}
       <main className="flex-1 px-4 pt-4 pb-16 space-y-6">
         <Card className="rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+          {imageUrl && (
+            <div className="px-6 pt-6"> {/* Добавляем горизонтальные отступы */}
+      <img 
+        src={imageUrl} 
+        alt={item?.title || "News"} 
+        className="w-1/2 h-64 md:h-72 object-cover rounded-xl shadow-md mx-auto"
+      />
+    </div>
+          )}
           <div className="p-6 sm:p-8">
             {/* Метаданные */}
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">

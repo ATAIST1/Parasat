@@ -85,3 +85,4 @@ export default function ChangePasswordScreen({ onBack }: ChangePasswordScreenPro
     </div>
   );
 }
+

@@ -20,9 +20,9 @@ namespace Core.Models
         
         public string Category { get; set; } = null!; // Новость, Достижение, Партнерство, Рост
         
-        public string ImageUrl { get; set; } = null!;
-        
         public string Badge { get; set; } = null!; // Новое, Сделка, Рост, Партнерство
+        
+        public string ImageKey { get; set; } = null!;
         
         [BsonDefaultValue(false)]
         public bool IsFeatured { get; set; }

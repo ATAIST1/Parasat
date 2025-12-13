@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Core.Interfaces;
 
 namespace WebApi.Controllers
 {
@@ -63,25 +65,36 @@ namespace WebApi.Controllers
             return Ok(news);
         }
 
+        [HttpGet("{id}/image")]
+        public async Task<IActionResult> GetNewsImage(string id, [FromServices] IFileStorageService storage)
+        {
+            var news = await _newsService.GetNewsByIdAsync(id);
+            if (news == null || string.IsNullOrEmpty(news.ImageKey))
+                return NotFound();
+            var url = await storage.GetDownloadUrlAsync(news.ImageKey, TimeSpan.FromMinutes(10));
+            return Ok(new { url });
+        }
+
         // [Authorize(Roles = "Admin,Editor")] чек на роль
         [HttpPost]
-        public async Task<IActionResult> CreateNews([FromBody] CreateNewsDto dto)
+        public async Task<IActionResult> CreateNews([
+            FromForm] CreateNewsDto dto, IFormFile? image)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var createdNews = await _newsService.CreateNewsAsync(dto);
+            var createdNews = await _newsService.CreateNewsAsync(dto, image);
             return CreatedAtAction(nameof(GetNewsById), new { id = createdNews.Id }, createdNews);
         }
 
         // [Authorize(Roles = "Admin,Editor")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateNews(string id, [FromBody] UpdateNewsDto dto)
+        public async Task<IActionResult> UpdateNews(string id, [FromForm] UpdateNewsDto dto, IFormFile? image)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedNews = await _newsService.UpdateNewsAsync(id, dto);
+            var updatedNews = await _newsService.UpdateNewsAsync(id, dto, image);
             return updatedNews != null ? Ok(updatedNews) : NotFound();
         }
 

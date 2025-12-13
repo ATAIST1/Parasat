@@ -15,9 +15,9 @@ namespace Application.Mappers
                 Description = news.Description,
                 Date = news.Date,
                 Category = news.Category,
-                ImageUrl = news.ImageUrl,
                 Badge = news.Badge,
-                IsFeatured = news.IsFeatured
+                IsFeatured = news.IsFeatured,
+                ImageKey = news.ImageKey
             };
         }
 
@@ -29,10 +29,10 @@ namespace Application.Mappers
                 Content = dto.Content,
                 Description = dto.Description,
                 Category = dto.Category,
-                ImageUrl = dto.ImageUrl,
                 Badge = dto.Badge,
                 IsFeatured = dto.IsFeatured,
-                Date = dto.Date ?? DateTime.UtcNow
+                Date = dto.Date ?? DateTime.UtcNow,
+                ImageKey = string.Empty
             };
         }
 
@@ -49,9 +49,6 @@ namespace Application.Mappers
             
             if (dto.Category != null)
                 existingNews.Category = dto.Category;
-            
-            if (dto.ImageUrl != null)
-                existingNews.ImageUrl = dto.ImageUrl;
             
             if (dto.Badge != null)
                 existingNews.Badge = dto.Badge;

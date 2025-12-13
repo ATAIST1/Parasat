@@ -6,16 +6,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
 {
     public class NewsService
     {
         private readonly INewsRepository _newsRepository;
+        private readonly IFileStorageService _fileStorage;
 
-        public NewsService(INewsRepository newsRepository)
+        public NewsService(INewsRepository newsRepository, IFileStorageService fileStorage)
         {
             _newsRepository = newsRepository;
+            _fileStorage = fileStorage;
         }
 
         public async Task<List<NewsDto>> GetAllNewsAsync()
@@ -48,20 +51,41 @@ namespace Application.Services
             return news.Select(NewsMapper.ToDto).ToList();
         }
 
-        public async Task<NewsDto> CreateNewsAsync(CreateNewsDto dto)
+        public async Task<NewsDto> CreateNewsAsync(CreateNewsDto dto, IFormFile? image)
         {
             var news = NewsMapper.ToModel(dto);
+
+            if (image != null && image.Length > 0)
+            {
+                using var stream = image.OpenReadStream();
+                var key = $"news/{Guid.NewGuid()}_{image.FileName}";
+                var uploadedKey = await _fileStorage.UploadAsync(
+                    stream,
+                    image.ContentType,
+                    key);
+                news.ImageKey = uploadedKey;
+            }
+
             var createdNews = await _newsRepository.AddAsync(news);
             return NewsMapper.ToDto(createdNews);
         }
 
-        public async Task<NewsDto?> UpdateNewsAsync(string id, UpdateNewsDto dto)
+        public async Task<NewsDto?> UpdateNewsAsync(string id, UpdateNewsDto dto, IFormFile? image)
         {
             var existingNews = await _newsRepository.GetByIdAsync(id);
             if (existingNews == null)
                 return null;
-
             var updatedNews = NewsMapper.UpdateModel(existingNews, dto);
+            if (image != null && image.Length > 0)
+            {
+                using var stream = image.OpenReadStream();
+                var key = $"news/{existingNews.Id}_{image.FileName}";
+                var uploadedKey = await _fileStorage.UploadAsync(
+                    stream,
+                    image.ContentType,
+                    key);
+                updatedNews.ImageKey = uploadedKey;
+            }
             await _newsRepository.UpdateAsync(updatedNews);
             return NewsMapper.ToDto(updatedNews);
         }
