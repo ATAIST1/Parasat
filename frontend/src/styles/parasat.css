@@ -2,8 +2,7 @@
   min-height: 100vh;
   background-color: #081a5f;
   color: #e2e6f3;
-  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont,
-    sans-serif;
+  font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* верхняя часть страницы */
@@ -18,7 +17,6 @@
   padding: 0 1rem;
 }
 
-/* header */
 .parasat-header {
   display: flex;
   align-items: center;
@@ -66,7 +64,7 @@
   color: #9fa5c1;
 }
 
-/* CTA кнопка */
+/* кнопка "Вступить в клуб" */
 .parasat-cta-btn {
   display: inline-flex;
   align-items: center;
@@ -100,51 +98,20 @@
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
-/* миссия + анимация печати */
-.parasat-typing-wrapper {
-  max-width: 36rem;
-}
-
-.parasat-typing-text {
-  font-size: clamp(1.6rem, 2.4vw + 1rem, 2.6rem);
-  font-weight: 900;
-  line-height: 1.25;
-  color: #ffffff;
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 0.12rem;
-  min-height: 3.1rem;
-}
-
-.parasat-typing-cursor {
-  width: 2px;
-  align-self: stretch;
-  background-color: #ffffff;
-  display: inline-block;
-  margin-bottom: 0.15em;
-  animation: parasat-cursor-blink 1s steps(2, start) infinite;
-}
-
-@keyframes parasat-cursor-blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
+/* миссия */
+.parasat-mission {
+  max-width: 880px;
 }
 
 .parasat-mission-text {
   font-size: 0.95rem;
   line-height: 1.6;
   color: #e2e6f3;
-  max-width: 32rem;
 }
 
-/* секции */
+/* секционные заголовки */
 .parasat-section {
-  margin-bottom: 2.75rem;
+  margin-top: 2.75rem;
 }
 
 .parasat-section-title {
@@ -157,7 +124,7 @@
 
 /* основатели */
 .parasat-founders {
-  margin-bottom: 3rem;
+  margin-top: 1rem;
 }
 
 .parasat-founders-grid {
@@ -190,6 +157,11 @@
   height: 260px;
 }
 
+.parasat-founder-card--right .parasat-founder-image-wrap {
+  left: auto;
+  right: -32px;
+}
+
 .parasat-founder-image {
   height: 100%;
   object-fit: contain;
@@ -197,22 +169,18 @@
 }
 
 .parasat-founder-content {
-  margin-left: 120px;
+  margin-left: 130px;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   max-width: 320px;
 }
 
-.parasat-founder-card--right .parasat-founder-image-wrap {
-  left: auto;
-  right: -32px;
-}
-
-.parasat-founder-card--right .parasat-founder-content {
-  margin-left: 0;
-  margin-right: 130px;
-  text-align: right;
+.parasat-founder-content-right {
+  margin-left: auto;
+  margin-right: 30px;
+  text-align: left;
+  align-items: flex-start;
 }
 
 @media (min-width: 1024px) {
@@ -231,30 +199,29 @@
     left: auto;
   }
 
-  .parasat-founder-card--right .parasat-founder-content {
-    margin-right: 150px;
-    margin-left: 0;
+  .parasat-founder-content-right {
+    margin-right: 170px;
   }
 }
 
 .parasat-founder-name-top {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: #e2e6f3;
 }
 
 .parasat-founder-name-main {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 900;
   color: #ffffff;
 }
 
 .parasat-founder-description {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #e2e6f3;
 }
 
 .parasat-founder-instagram {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #e2e6f3;
 }
 
@@ -272,7 +239,7 @@
 .parasat-task-item {
   display: flex;
   gap: 0.75rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   color: #e2e6f3;
 }
@@ -323,159 +290,92 @@
 }
 
 .parasat-value-title {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
 .parasat-value-text {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #e2e6f3;
 }
 
-/* резиденты (текст) */
+/* резиденты */
 .parasat-residents-card {
   border-radius: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(8, 26, 95, 0.5);
   padding: 1.1rem 1.2rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   color: #e2e6f3;
 }
 
-/* члены бизнес-клуба */
-.parasat-members-row {
-  display: flex;
-  gap: 1.25rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
+/* члены клуба */
+.parasat-members-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* на мобиле - 2 в ряд */
+  gap: 1rem;
 }
 
-.parasat-members-row::-webkit-scrollbar {
-  height: 6px;
+@media (min-width: 640px) {
+  .parasat-members-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.parasat-members-row::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.parasat-members-row::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
+@media (min-width: 880px) {
+  .parasat-members-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)); /* 6 людей + "ещё" */
+  }
 }
 
 .parasat-member-card {
-  min-width: 120px;
   text-align: center;
+  background: rgba(8, 26, 95, 0.55);
+  border-radius: 1.2rem;
+  padding: 0.9rem 0.5rem 0.8rem;
+  border: 1px solid rgba(159, 165, 193, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
 }
 
-.parasat-member-avatar-wrap {
-  width: 4.5rem;
-  height: 4.5rem;
-  margin: 0 auto 0.4rem;
-  border-radius: 999px;
-  padding: 0.12rem;
-  background: linear-gradient(135deg, #005cfa, #0a6bff);
-}
-
-.parasat-member-avatar {
-  width: 100%;
-  height: 100%;
+.parasat-member-card img {
+  width: 80px;
+  height: 80px;
   border-radius: 999px;
   object-fit: cover;
-  background-color: #021035;
+  border: 3px solid #005cfa;
 }
 
 .parasat-member-name {
   font-size: 0.8rem;
-  font-weight: 600;
+  color: #e2e6f3;
 }
 
-.parasat-member-role {
+/* "Ещё" */
+.parasat-member-more {
+  cursor: pointer;
+  justify-content: center;
+  background: rgba(0, 92, 250, 0.12);
+}
+
+.parasat-member-more-inner {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 2px dashed #005cfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
   font-size: 0.7rem;
-  color: #c3c7e2;
+  letter-spacing: 0.12em;
+  color: #e2e6f3;
 }
 
-/* как вступить в клуб – лестница */
-.parasat-join-section {
-  margin-top: 1rem;
-}
-
-.parasat-join-timeline {
-  position: relative;
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  padding: 0.5rem 0;
-}
-
-.parasat-join-timeline::before {
-  content: '';
-  position: absolute;
-  top: 0.4rem;
-  bottom: 0.4rem;
-  left: 50%;
-  width: 2px;
-  background: rgba(255, 255, 255, 0.55);
-}
-
-.parasat-join-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.8fr) auto minmax(0, 1.8fr);
-  align-items: center;
-  column-gap: 1.2rem;
-}
-
-.parasat-join-side {
-  min-height: 0;
-}
-
-.parasat-join-card {
-  border-radius: 999px;
-  background: #005cfa;
-  color: #ffffff;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.82rem;
-  box-shadow: 0 10px 25px rgba(0, 92, 250, 0.4);
-}
-
-.parasat-join-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.parasat-join-dot {
-  width: 1.9rem;
-  height: 1.9rem;
-  border-radius: 999px;
-  background-color: #081a5f;
-  border: 2px solid #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-/* филиалы клуба */
-.parasat-branches-card {
-  border-radius: 1.5rem;
-  background: radial-gradient(circle at top left, #0967d6 0, #081a5f 55%, #020b3d 100%);
-  border: 1px solid rgba(159, 165, 193, 0.7);
-  padding: 1.5rem;
-}
-
-.parasat-branches-map {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-}
 
 /* нижняя часть */
 .parasat-bottom {
@@ -492,12 +392,317 @@
   padding: 0 1rem;
 }
 
-/* О клубе (карточка внизу) */
+/* тайпинг */
+.parasat-typing-wrapper {
+  max-width: 36rem;
+}
+
+.parasat-typing-text {
+  font-size: clamp(1.6rem, 2.4vw + 1rem, 2.6rem);
+  font-weight: 900;
+  line-height: 1.25;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.12rem;
+  min-height: 3.1rem;
+}
+
+.parasat-typing-cursor {
+  width: 2px;
+  align-self: stretch;
+  background-color: #ffffff;
+  display: inline-block;
+  margin-bottom: 0.15em;
+  animation: parasat-cursor-blink 1s steps(2, start) infinite;
+}
+
+@keyframes parasat-cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ключевые показатели */
+.parasat-metrics-card {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+}
+
+.parasat-metrics-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.parasat-metrics-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #005cfa;
+}
+
+.parasat-metrics-star {
+  color: #facc15;
+  fill: #facc15;
+}
+
+.parasat-metric-item {
+  background-color: #f9fafb;
+  border-radius: 0.9rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.parasat-metric-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parasat-metric-value {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #005cfa;
+}
+
+.parasat-metric-label {
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+/* как вступить в клуб – лестница */
+.parasat-join-section {
+  margin-top: 2rem;
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+}
+
+.parasat-join-section h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #005cfa;
+}
+
+.parasat-steps-ladder {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.parasat-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.parasat-step-circle {
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background-color: #005cfa;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(0, 92, 250, 0.4);
+}
+
+.parasat-step-pill {
+  flex: 1;
+  border-radius: 999px;
+  padding: 0.7rem 1.1rem;
+  background-color: #f5f7ff;
+  border: 1px solid #d5defa;
+}
+
+.parasat-step-pill p {
+  font-size: 0.88rem;
+  color: #111827;
+}
+
+/* филиалы клуба */
+.parasat-branches-section {
+  margin-top: 2rem;
+}
+
+.parasat-branches-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e2e6f3;
+  margin-bottom: 0.75rem;
+}
+
+.parasat-branches-map-wrapper {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  padding: 1rem 1.5rem 1.5rem;
+  background: radial-gradient(circle at top, #0b2a8a 0%, #081a5f 60%, #050f3a 100%);
+  border: 1px solid rgba(159, 165, 193, 0.6);
+}
+
+.parasat-branches-map {
+  width: 100%;
+  display: block;
+}
+
+/* точки филиалов */
+.parasat-branch-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.parasat-branch-pulse {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background-color: rgba(0, 92, 250, 0.35);
+  animation: parasat-pulse 1.8s infinite;
+}
+
+.parasat-branch-dot {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background-color: #ffffff;
+  margin-top: -1.05rem;
+}
+
+.parasat-branch-label {
+  font-size: 0.75rem;
+  color: #e2e6f3;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background-color: rgba(8, 26, 95, 0.9);
+  border: 1px solid rgba(159, 165, 193, 0.6);
+}
+
+.parasat-branch-uralsk {
+  top: 37.3%;
+  left: 12.4%;
+}
+
+.parasat-branch-astana {
+  top: 31%;
+  left: 53.5%;
+}
+
+.parasat-branch-karaganda {
+  top: 43%;
+  left: 57.6%;
+}
+
+.parasat-branch-almaty {
+  top: 85%;
+  left: 76.75%;
+}
+
+.parasat-branch-shymkent {
+  top: 97%;
+  left: 56.3%;
+}
+
+@keyframes parasat-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+}
+
+/* новости */
+.parasat-news-section {
+  margin-top: 2.25rem;
+}
+
+.parasat-news-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.parasat-news-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #005cfa;
+}
+
+.parasat-news-badge {
+  background-color: #fee2b3 !important;
+  color: #92400e !important;
+}
+
+.parasat-news-card {
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.parasat-news-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.parasat-news-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.parasat-news-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.parasat-news-empty {
+  text-align: center;
+  padding: 2rem 0;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.parasat-news-error {
+  text-align: center;
+  padding: 2rem 0;
+  font-size: 0.9rem;
+  color: #ef4444;
+}
+
+/* блок "о клубе" */
 .parasat-about-card {
   margin-top: 1.75rem;
   border-radius: 1.5rem;
   padding: 1.5rem 1.6rem;
-  background: radial-gradient(circle at top left, #081a5f 100%);
+  background: radial-gradient(circle at top left, #0b2a8a 0%, #081a5f 70%);
   border: 1px solid rgba(159, 165, 193, 0.6);
   color: #e2e6f3;
 }
@@ -546,11 +751,7 @@
     align-self: flex-start;
   }
 
-  .parasat-typing-text {
-    font-size: 1.6rem;
-  }
-
-  .parasat-join-timeline::before {
-    left: calc(50% + 1px);
+  .parasat-mission-text {
+    font-size: 0.9rem;
   }
 }
