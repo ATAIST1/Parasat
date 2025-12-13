@@ -74,9 +74,25 @@ public class MessageService
         await _conversationRepo.CreateAsync(c);
         return c;
     }
-    public async Task<MessageDto> SendMessageAsync(string fromId, string toId, string text)
+    public async Task<MessageDto> SendMessageAsync(string conversationId, string fromId, string text)
     {
-        var message = new Message { FromId = fromId, ToId = toId, Text = text, SentAt = DateTime.UtcNow };
+        var conv = await _conversationRepo.GetByIdAsync(conversationId)
+            ?? throw new Exception("Conversation not found");
+
+        if (!conv.ParticipantIds.Contains(fromId))
+            throw new UnauthorizedAccessException("Not a participant");
+
+        var toId = conv.ParticipantIds.First(x => x != fromId);
+
+        var message = new Message
+        {
+            ConversationId = conversationId,   // ✅ ключевой момент
+            FromId = fromId,
+            ToId = toId,
+            Text = text,
+            SentAt = DateTime.UtcNow
+        };
+
         await _chatRepo.SendMessageAsync(message);
 
         var users = await _userRepo.GetByIdsAsync(new List<string> { fromId, toId });
@@ -98,7 +114,16 @@ public class MessageService
         return messages.ToDtoList(userId, names);
 
     }
+    public async Task<List<string>> GetConversationParticipantIdsAsync(string userId, string conversationId)
+    {
+        var conv = await _conversationRepo.GetByIdAsync(conversationId)
+            ?? throw new Exception("Conversation not found");
 
+        if (!conv.ParticipantIds.Contains(userId))
+            throw new UnauthorizedAccessException("Not a participant");
+
+        return conv.ParticipantIds;
+    }
 
 
 }

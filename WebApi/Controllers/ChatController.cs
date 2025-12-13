@@ -24,8 +24,10 @@ public class ChatController : ControllerBase
         _chatService = chatService;
         _hub = hub;
     }
+
     private string UserId => User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
+    // открыть/создать чат из стартапа
     [HttpPost("startup/{startupId}")]
     public async Task<IActionResult> OpenFromStartup(string startupId)
     {
@@ -33,6 +35,7 @@ public class ChatController : ControllerBase
         return Ok(new { conversationId = conv.Id });
     }
 
+    // получить сообщения по conversationId
     [HttpGet("{conversationId}")]
     public async Task<IActionResult> GetChat(string conversationId)
     {
@@ -40,30 +43,17 @@ public class ChatController : ControllerBase
         return Ok(messages);
     }
 
-    [HttpPost("{partnerId}")]
-    public async Task<IActionResult> SendMessage(string partnerId, [FromBody] SendMessageDto dto)
+    // ✅ отправка сообщения ТОЛЬКО по conversationId
+    [HttpPost("{conversationId}")]
+    public async Task<IActionResult> SendMessage(string conversationId, [FromBody] SendMessageDto dto)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        var msg = await _chatService.SendMessageAsync(conversationId, UserId, dto.Text);
 
-        // сервис уже возвращает MessageDto с именами
-        var senderDto = await _chatService.SendMessageAsync(userId, partnerId, dto.Text);
+        // разослать всем участникам диалога (не partnerId)
+        var participantIds = await _chatService.GetConversationParticipantIdsAsync(UserId, conversationId);
+        foreach (var pid in participantIds)
+            await _hub.Clients.Group(pid).SendAsync("ReceiveMessage", msg);
 
-        // для получателя то же сообщение, но IsMine = false
-        var receiverDto = new MessageDto
-        {
-            Id = senderDto.Id,
-            Text = senderDto.Text,
-            SentAt = senderDto.SentAt,
-            IsMine = false,
-            IsRead = senderDto.IsRead,
-            From = senderDto.From,
-            To = senderDto.To
-        };
-
-        await _hub.Clients.Group(userId).SendAsync("ReceiveMessage", senderDto);
-        await _hub.Clients.Group(partnerId).SendAsync("ReceiveMessage", receiverDto);
-
-        return Ok(senderDto);
+        return Ok(msg);
     }
-
 }
