@@ -35,16 +35,9 @@ public class BookmarkService
         return BookmarkMapper.ToDto(bookmark);
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(string id, string userId)
     {
-        var existing = await _repository.GetByIdAsync(id);
-        if (existing == null)
-        {
-            return false;
-        }
-
-        await _repository.DeleteAsync(id);
-        return true;
+        return await _repository.DeleteAsync(id, userId);
     }
 
     public async Task<bool> DeleteByUserAndItemAsync(string userId, string itemId, Core.Models.BookmarkItemType itemType)
