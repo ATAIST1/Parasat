@@ -43,11 +43,11 @@ public class AdminService
     }
 
     public async Task BanUserAsync(string userId)
-    {
-        var user = await _userRepo.GetByIdAsync(userId)
-                   ?? throw new Exception("User not found");
+        {
+            var user = await _userRepo.GetByIdAsync(userId) ?? throw new Exception("User not found");
+            user.IsBanned = true;
+            user.BannedUntil = null; // или DateTime.UtcNow.AddDays(7)
+            await _userRepo.UpdateAsync(user);
+        }
 
-        user.Role = "Banned";
-        await _userRepo.UpdateAsync(user);
-    }
 }

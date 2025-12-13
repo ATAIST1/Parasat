@@ -11,7 +11,7 @@ public interface IUserRepository
     Task<User?> GetByIdAsync(string id);
     Task<List<User>> GetAllAsync();
     Task UpdateAsync(User user);
-    Task<User?> GetByRefreshTokenAsync(string refreshToken);
+    Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash);
 
     Task<User?> GetByTwoFactorTempTokenAsync(string tempToken);
 }

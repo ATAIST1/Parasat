@@ -29,10 +29,11 @@ public class UserRepository : IUserRepository
     {
         await _users.ReplaceOneAsync(x => x.Id == user.Id, user);
     }
-    public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
+    public async Task<User?> GetByRefreshTokenHashAsync(string refreshTokenHash)
     {
-        return await _users.Find(x => x.RefreshTokens != null && x.RefreshTokens.Contains(refreshToken))
-                        .FirstOrDefaultAsync();
+        return await _users
+            .Find(x => x.RefreshTokenHashes != null && x.RefreshTokenHashes.Contains(refreshTokenHash))
+            .FirstOrDefaultAsync();
     }
 
     // НОВОЕ: поиск пользователя по временной 2FA-сессии

@@ -51,7 +51,7 @@ public class AuthService
             Name = dto.Name,
             Email = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = dto.Email.EndsWith("@admin.com") ? "Admin" : "User",
+            Role = "User",
             EmailConfirmationToken = confirmToken,
             EmailConfirmationTokenExpires = DateTime.UtcNow.AddHours(1)
         };
@@ -66,6 +66,8 @@ public class AuthService
         var user = await _userRepo.GetByEmailAsync(dto.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials");
+        if (IsUserBanned(user))
+            throw new UnauthorizedAccessException("User is banned");
 
         if (!user.EmailConfirmed)
             throw new UnauthorizedAccessException("Email not confirmed. Check your inbox.");
@@ -75,9 +77,8 @@ public class AuthService
         {
             var accessToken = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken();
-
-            user.RefreshTokens ??= new List<string>();
-            user.RefreshTokens.Add(refreshToken);
+            user.RefreshTokenHashes ??= new();
+            user.RefreshTokenHashes.Add(HashToken(refreshToken));
             await _userRepo.UpdateAsync(user);
 
             return new LoginResponse(
@@ -115,20 +116,22 @@ public class AuthService
             throw new SecurityTokenException("Refresh token is required");
 
         // 1. Find user by refresh token
-        var user = await _userRepo.GetByRefreshTokenAsync(request.RefreshToken);
+        var hash = HashToken(request.RefreshToken);
+        var user = await _userRepo.GetByRefreshTokenHashAsync(hash);
         if (user == null)
             throw new SecurityTokenException("Invalid or expired refresh token");
+        if (IsUserBanned(user))
+            throw new UnauthorizedAccessException("User is banned");    
 
-        // 2. Generate new tokens
-        var newAccessToken = GenerateJwtToken(user);
-        var newRefreshToken = GenerateRefreshToken();
+       var newAccessToken = GenerateJwtToken(user);
 
-        // 3. Rotate refresh token
-        user.RefreshTokens!.Remove(request.RefreshToken);
-        user.RefreshTokens.Add(newRefreshToken);
+        user.RefreshTokenHashes!.Remove(hash);
+        var newRefresh = GenerateRefreshToken();
+        user.RefreshTokenHashes.Add(HashToken(newRefresh));
         await _userRepo.UpdateAsync(user);
 
-        return new TokenResponse(newAccessToken, newRefreshToken);
+
+        return new TokenResponse(newAccessToken, newRefresh);
     }
 
     private string GenerateJwtToken(Core.Models.User user)
@@ -205,51 +208,42 @@ public class AuthService
             };
             await _userRepo.AddAsync(user);
         }
+        if (IsUserBanned(user))
+    throw new UnauthorizedAccessException("User is banned");
 
         var accessToken = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
-
-        user.RefreshTokens ??= new List<string>();
-        user.RefreshTokens.Add(refreshToken);
+        user.RefreshTokenHashes ??= new();
+        user.RefreshTokenHashes.Add(HashToken(refreshToken));
         await _userRepo.UpdateAsync(user);
 
         return new TokenResponse(accessToken, refreshToken);
     }
 
     public async Task LogoutAsync(string userId, string? refreshToken = null)
+{
+    var user = await _userRepo.GetByIdAsync(userId);
+    if (user == null) throw new UnauthorizedAccessException("User not found");
+
+    user.RefreshTokenHashes ??= new List<string>();
+
+    if (!string.IsNullOrWhiteSpace(refreshToken))
     {
-        var user = await _userRepo.GetByIdAsync(userId);
-        if (user == null)
-            throw new UnauthorizedAccessException("User not found");
+        var hash = HashToken(refreshToken);
 
-        if (user.RefreshTokens == null || user.RefreshTokens.Count == 0)
-        {
-            if (!string.IsNullOrWhiteSpace(refreshToken))
-            {
-                throw new UnauthorizedAccessException("Refresh token not found or already invalidated");
-            }
-            return;
-        }
+        if (!user.RefreshTokenHashes.Contains(hash))
+            throw new UnauthorizedAccessException("Refresh token not found or already invalidated");
 
-        if (!string.IsNullOrWhiteSpace(refreshToken))
-        {
-
-            if (!user.RefreshTokens.Contains(refreshToken))
-            {
-                throw new UnauthorizedAccessException("Refresh token not found or already invalidated");
-            }
-            
-            // удалить конкретный refresh token
-            user.RefreshTokens.Remove(refreshToken);
-        }
-        else
-        {
-            // удалить все refresh tokens (выйти из всех устройств)
-            user.RefreshTokens.Clear();
-        }
-
-        await _userRepo.UpdateAsync(user);
+        user.RefreshTokenHashes.Remove(hash);
     }
+    else
+    {
+        user.RefreshTokenHashes.Clear();
+    }
+
+    await _userRepo.UpdateAsync(user);
+}
+
 
     public async Task ResendConfirmationEmailAsync(ResendConfirmationDto dto)
     {
@@ -305,6 +299,9 @@ public class AuthService
         if (user == null)
             throw new UnauthorizedAccessException("Invalid or expired 2FA session");
 
+        if (IsUserBanned(user))
+            throw new UnauthorizedAccessException("User is banned");
+
         if (user.TwoFactorCodeHash == null || user.TwoFactorCodeExpiresAt == null)
             throw new UnauthorizedAccessException("2FA code not generated");
 
@@ -323,9 +320,8 @@ public class AuthService
         // генерим новые токены как в LoginAsync / RefreshTokenAsync
         var accessToken = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
-
-        user.RefreshTokens ??= new List<string>();
-        user.RefreshTokens.Add(refreshToken);
+        user.RefreshTokenHashes ??= new();
+        user.RefreshTokenHashes.Add(HashToken(refreshToken));
 
         await _userRepo.UpdateAsync(user);
 
@@ -395,10 +391,18 @@ public class AuthService
         user.PasswordResetTokenExpires = null;
 
         // По-хорошему можно инвалидировать все refresh токены, чтобы выкинуть юзера изо всех устройств
-        user.RefreshTokens = new List<string>();
+        user.RefreshTokenHashes = new List<string>();
 
         await _userRepo.UpdateAsync(user);
     }
+    private static bool IsUserBanned(Core.Models.User u) =>
+    u.IsBanned && (u.BannedUntil == null || u.BannedUntil > DateTime.UtcNow);
+    private static string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(bytes);
+    }
+
 
 
 }
