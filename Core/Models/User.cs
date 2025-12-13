@@ -34,6 +34,11 @@ namespace Core.Models
         // === НОВОЕ: восстановление пароля ===
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpires { get; set; }
+
+        public DateTime? InvestorContactsSubscriptionExpiresAt { get; set; }
+
+        public string? Phone { get; set; }
+        public string? Telegram { get; set; }
          
     }
 }

@@ -1,6 +1,8 @@
 using Application.Mappers;
 using Core.Dtos.Investor;
 using Core.Interfaces;
+using Core.Models;
+
 
 namespace Application.Services
 {

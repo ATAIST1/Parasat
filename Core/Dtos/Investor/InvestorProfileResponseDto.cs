@@ -19,6 +19,9 @@ namespace Core.Dtos.Investor
         public string InvestmentRange { get; set; } = null!;
         public int DealCount { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? Telegram { get; set; }
 
         public static InvestorProfileResponseDto FromModel(InvestorProfile model)
         {

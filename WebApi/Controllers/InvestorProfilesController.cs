@@ -2,23 +2,24 @@ using Application.Services;
 using Core.Dtos.Investor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // Можешь вообще сделать весь контроллер публичным во время разработки:
-    [AllowAnonymous]
+    [AllowAnonymous] // временно публичный
     public class InvestorProfilesController : ControllerBase
     {
         private readonly InvestorProfileService _service;
+        private readonly InvestorContactsService _contactsService;
 
-        public InvestorProfilesController(InvestorProfileService service)
+        public InvestorProfilesController(InvestorProfileService service, InvestorContactsService contactsService)
         {
             _service = service;
+            _contactsService = contactsService;
         }
 
-        // GET: /api/InvestorProfiles
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,43 +27,78 @@ namespace WebApi.Controllers
             return Ok(items);
         }
 
-        // GET: /api/InvestorProfiles/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var item = await _service.GetByIdAsync(id);
-            if (item == null) return NotFound();
-            return Ok(item);
+            var investor = await _service.GetByIdAsync(id);
+            if (investor == null) return NotFound();
+            return Ok(investor);
         }
 
-        // POST: /api/InvestorProfiles
+        [HttpGet("{id}/contacts")]
+        [Authorize]
+        public async Task<IActionResult> GetContacts(string id)
+        {
+            var requesterUserId =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value
+                ?? User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(requesterUserId))
+                return Unauthorized();
+
+            try
+            {
+                var contacts = await _contactsService.GetContactsAsync(id, requesterUserId);
+                return Ok(contacts);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateInvestorProfileDto dto)
         {
-            // ВРЕМЕННО: без реального userId
-            var userId = "dev-user";
-
+            var userId = GetUserId();
             await _service.CreateAsync(dto, userId);
             return Ok(new { message = "Профиль инвестора создан" });
         }
 
-        // PUT: /api/InvestorProfiles/{id}
+
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateInvestorProfileDto dto)
         {
-          // тоже без userId-проверок на время разработки
-          var updated = await _service.UpdateAsync(id, dto, userId: "dev-user");
-          if (!updated) return NotFound();
-          return Ok(new { message = "Профиль инвестора обновлён" });
+            var userId = GetUserId();
+            var updated = await _service.UpdateAsync(id, dto, userId);
+            if (!updated) return NotFound();
+            return Ok(new { message = "Профиль инвестора обновлён" });
         }
 
-        // DELETE: /api/InvestorProfiles/{id}
+
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
-            var deleted = await _service.DeleteAsync(id, userId: "dev-user");
+            var userId = GetUserId();
+            var deleted = await _service.DeleteAsync(id, userId);
             if (!deleted) return NotFound();
             return Ok(new { message = "Профиль инвестора удалён" });
         }
+
+        private string GetUserId()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value
+                ?? throw new UnauthorizedAccessException("User id not found in token");
+        }
+
     }
 }
