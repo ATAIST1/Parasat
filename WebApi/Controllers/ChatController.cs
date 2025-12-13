@@ -24,20 +24,19 @@ public class ChatController : ControllerBase
         _chatService = chatService;
         _hub = hub;
     }
+    private string UserId => User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-    [HttpGet("partners")]
-    public async Task<ActionResult<List<UserDto>>> GetPartners()
+    [HttpPost("startup/{startupId}")]
+    public async Task<IActionResult> OpenFromStartup(string startupId)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var partners = await _chatService.GetChatPartnersAsync(userId);
-        return Ok(partners);
+        var conv = await _chatService.GetOrCreateForStartupAsync(UserId, startupId);
+        return Ok(new { conversationId = conv.Id });
     }
 
-    [HttpGet("{partnerId}")]
-    public async Task<ActionResult<List<MessageDto>>> GetChat(string partnerId)
+    [HttpGet("{conversationId}")]
+    public async Task<IActionResult> GetChat(string conversationId)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var messages = await _chatService.GetChatAsync(userId, partnerId);
+        var messages = await _chatService.GetConversationMessagesAsync(UserId, conversationId);
         return Ok(messages);
     }
 
@@ -46,18 +45,25 @@ public class ChatController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
-        // 💡 вся логика создания/сейва в ChatService
-        var message = await _chatService.SendMessageAsync(userId, partnerId, dto.Text);
+        // сервис уже возвращает MessageDto с именами
+        var senderDto = await _chatService.SendMessageAsync(userId, partnerId, dto.Text);
 
-        // маппим под каждого юзера, чтобы IsMine был корректный
-        var senderDto   = message.ToDto(userId);
-        var receiverDto = message.ToDto(partnerId);
+        // для получателя то же сообщение, но IsMine = false
+        var receiverDto = new MessageDto
+        {
+            Id = senderDto.Id,
+            Text = senderDto.Text,
+            SentAt = senderDto.SentAt,
+            IsMine = false,
+            IsRead = senderDto.IsRead,
+            From = senderDto.From,
+            To = senderDto.To
+        };
 
-        // рассылаем всем коннектам обоих пользователей
         await _hub.Clients.Group(userId).SendAsync("ReceiveMessage", senderDto);
         await _hub.Clients.Group(partnerId).SendAsync("ReceiveMessage", receiverDto);
 
-        // можно вернуть senderDto, если фронту нужно сразу
         return Ok(senderDto);
     }
+
 }

@@ -9,7 +9,6 @@ namespace Application.Mappers
         {
             return new Startup
             {
-                OwnerId = dto.OwnerId,
                 ProjectName = dto.ProjectName,
                 Title = dto.Title,
                 ShortPitch = dto.ShortPitch,

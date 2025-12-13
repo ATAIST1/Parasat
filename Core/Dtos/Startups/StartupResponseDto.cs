@@ -5,7 +5,6 @@ namespace Core.Dtos.Startups
     public class StartupResponseDto
     {
         public string Id { get; set; } = null!;
-        public string OwnerId { get; set; } = null!;
         public string ProjectName { get; set; } = null!;
         public string Title { get; set; } = null!;
         public string ShortPitch { get; set; } = null!;
@@ -27,8 +26,8 @@ namespace Core.Dtos.Startups
         public double? GrowthPercentage { get; set; }
         public int? TeamMembers { get; set; }
 
-        public string? PitchDeckKey { get; set; }
-        public string? FinancialModelKey { get; set; }
+        public bool HasPitchDeck { get; set; }
+        public bool HasFinancialModel { get; set; }
         public List<string> ExternalLinks { get; set; } = new();
 
         public string Status { get; set; } = null!;
@@ -39,7 +38,6 @@ namespace Core.Dtos.Startups
             return new StartupResponseDto
             {
                 Id = model.Id,
-                OwnerId = model.OwnerId,
                 ProjectName = model.ProjectName,
                 Title = model.Title,
                 ShortPitch = model.ShortPitch,
@@ -58,8 +56,8 @@ namespace Core.Dtos.Startups
                 Revenue = model.Revenue,
                 DAU = model.DAU,
                 GrowthPercentage = model.GrowthPercentage,
-                PitchDeckKey = model.PitchDeckKey,
-                FinancialModelKey = model.FinancialModelKey,
+                HasPitchDeck = !string.IsNullOrEmpty(model.PitchDeckKey),
+                HasFinancialModel = !string.IsNullOrEmpty(model.FinancialModelKey),
                 ExternalLinks = model.ExternalLinks,
                 Status = model.Status,
                 CreatedAt = model.CreatedAt

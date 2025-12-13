@@ -17,7 +17,10 @@ public class UserRepository : IUserRepository
         => await _users.Find(x => x.Email == email).FirstOrDefaultAsync();
 
     public async Task<User?> GetByIdAsync(string id)
-        => await _users.Find(x => x.Id == id).FirstOrDefaultAsync();
+    => await _users.Find(x => x.Id == id).FirstOrDefaultAsync();
+    
+    public async Task<List<User>> GetByIdsAsync(List<string> ids)
+        => await _users.Find(u => ids.Contains(u.Id)).ToListAsync();
 
     public async Task AddAsync(User user)
         => await _users.InsertOneAsync(user);

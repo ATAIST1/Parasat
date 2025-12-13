@@ -46,4 +46,9 @@ public class ChatRepository : IChatRepository
 
         return partners.Distinct().ToList();
     }
+    public async Task<List<Message>> GetByConversationAsync(string conversationId)
+    => await _messages.Find(m => m.ConversationId == conversationId)
+        .SortBy(m => m.SentAt)
+        .ToListAsync();
+
 }

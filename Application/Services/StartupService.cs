@@ -38,6 +38,7 @@ namespace Application.Services
         /// Создание стартапа + опциональная загрузка pitch deck и financial model в сторидж.
         /// </summary>
         public async Task CreateAsync(
+            string ownerId,
             CreateStartupDto dto,
             Stream? pitchDeckStream = null,
             string? pitchDeckContentType = null,
@@ -45,8 +46,8 @@ namespace Application.Services
             string? financialModelContentType = null,
             CancellationToken ct = default)
         {
-
             var model = StartupMapper.ToModel(dto);
+            model.OwnerId = ownerId;
 
             if (dto.Technologies != null)
                 model.Technologies = dto.Technologies;
@@ -99,6 +100,7 @@ namespace Application.Services
         /// Обновление стартапа. Можно заменить pitch deck и/или financial model.
         /// </summary>
         public async Task<bool> UpdateAsync(
+            string currentUserId,
             string id,
             UpdateStartupDto dto,
             Stream? newPitchDeckStream = null,
@@ -109,6 +111,9 @@ namespace Application.Services
         {
             var model = await _repo.GetByIdAsync(id);
             if (model == null) return false;
+
+            if (model.OwnerId != currentUserId)
+                throw new UnauthorizedAccessException("Not owner");
 
             StartupMapper.UpdateModel(model, dto);
 
@@ -160,12 +165,24 @@ namespace Application.Services
             return await _repo.UpdateAsync(model);
         }
 
-        public Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(string currentUserId, string id)
         {
-            // по уму: достать стартап, удалить PitchDeckKey/FinancialModelKey из S3
-            return _repo.DeleteAsync(id);
-        }
+            var model = await _repo.GetByIdAsync(id);
+            if (model == null) return false;
 
+            if (model.OwnerId != currentUserId)
+                throw new UnauthorizedAccessException("Not owner");
+
+            // (по уму удалить файлы из S3)
+            if (!string.IsNullOrEmpty(model.PitchDeckKey))
+                await _fileStorage.DeleteAsync(model.PitchDeckKey);
+
+            if (!string.IsNullOrEmpty(model.FinancialModelKey))
+                await _fileStorage.DeleteAsync(model.FinancialModelKey);
+
+            return await _repo.DeleteAsync(id);
+        }
+        
         public async Task<string?> GetPitchDeckUrlAsync(string id, CancellationToken ct = default)
         {
             var startup = await _repo.GetByIdAsync(id);

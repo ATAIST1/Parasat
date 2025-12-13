@@ -10,32 +10,29 @@ public class MessageService
 {
     private readonly IChatRepository _chatRepo;
     private readonly IUserRepository _userRepo;
+    private readonly IStartupRepository _startupRepo;
+    private readonly IConversationRepository _conversationRepo;
 
-    public MessageService(IChatRepository chatRepo, IUserRepository userRepo)
+    public MessageService(IChatRepository chatRepo, IUserRepository userRepo, IStartupRepository startupRepo, IConversationRepository conversationRepo)
     {
         _chatRepo = chatRepo;
         _userRepo = userRepo;
+        _startupRepo = startupRepo;
+        _conversationRepo = conversationRepo;
     }
 
     public async Task<List<MessageDto>> GetChatAsync(string currentUserId, string partnerId)
     {
         var messages = await _chatRepo.GetChatAsync(currentUserId, partnerId);
-        return messages.ToDtoList(currentUserId);
+
+        var ids = messages.SelectMany(m => new[] { m.FromId, m.ToId }).Distinct().ToList();
+        var users = await _userRepo.GetByIdsAsync(ids);
+
+        var names = users.ToDictionary(u => u.Id, u => u.Name);
+        return messages.ToDtoList(currentUserId, names);
     }
 
-    public async Task<Message> SendMessageAsync(string fromId, string toId, string text)
-    {
-        var message = new Message
-        {
-            FromId = fromId,
-            ToId = toId,
-            Text = text,
-            SentAt = DateTime.UtcNow
-        };
 
-        await _chatRepo.SendMessageAsync(message);
-        return message;
-    }
 
     public async Task<List<UserDto>> GetChatPartnersAsync(string userId)
     {
@@ -51,4 +48,57 @@ public class MessageService
 
         return partners;
     }
+    public async Task<Conversation> GetOrCreateForStartupAsync(string currentUserId, string startupId)
+    {
+        var startup = await _startupRepo.GetByIdAsync(startupId)
+            ?? throw new Exception("Startup not found");
+
+        var ownerId = startup.OwnerId;
+
+        // запрет писать самому себе
+        if (ownerId == currentUserId)
+            throw new Exception("Cannot chat with yourself");
+
+        // ищем существующий диалог именно по этому стартапу + этим двум людям
+        var existing = await _conversationRepo.GetByStartupAndUsersAsync(startupId, ownerId, currentUserId);
+        if (existing != null) return existing;
+
+        var c = new Conversation
+        {
+            StartupId = startupId,
+            OwnerId = ownerId,
+            InitiatorId = currentUserId,
+            ParticipantIds = new List<string> { ownerId, currentUserId }
+        };
+
+        await _conversationRepo.CreateAsync(c);
+        return c;
+    }
+    public async Task<MessageDto> SendMessageAsync(string fromId, string toId, string text)
+    {
+        var message = new Message { FromId = fromId, ToId = toId, Text = text, SentAt = DateTime.UtcNow };
+        await _chatRepo.SendMessageAsync(message);
+
+        var users = await _userRepo.GetByIdsAsync(new List<string> { fromId, toId });
+        var names = users.ToDictionary(u => u.Id, u => u.Name);
+
+        return message.ToDto(fromId, names);
+    }
+
+    public async Task<List<MessageDto>> GetConversationMessagesAsync(string userId, string conversationId)
+    {
+        var conv = await _conversationRepo.GetByIdAsync(conversationId) ?? throw new Exception("Conversation not found");
+        if (!conv.ParticipantIds.Contains(userId)) throw new UnauthorizedAccessException("Not a participant");
+
+        var messages = await _chatRepo.GetByConversationAsync(conversationId);
+        var ids = messages.SelectMany(m => new[] { m.FromId, m.ToId }).Distinct().ToList();
+        var users = await _userRepo.GetByIdsAsync(ids);
+        var names = users.ToDictionary(u => u.Id, u => u.Name);
+
+        return messages.ToDtoList(userId, names);
+
+    }
+
+
+
 }

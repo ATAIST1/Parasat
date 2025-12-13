@@ -5,9 +5,6 @@ namespace Core.Dtos.Startups
     public class CreateStartupDto
     {
         [Required]
-        public string OwnerId { get; set; } = default!;
-
-        [Required]
         public string ProjectName { get; set; } = default!;
 
         [Required]

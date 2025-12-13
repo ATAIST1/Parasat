@@ -68,6 +68,7 @@ builder.Services.AddScoped<IInvestorProfileRepository, InvestorProfileRepository
 builder.Services.AddScoped<InvestorProfileService>();
 builder.Services.AddScoped<InvestorContactsService>();
 builder.Services.AddScoped<SubscriptionService>();
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
