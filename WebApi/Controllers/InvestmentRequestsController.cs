@@ -1,147 +1,131 @@
 using Application.Services;
 using Core.Dtos.Investment;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-namespace WebApi.Controllers
+namespace WebApi.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class InvestmentRequestsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class InvestmentRequestsController : ControllerBase
+    private readonly InvestmentRequestService _service;
+
+    public InvestmentRequestsController(InvestmentRequestService service)
     {
-        private readonly InvestmentRequestService _service;
-        private readonly IHttpContextAccessor _httpContext;
+        _service = service;
+    }
 
-        public InvestmentRequestsController(InvestmentRequestService service, IHttpContextAccessor httpContext)
+    private string CurrentUserId =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new UnauthorizedAccessException("User is not authenticated");
+
+    // Публичная лента — только Published
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<ActionResult<List<InvestmentRequestResponseDto>>> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] string? industry,
+        [FromQuery] string? profitRange,
+        [FromQuery] string? equityRange)
+    {
+        var requests = await _service.GetAllPublishedAsync(search, industry, profitRange, equityRange);
+        return Ok(requests);
+    }
+
+    // Мои заявки (и Draft и Published)
+    [Authorize]
+    [HttpGet("my")]
+    public async Task<ActionResult<List<InvestmentRequestResponseDto>>> GetMy()
+    {
+        var requests = await _service.GetMyAsync(CurrentUserId);
+        return Ok(requests);
+    }
+
+    // Деталка: published видят все, draft — только владелец
+    [AllowAnonymous]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<InvestmentRequestResponseDto>> GetById(string id)
+    {
+        var userIdOrNull = User.Identity?.IsAuthenticated == true
+            ? User.FindFirstValue(ClaimTypes.NameIdentifier)
+            : null;
+
+        var dto = await _service.GetByIdAsync(id, userIdOrNull);
+        return dto == null ? NotFound() : Ok(dto);
+    }
+
+    // Создание — только авторизованный
+    [Authorize]
+    [HttpPost]
+    [RequestSizeLimit(100_000_000)]
+    public async Task<IActionResult> Create(
+        [FromForm] CreateInvestmentRequestDto dto,
+        IFormFile? investmentMemorandum,
+        IFormFile? financialReport,
+        IFormFile? businessPlan,
+        IFormFile? presentation,
+        List<IFormFile>? otherDocuments)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        Stream? memoStream = investmentMemorandum is { Length: > 0 } ? investmentMemorandum.OpenReadStream() : null;
+        string? memoContentType = memoStream != null ? investmentMemorandum!.ContentType : null;
+
+        Stream? finStream = financialReport is { Length: > 0 } ? financialReport.OpenReadStream() : null;
+        string? finContentType = finStream != null ? financialReport!.ContentType : null;
+
+        Stream? bpStream = businessPlan is { Length: > 0 } ? businessPlan.OpenReadStream() : null;
+        string? bpContentType = bpStream != null ? businessPlan!.ContentType : null;
+
+        Stream? presStream = presentation is { Length: > 0 } ? presentation.OpenReadStream() : null;
+        string? presContentType = presStream != null ? presentation!.ContentType : null;
+
+        var otherDocs = new List<(Stream Stream, string ContentType, string FileName)>();
+        if (otherDocuments != null)
         {
-            _service = service;
-            _httpContext = httpContext;
+            foreach (var f in otherDocuments.Where(x => x is { Length: > 0 }))
+                otherDocs.Add((f.OpenReadStream(), f.ContentType, f.FileName));
         }
 
-        private string CurrentUserId =>
-            _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? "test-user-123";
+        await _service.CreateAsync(
+            dto,
+            CurrentUserId,
+            memoStream, memoContentType,
+            finStream, finContentType,
+            bpStream, bpContentType,
+            presStream, presContentType,
+            otherDocs);
 
-        // ----- GET /api/InvestmentRequests -----
-        [HttpGet]
-        public async Task<ActionResult<List<InvestmentRequestResponseDto>>> GetAll(
-            [FromQuery] string? search,
-            [FromQuery] string? industry,
-            [FromQuery] string? profitRange,
-            [FromQuery] string? equityRange)
-        {
-            var requests = await _service.GetAllAsync(search, industry, profitRange, equityRange);
-            return Ok(requests);
-        }
+        return Ok(new { message = "Investment request created (draft)" });
+    }
 
-        // ----- GET /api/InvestmentRequests/{id} -----
-        [HttpGet("{id}")]
-        public async Task<ActionResult<InvestmentRequestResponseDto>> GetById(string id)
-        {
-            var dto = await _service.GetByIdAsync(id);
-            if (dto == null) return NotFound();
-            return Ok(dto);
-        }
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] UpdateInvestmentRequestDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // ----- POST /api/InvestmentRequests -----
-        [HttpPost]
-        [RequestSizeLimit(100_000_000)]
-        public async Task<IActionResult> Create(
-            [FromForm] CreateInvestmentRequestDto dto,
-            IFormFile? investmentMemorandum,
-            IFormFile? financialReport,
-            IFormFile? businessPlan,
-            IFormFile? presentation,
-            List<IFormFile>? otherDocuments)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+        var success = await _service.UpdateAsync(id, dto, CurrentUserId);
+        return success ? NoContent() : NotFound();
+    }
 
-            // IFormFile -> Stream + ContentType + FileName
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var success = await _service.DeleteAsync(id, CurrentUserId);
+        return success ? NoContent() : NotFound();
+    }
 
-            Stream? memoStream = null;
-            string? memoContentType = null;
-            if (investmentMemorandum is { Length: > 0 })
-            {
-                memoStream = investmentMemorandum.OpenReadStream();
-                memoContentType = investmentMemorandum.ContentType;
-            }
-
-            Stream? finStream = null;
-            string? finContentType = null;
-            if (financialReport is { Length: > 0 })
-            {
-                finStream = financialReport.OpenReadStream();
-                finContentType = financialReport.ContentType;
-            }
-
-            Stream? bpStream = null;
-            string? bpContentType = null;
-            if (businessPlan is { Length: > 0 })
-            {
-                bpStream = businessPlan.OpenReadStream();
-                bpContentType = businessPlan.ContentType;
-            }
-
-            Stream? presStream = null;
-            string? presContentType = null;
-            if (presentation is { Length: > 0 })
-            {
-                presStream = presentation.OpenReadStream();
-                presContentType = presentation.ContentType;
-            }
-
-            var otherDocs = new List<(Stream Stream, string ContentType, string FileName)>();
-            if (otherDocuments != null && otherDocuments.Count > 0)
-            {
-                foreach (var file in otherDocuments.Where(f => f is { Length: > 0 }))
-                {
-                    otherDocs.Add((file.OpenReadStream(), file.ContentType, file.FileName));
-                }
-            }
-
-            await _service.CreateAsync(
-                dto,
-                CurrentUserId,
-                memoStream, memoContentType,
-                finStream, finContentType,
-                bpStream, bpContentType,
-                presStream, presContentType,
-                otherDocs);
-
-            return Ok(new { message = "Запрос на инвестиции создан (черновик)" });
-        }
-
-        // ----- PUT /api/InvestmentRequests/{id} -----
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateInvestmentRequestDto dto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var success = await _service.UpdateAsync(id, dto, CurrentUserId);
-            return success ? NoContent() : NotFound();
-        }
-
-        // ----- DELETE /api/InvestmentRequests/{id} -----
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var success = await _service.DeleteAsync(id, CurrentUserId);
-            return success ? NoContent() : NotFound();
-        }
-
-        // ----- POST /api/InvestmentRequests/{id}/publish -----
-        [HttpPost("{id}/publish")]
-        public async Task<IActionResult> Publish(string id)
-        {
-            var success = await _service.PublishAsync(id, CurrentUserId);
-            return success
-                ? Ok(new { message = "Запрос опубликован и виден инвесторам!" })
-                : BadRequest("Нельзя опубликовать: либо не ваш, либо уже опубликован");
-        }
+    [Authorize]
+    [HttpPost("{id}/publish")]
+    public async Task<IActionResult> Publish(string id)
+    {
+        var success = await _service.PublishAsync(id, CurrentUserId);
+        return success
+            ? Ok(new { message = "Published" })
+            : BadRequest("Cannot publish (not owner or not draft)");
     }
 }

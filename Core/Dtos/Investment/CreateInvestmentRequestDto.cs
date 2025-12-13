@@ -4,6 +4,7 @@ namespace Core.Dtos.Investment
 {
     public class CreateInvestmentRequestDto
     {
+        [Required] 
         public string StartupId { get; set; } = null!;
         [Required] public string Title { get; set; } = null!;
         [Required] public string Industry { get; set; } = null!;
