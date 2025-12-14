@@ -4,18 +4,18 @@
   --font-size: 16px;
 
   /* === PARASAT palette === */
-  --color_a: #081a5f;   /* фон */
+  --color_a: #081a5f;   /* темный фон */
   --color_b: #0967D6;   /* акцентный синий */
   --color_c: #5f678c;   /* серо-синий */
   --color_d: #9fa5c1;   /* светло-серый */
-  --color_e: #e2e6f3;   /* почти белый-серый */
+  --color_e: #e2e6f3;   /* светлый голубовато-серый */
   --color_f: #ffffff;   /* белый */
   --color_g: #005CFA;   /* ярко-синий акцент */
 
   /* БАЗОВЫЕ ТОКЕНЫ */
-  --background: var(--color_a);       /* как и было */
-  --foreground: #111827;             /* ЧЁТКИЙ ТЁМНЫЙ ТЕКСТ */
-
+  --background: var(--color_a);       /* тёмно-синий фон под контентом */
+  --foreground: #111827;              /* ЧЁРНЫЙ/очень тёмный текст */
+  --background-hover: #0b2375; 
   --card: #ffffff;
   --card-foreground: #111827;
   --popover: #ffffff;
@@ -24,12 +24,12 @@
   --primary: var(--color_g);
   --primary-foreground: #ffffff;
 
-  /* убираем весь оранжевый */
-  --secondary: #e2e6f3;              /* светло-синий фон для табов */
-  --secondary-foreground: #081a5f;   /* тёмно-синий текст */
+  /* вместо бежевого – холодный светлый фон */
+  --secondary: #e2e6f3;
+  --secondary-foreground: #081a5f;
 
-  --muted: #e2e6f3;                  /* фон TabsList по умолчанию */
-  --muted-foreground: #111827;       /* НОРМАЛЬНЫЙ ЧЁРНЫЙ ТЕКСТ */
+  --muted: #e2e6f3;                   /* фон фильтров / табов */
+  --muted-foreground: #111827;        /* текст НЕ серый, а тёмный */
 
   --accent: #e2e6f3;
   --accent-foreground: #081a5f;
@@ -45,11 +45,12 @@
   --font-weight-normal: 400;
   --ring: var(--color_g);
   --chart-1: var(--color_g);
-  --chart-2: #f97316;
-  --chart-3: #eab308;
-  --chart-4: #84cc16;
-  --chart-5: #06b6d4;
+  --chart-2: #2563eb;
+  --chart-3: #0ea5e9;
+  --chart-4: #22c55e;
+  --chart-5: #a855f7;
   --radius: 1rem;
+
   --sidebar: #ffffff;
   --sidebar-foreground: #111827;
   --sidebar-primary: var(--color_g);

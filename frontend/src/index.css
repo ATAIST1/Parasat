@@ -4152,13 +4152,13 @@
   --card-foreground: #1a1a1a;
   --popover: #fff;
   --popover-foreground: #1a1a1a;
-  --primary: #f59e0b;
+  --primary: #e2e6f3;;
   --primary-foreground: #fff;
   --secondary: #fef3c7;
   --secondary-foreground: #92400e;
   --muted: #fef9e7;
   --muted-foreground: #6b7280;
-  --accent: #fed7aa;
+  --accent: #e2e6f3;
   --accent-foreground: #9a3412;
   --destructive: #ef4444;
   --destructive-foreground: #fff;
@@ -4556,7 +4556,6 @@ html {
 }
 
 :root {
-  /* Parasat палитра */
   --color_a: #081a5f;   /* главный фон */
   --color_b: #0967D6;   /* акцентный синий */
   --color_c: #5f678c;   /* серо-синий */
@@ -4565,7 +4564,6 @@ html {
   --color_f: #ffffff;   /* белый */
   --color_g: #005CFA;   /* ярко-синий акцент */
 
-  /* Перекрашиваем tailwind-тему на наш фон */
   --background: var(--color_a);
   --foreground: var(--color_e);
 

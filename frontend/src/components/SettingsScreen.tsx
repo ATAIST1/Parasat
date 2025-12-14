@@ -40,7 +40,7 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
       </div>
 
       <div className="p-4 space-y-6">
-        <div className="space-y-4">
+        {/*<div className="space-y-4">
           <div className="flex items-center gap-3">
             <Bell className="w-5 h-5 text-gray-600" />
             <h2 className="text-gray-900">Уведомления</h2>
@@ -76,7 +76,7 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
           </div>
         </div>
 
-        <Separator />
+        <Separator />*/}
 
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
 
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-gray-600" />
+            <Clock className="w-5 h-5 text-gray-900" />
             <h2 className="text-gray-900">Часовой пояс</h2>
           </div>
           
@@ -171,5 +171,6 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
         </div>
       </div>
     </div>
+    
   );
 }
