@@ -12,7 +12,6 @@ public interface IInvestmentRequestRepository
         InvestmentRequestStatus? status = null);
 
     Task<InvestmentRequest?> GetByIdAsync(string id);
-    Task<InvestmentRequest?> GetByStartupIdAsync(string startupId);
 
     Task AddAsync(InvestmentRequest request);
     Task<bool> UpdateAsync(InvestmentRequest request);

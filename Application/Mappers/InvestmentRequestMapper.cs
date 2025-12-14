@@ -10,7 +10,6 @@ namespace Application.Mappers
             return new InvestmentRequest
             {
                 UserId = userId,
-                StartupId = dto.StartupId,
                 Title = dto.Title,
                 Industry = dto.Industry,
                 City = dto.City,

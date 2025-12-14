@@ -5,7 +5,6 @@ namespace Core.Dtos.Investment
     {
         public string Id { get; set; } = null!;
         public string UserId { get; set; } = null!;
-        public string StartupId { get; set; } = null!;
         public string Title { get; set; } = null!;
         public string Industry { get; set; } = null!;
         public string City { get; set; } = null!;
@@ -33,7 +32,6 @@ namespace Core.Dtos.Investment
             {
                 Id = model.Id ?? "",
                 UserId = model.UserId,
-                StartupId = model.StartupId,
                 Title = model.Title,
                 Industry = model.Industry,
                 City = model.City,

@@ -12,9 +12,6 @@ public class InvestmentRequest
     [BsonRepresentation(BsonType.ObjectId)]
     public string UserId { get; set; } = null!;
 
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string StartupId { get; set; } = null!;
-
     public string Title { get; set; } = null!;
     public string Industry { get; set; } = null!;
     public string City { get; set; } = null!;
