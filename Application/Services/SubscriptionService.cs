@@ -33,6 +33,8 @@ public class SubscriptionService
     {
         if (dto.Months <= 0)
             throw new Exception("Months must be > 0");
+        if (dto.Months <= 0 || dto.Months > 24)
+            throw new Exception("Months must be between 1 and 24");
 
         var user = await _userRepo.GetByIdAsync(userId)
                    ?? throw new Exception("User not found");
