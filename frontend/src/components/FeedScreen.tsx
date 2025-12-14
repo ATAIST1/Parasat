@@ -13,6 +13,7 @@ import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import { startupService } from '../services/startupService';
 import { developerService } from '../services/developerService';
 import { investorService } from '../services/investorService';
+import { investmentRequestService } from '../services/investmentRequestService';
 import { bookmarkService, BookmarkItemType } from '../services/bookmarkService';
 import type { InvestorProfileResponseDto } from '../types/investor';
 
@@ -268,7 +269,10 @@ const [isLoadingDevelopers, setIsLoadingDevelopers] = useState<boolean>(true);
 // Инвесторы с бэка
 const [investors, setInvestors] = useState<any[]>([]);
 const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
-  
+
+const [businesses, setBusinesses] = useState<any[]>([]);
+const [isLoadingBusinesses, setIsLoadingBusinesses] = useState<boolean>(true);
+
   // Search and filter states
   const [startupSearch, setStartupSearch] = useState('');
   const [startupStage, setStartupStage] = useState('all');
@@ -412,10 +416,59 @@ const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
     }
   };
 
+    const loadBusinesses = async () => {
+      try {
+        const data = await investmentRequestService.getAll();
 
-    loadStartups();
-    loadDevelopers();
-    loadInvestors();
+        const mapped = (data || []).map((r: any) => {
+          const id = r.id || r._id || r.Id;
+
+          return {
+            id,
+            name: r.title || r.Title || 'Без названия',
+            industry: r.industry || r.Industry || '',
+            location: r.city || r.City || '',
+            description: r.description || r.Description || '',
+            revenue: String(r.revenueLastYear ?? r.RevenueLastYear ?? '0'),
+            profit: String(r.profitLastYear ?? r.ProfitLastYear ?? '0'),
+            employees: r.numberOfEmployees ?? r.NumberOfEmployees ?? 0,
+            founded: r.yearOfFoundation ?? r.YearOfFoundation ?? '',
+            investmentNeeded: String(r.investmentNeeded ?? r.InvestmentNeeded ?? '0'),
+            investmentGoal: r.investmentPurpose || r.InvestmentPurpose || '',
+            equity: `${r.equityOfferedPercent ?? r.EquityOfferedPercent ?? ''}%`,
+            verified: true, // если на бэке появится флаг — подставишь
+            createdAt: r.createdAt || r.CreatedAt,
+          };
+        });
+
+        mapped.sort((a: any, b: any) => {
+          if (!a.createdAt || !b.createdAt) return 0;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+
+        setBusinesses(mapped);
+      } catch (e: any) {
+        console.error('Ошибка загрузки business/investment requests:', e);
+        toast('Не удалось загрузить бизнесы');
+      } finally {
+        setIsLoadingBusinesses(false);
+      }
+    };
+
+    const loadAllData = async () => {
+      try {
+        await Promise.all([
+          loadStartups(),
+          loadDevelopers(),
+          loadInvestors(),
+          loadBusinesses()
+        ]);
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+      }
+    };
+
+    loadAllData();
   }, []);
 
   const handleBookmarkToggle = async (itemId: string, itemType: BookmarkItemType) => {
@@ -508,27 +561,31 @@ const filteredDevelopers = developers.filter((developer) => {
 });
 
 
-  const filteredBusinesses = mockBusinesses.filter((business) => {
+  const filteredBusinesses = businesses.filter((business) => {
     const query = businessSearch.toLowerCase();
+
     const matchesSearch =
-      !query ||
-      business.name.toLowerCase().includes(query) ||
-      business.industry.toLowerCase().includes(query) ||
-      business.location.toLowerCase().includes(query) ||
-      business.description.toLowerCase().includes(query) ||
-      business.investmentGoal.toLowerCase().includes(query);
+        !query ||
+        business.name.toLowerCase().includes(query) ||
+        business.industry.toLowerCase().includes(query) ||
+        business.location.toLowerCase().includes(query) ||
+        business.description.toLowerCase().includes(query) ||
+        (business.investmentGoal || '').toLowerCase().includes(query);
+
     const matchesIndustry =
-      businessIndustry === 'all' || business.industry === businessIndustry;
-    const revenueNum = parseInt(business.revenue.replace(/,/g, ''));
+        businessIndustry === 'all' || business.industry === businessIndustry;
+
+    const revenueNum = parseInt(String(business.revenue || '0').replace(/[^\d]/g, '') || '0', 10);
+
     const matchesRevenue =
-      businessRevenue === 'all' ||
-      (businessRevenue === 'small' && revenueNum < 100000000) ||
-      (businessRevenue === 'medium' &&
-        revenueNum >= 100000000 &&
-        revenueNum < 300000000) ||
-      (businessRevenue === 'large' && revenueNum >= 300000000);
+        businessRevenue === 'all' ||
+        (businessRevenue === 'small' && revenueNum < 100000000) ||
+        (businessRevenue === 'medium' && revenueNum >= 100000000 && revenueNum < 300000000) ||
+        (businessRevenue === 'large' && revenueNum >= 300000000);
+
     return matchesSearch && matchesIndustry && matchesRevenue;
   });
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -772,22 +829,25 @@ const filteredDevelopers = developers.filter((developer) => {
             </div>
           </div>
           <div className="p-4 space-y-4">
-            {filteredBusinesses.length > 0 ? (
-              filteredBusinesses.map((business) => (
-                <BusinessCard
-                  key={business.id}
-                  business={business}
-                  isSaved={savedBookmarks.has(business.id) && savedBookmarks.get(business.id) === BookmarkItemType.Business}
-                  onSave={() => handleBookmarkToggle(business.id, BookmarkItemType.Business)}
-                  onClick={onProjectClick}
-                />
-              ))
+            {isLoadingBusinesses ? (
+                <div className="text-center py-12 text-gray-500">Загрузка бизнесов…</div>
+            ) : filteredBusinesses.length > 0 ? (
+                filteredBusinesses.map((business) => (
+                    <BusinessCard
+                        key={business.id}
+                        business={business}
+                        isSaved={savedBookmarks.has(business.id) && savedBookmarks.get(business.id) === BookmarkItemType.Business}
+                        onSave={() => handleBookmarkToggle(business.id, BookmarkItemType.Business)}
+                        onClick={onProjectClick}
+                    />
+                ))
             ) : (
-              <div className="text-center py-12 text-gray-500">
-                <p>Ничего не найдено</p>
-                <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
-              </div>
+                <div className="text-center py-12 text-gray-500">
+                  <p>Ничего не найдено</p>
+                  <p className="text-sm mt-1">Попробуйте изменить фильтры</p>
+                </div>
             )}
+
           </div>
         </TabsContent>
       </Tabs>

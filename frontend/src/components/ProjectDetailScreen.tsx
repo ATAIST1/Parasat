@@ -15,6 +15,8 @@ import {
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
 import { startupService } from '../services/startupService';
+import { investmentRequestService } from '../services/investmentRequestService';
+
 
 interface ProjectDetailScreenProps {
   projectId: string;
@@ -64,10 +66,6 @@ const mockProject = {
 };
 */
 
-const mockBusinesses: any = {
-  biz1: { /* ... */ },
-  biz2: { /* ... */ },
-};
 
 export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: ProjectDetailScreenProps) {
   const [isSaved, setIsSaved] = useState(false);
@@ -75,29 +73,48 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
   const [interestMessage, setInterestMessage] = useState('');
   const [shareMandate, setShareMandate] = useState(false);
 
-  const isBusiness = projectId.startsWith('biz');
-  const currentBusiness = isBusiness ? mockBusinesses[projectId] : null;
-
   const [project, setProject] = useState<any | null>(null);
-  const [isLoadingProject, setIsLoadingProject] = useState<boolean>(!isBusiness);
+  const [business, setBusiness] = useState<any | null>(null);
+  const [isLoadingProject, setIsLoadingProject] = useState<boolean>(true);
+
 
   useEffect(() => {
-    if (isBusiness) return;
+    let alive = true;
 
-    const loadProject = async () => {
+    const load = async () => {
+      setIsLoadingProject(true);
+      setProject(null);
+      setBusiness(null);
+
       try {
-        const data = await startupService.getById(projectId);
-        setProject(data);
+        // 1) пробуем стартап
+        try {
+          const data = await startupService.getById(projectId);
+          if (!alive) return;
+          setProject(data);
+          return; // ок, это стартап
+        } catch (e) {
+          // не стартап — идём дальше
+        }
+
+        // 2) пробуем investment request (business)
+        const data = await investmentRequestService.getById(projectId);
+        if (!alive) return;
+        setBusiness(data);
       } catch (e) {
         console.error(e);
-        toast('Не удалось загрузить проект');
+        toast('Не удалось загрузить');
       } finally {
-        setIsLoadingProject(false);
+        if (alive) setIsLoadingProject(false);
       }
     };
 
-    loadProject();
-  }, [projectId, isBusiness]);
+    load();
+
+    return () => {
+      alive = false;
+    };
+  }, [projectId]);
 
   const formatNumber = (num: any) => {
     if (num === null || num === undefined) return '0';
@@ -147,19 +164,159 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
   };
 
 
-  if (isBusiness && currentBusiness) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-      </div>
-    );
-  }
-
-
   if (isLoadingProject) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500">Загрузка проекта…</p>
       </div>
+    );
+  }
+
+  if (business) {
+    const title = business.title || business.Title;
+    const industry = business.industry || business.Industry;
+    const city = business.city || business.City;
+    const description = business.description || business.Description;
+
+    const revenue = business.revenueLastYear ?? business.RevenueLastYear ?? 0;
+    const profit = business.profitLastYear ?? business.ProfitLastYear ?? 0;
+    const employees = business.numberOfEmployees ?? business.NumberOfEmployees ?? 0;
+    const founded = business.yearOfFoundation ?? business.YearOfFoundation ?? '';
+    const investmentNeeded = business.investmentNeeded ?? business.InvestmentNeeded ?? 0;
+    const investmentPurpose = business.investmentPurpose || business.InvestmentPurpose || '';
+    const equity = business.equityOfferedPercent ?? business.EquityOfferedPercent ?? 0;
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 z-10">
+            <div className="flex items-center justify-between">
+              <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              <div className="flex gap-2">
+                <button onClick={handleSave} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-blue-600 text-blue-600' : 'text-gray-600'}`} />
+                </button>
+                <button onClick={() => toast('Ссылка скопирована')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <Share2 className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 space-y-4 pb-24">
+            <div className="bg-white rounded-2xl p-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <Building2 className="w-7 h-7 text-white" />
+                </div>
+
+                <div className="flex-1">
+                  <h1 className="text-gray-900">{title}</h1>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {industry && <Badge variant="outline">{industry}</Badge>}
+                    {city && <Badge variant="outline">{city}</Badge>}
+                    <Badge variant="secondary">Бизнес</Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 space-y-3">
+              <h2 className="text-gray-900">Описание</h2>
+              <p className="text-gray-600 leading-relaxed">{description}</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 space-y-4">
+              <h2 className="text-gray-900">Показатели</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600">Выручка (год)</p>
+                  <p className="text-gray-900">{formatNumber(revenue)} ₸</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600">Прибыль (год)</p>
+                  <p className="text-gray-900">{formatNumber(profit)} ₸</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600">Сотрудники</p>
+                  <p className="text-gray-900">{employees}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600">Год основания</p>
+                  <p className="text-gray-900">{founded || '—'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 space-y-2">
+              <h3 className="text-gray-900">Запрос инвестиций</h3>
+              <p className="text-gray-700">{formatNumber(investmentNeeded)} ₸</p>
+
+              {investmentPurpose && <p className="text-sm text-gray-600">{investmentPurpose}</p>}
+
+              <div className="flex items-center gap-2 text-sm mt-2">
+                <PieChart className="w-4 h-4 text-purple-600" />
+                <span className="text-purple-700">{equity}% доли</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 space-y-2">
+            <Button onClick={() => setShowInterestDialog(true)} className="w-full" size="lg">
+              Отправить интерес
+            </Button>
+            <Button onClick={() => navigateTo('chat')} variant="outline" className="w-full" size="lg">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Сообщение
+            </Button>
+          </div>
+
+          {/* Диалог интереса — можно оставить тот же, только заголовок поменять */}
+          <Dialog open={showInterestDialog} onOpenChange={setShowInterestDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Отправить интерес: {title}</DialogTitle>
+                <DialogDescription>
+                  Команда получит уведомление и сможет связаться с вами
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <Textarea
+                    placeholder="Коротко о вас и ожиданиях…"
+                    value={interestMessage}
+                    onChange={(e) => setInterestMessage(e.target.value)}
+                    rows={4}
+                />
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                      id="share-mandate-biz"
+                      checked={shareMandate}
+                      onCheckedChange={(checked) => setShareMandate(checked as boolean)}
+                  />
+                  <label htmlFor="share-mandate-biz" className="text-sm text-gray-700">
+                    Поделиться моим мандатом
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowInterestDialog(false)} className="flex-1">
+                  Отмена
+                </Button>
+                <Button onClick={handleSendInterest} className="flex-1">
+                  Отправить
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
     );
   }
 

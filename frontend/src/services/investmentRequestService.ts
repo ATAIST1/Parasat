@@ -7,16 +7,16 @@ import type {
 } from '../types/investment.ts';
 
 export const investmentRequestService = {
-  // ⬇ именно так
   create: async (formData: FormData) => {
-    return api.post('/api/InvestmentRequests', formData, {
+    const response = await api.post('/api/InvestmentRequests', formData, {
       transformRequest: [
         (data, headers) => {
-          delete headers['Content-Type']; // multipart/form-data сам проставится
+          delete headers['Content-Type'];
           return data;
         },
       ],
     });
+    return response.data;
   },
 
   // получить все запросы (с фильтрами или без)
