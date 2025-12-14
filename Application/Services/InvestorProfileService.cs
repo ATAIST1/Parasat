@@ -3,7 +3,6 @@ using Core.Dtos.Investor;
 using Core.Interfaces;
 using Core.Models;
 
-
 namespace Application.Services
 {
     public class InvestorProfileService
@@ -35,13 +34,12 @@ namespace Application.Services
 
         public async Task CreateAsync(CreateInvestorProfileDto dto, string userId)
         {
-            /* ПОТОМ ОБЯЗАТЕЛЬНО СТОИТЬ ЭТО ВКЛЮЧИТЬ, ЭТО ТИП ЧТОБ ОДИН ПОЛЬЗОВАТЕЛЬ - ОДИН ПРОФИЛЬ, Я ПОКА ВЫКЛЮЧУ ЭТО, НЕ УДАЛЯЙТЕ
             var existing = await _repo.GetByUserIdAsync(userId);
             if (existing != null)
             {
                 throw new InvalidOperationException("Профиль инвестора уже существует для этого пользователя.");
             }
-*/
+
             var model = InvestorProfileMapper.ToModel(dto, userId);
             await _repo.AddAsync(model);
         }
