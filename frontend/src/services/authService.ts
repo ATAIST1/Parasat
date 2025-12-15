@@ -21,7 +21,6 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
-// НОВОЕ:
 export interface ForgotPasswordPayload {
   email: string;
 }
@@ -36,17 +35,22 @@ export const authService = {
   register: (data: RegisterPayload) =>
     api.post<TokenResponse | any>('/api/Auth/register', data),
 
-  login: (data: LoginPayload) =>
-    api.post<TokenResponse>('/api/Auth/login', data),
+  login: async (data: LoginPayload) => {
+    const res = await api.post<TokenResponse>('/api/Auth/login', data);
+    const { accessToken, refreshToken } = res.data;
+
+localStorage.setItem('accessToken', res.data.accessToken);
+localStorage.setItem('refreshToken', res.data.refreshToken);
+
+    return res.data;
+  },
 
   changePassword: (data: ChangePasswordPayload) =>
     api.post<any>('/api/Auth/change-password', data),
 
-  // НОВОЕ: запрос письма для восстановления
   forgotPassword: (data: ForgotPasswordPayload) =>
     api.post<any>('/api/Auth/forgot-password', data),
 
-  // НОВОЕ: смена пароля по токену из письма
   resetPassword: (data: ResetPasswordPayload) =>
     api.post<any>('/api/Auth/reset-password', data),
 };

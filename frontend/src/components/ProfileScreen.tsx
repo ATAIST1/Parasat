@@ -65,6 +65,12 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
   const menuItems = [
     {
       icon: FileText,
+      title: 'Подписки',
+      subtitle: `${myProjectsCount} активных`,
+      action: () => setCurrentScreen('my-projects'),
+    },
+    {
+      icon: FileText,
       title: 'Мои проекты',
       subtitle: `${myProjectsCount} активных`,
       action: () => setCurrentScreen('my-projects'),

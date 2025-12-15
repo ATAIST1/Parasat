@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState } from 'react';
 import { Home, Search, PlusCircle, MessageCircle, User, Building2 } from 'lucide-react';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -18,8 +17,6 @@ import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
 
 import NewsDetailScreen from './components/NewsDetailScreen'; 
-
-// Новый импорт экрана сброса пароля Л
 import ResetPasswordScreen from './components/ResetPasswordScreen';
 
 import { Toaster } from './components/ui/sonner';
@@ -56,11 +53,9 @@ export type Screen =
   | 'parasat-news-detail';
 
 function App() {
-  //Л
   const path = window.location.pathname;
 
   if (path === '/reset-password') {
-    // на странице сброса пароля тоже нужен Toaster
     return (
       <div className="min-h-screen bg-white">
         <ResetPasswordScreen />
@@ -73,6 +68,13 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
+  const [chatParams, setChatParams] = useState<{ conversationId: string; title: string } | null>(null);
+
+  const openChat = (conversationId: string, title: string) => {
+  setChatParams({ conversationId, title });
+  setCurrentScreen('chat');
+};
+
 
   const handleLogin = (email: string, role: UserRole) => {
     setUser({
@@ -113,16 +115,11 @@ function App() {
     setCurrentScreen('project-detail');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
-    setCurrentScreen('welcome');
-  };
+const navigateTo = (screen: Screen) => {
+  setCurrentScreen(screen);
+};
 
-  const navigateTo = (screen: Screen) => {
-    setCurrentScreen(screen);
-  };
+
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -132,8 +129,6 @@ function App() {
             onLogin={() => setCurrentScreen('auth')}
             onRegister={() => setCurrentScreen('auth')}
             onContinueAsGuest={() => {
-              localStorage.removeItem('accessToken');
-              localStorage.removeItem('refreshToken');
               setUser({ id: 'guest', email: '', role: null });
               setCurrentScreen('feed');
             }}
@@ -160,13 +155,16 @@ function App() {
             onComplete={handleOnboardingComplete}
           />
         );
-      case 'feed':
-        return (
-          <FeedScreen
-            onProjectClick={handleProjectClick}
-            navigateTo={navigateTo}
-          />
-        );
+case 'feed':
+  return (
+    <FeedScreen
+      onProjectClick={handleProjectClick}
+      navigateTo={navigateTo}
+      openChat={openChat}
+    />
+  );
+
+
       case 'search':
         return (
           <SearchScreen
@@ -186,12 +184,18 @@ function App() {
             navigateTo={navigateTo}
           />
         );
-      case 'chat':
-        return (
-          <ChatScreen
-            onBack={() => setCurrentScreen('chats')}
-          />
-        );
+case 'chat':
+  return (
+    chatParams && (
+      <ChatScreen
+        onBack={() => setCurrentScreen('chats')}
+        conversationId={chatParams.conversationId}
+        title={chatParams.title}
+      />
+    )
+  );
+
+
       case 'profile':
         return (
           <ProfileScreen
