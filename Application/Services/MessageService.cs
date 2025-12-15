@@ -1,5 +1,6 @@
 using Application.Mappers;
 using Core.Dtos;
+using Core.Dtos.Conversations;
 using Core.Interfaces;
 using Core.Models;
 using System.Security.Claims;
@@ -12,13 +13,15 @@ public class MessageService
     private readonly IUserRepository _userRepo;
     private readonly IStartupRepository _startupRepo;
     private readonly IConversationRepository _conversationRepo;
+    private readonly IConversationContextOwnerResolver _ownerResolver;
 
-    public MessageService(IChatRepository chatRepo, IUserRepository userRepo, IStartupRepository startupRepo, IConversationRepository conversationRepo)
+    public MessageService(IChatRepository chatRepo, IUserRepository userRepo, IStartupRepository startupRepo, IConversationRepository conversationRepo, IConversationContextOwnerResolver ownerResolver)
     {
         _chatRepo = chatRepo;
         _userRepo = userRepo;
         _startupRepo = startupRepo;
         _conversationRepo = conversationRepo;
+        _ownerResolver = ownerResolver; 
     }
 
     public async Task<List<MessageDto>> GetChatAsync(string currentUserId, string partnerId)
@@ -48,32 +51,7 @@ public class MessageService
 
         return partners;
     }
-    public async Task<Conversation> GetOrCreateForStartupAsync(string currentUserId, string startupId)
-    {
-        var startup = await _startupRepo.GetByIdAsync(startupId)
-            ?? throw new Exception("Startup not found");
-
-        var ownerId = startup.OwnerId;
-
-        // запрет писать самому себе
-        if (ownerId == currentUserId)
-            throw new Exception("Cannot chat with yourself");
-
-        // ищем существующий диалог именно по этому стартапу + этим двум людям
-        var existing = await _conversationRepo.GetByStartupAndUsersAsync(startupId, ownerId, currentUserId);
-        if (existing != null) return existing;
-
-        var c = new Conversation
-        {
-            StartupId = startupId,
-            OwnerId = ownerId,
-            InitiatorId = currentUserId,
-            ParticipantIds = new List<string> { ownerId, currentUserId }
-        };
-
-        await _conversationRepo.CreateAsync(c);
-        return c;
-    }
+    
     public async Task<MessageDto> SendMessageAsync(string conversationId, string fromId, string text)
     {
         var conv = await _conversationRepo.GetByIdAsync(conversationId)
@@ -126,39 +104,43 @@ public class MessageService
     }
     public async Task<List<ConversationListItemDto>> GetMyConversationsAsync(string userId)
     {
-        var convs = await _conversationRepo.GetByParticipantAsync(userId);
+        var list = await _conversationRepo.GetByUserAsync(userId);
 
-        // партнёры
-        var partnerIds = convs
-            .Select(c => c.ParticipantIds.First(x => x != userId))
-            .Distinct()
-            .ToList();
-
-        var users = await _userRepo.GetByIdsAsync(partnerIds);
-        var names = users.ToDictionary(u => u.Id, u => u.Name);
-
-        // последние сообщения (если у тебя сообщения по conversationId)
-        // если нет — просто верни без lastText/lastSentAt
-        var result = new List<ConversationListItemDto>();
-
-        foreach (var c in convs)
+        return list.Select(c => new ConversationListItemDto
         {
-            var partnerId = c.ParticipantIds.First(x => x != userId);
+            ConversationId = c.Id,
+            ItemType = (int)c.ContextType,
+            ItemId = c.ContextId,
+            OwnerId = c.OwnerId,
+            CreatedAtUtc = c.CreatedAtUtc
+        }).ToList();
+    }
+     public async Task<Conversation> GetOrCreateAsync(
+        string currentUserId,
+        ConversationContextType type,
+        string itemId)
+    {
+        var ownerId = await _ownerResolver.GetOwnerIdAsync(type, itemId);
 
-            var last = await _chatRepo.GetLastByConversationAsync(c.Id); // сделай метод в репо
+        if (ownerId == currentUserId)
+            throw new Exception("Cannot chat with yourself");
 
-            result.Add(new ConversationListItemDto
-            {
-                Id = c.Id,
-                StartupId = c.StartupId,
-                PartnerId = partnerId,
-                PartnerName = names.TryGetValue(partnerId, out var n) ? n : "Unknown",
-                LastText = last?.Text,
-                LastSentAt = last?.SentAt
-            });
-        }
+        var existing = await _conversationRepo.GetByContextAndUsersAsync(
+            type, itemId, ownerId, currentUserId);
 
-        return result;
+        if (existing != null) return existing;
+
+        var conv = new Conversation
+        {
+            ContextType = type,
+            ContextId = itemId,
+            OwnerId = ownerId,
+            InitiatorId = currentUserId,
+            ParticipantIds = new List<string> { ownerId, currentUserId }
+        };
+
+        await _conversationRepo.CreateAsync(conv);
+        return conv;
     }
 
 

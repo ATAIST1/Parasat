@@ -1,13 +1,12 @@
+using Application.Services;
 using Core.Dtos;
-using Core.Interfaces;
+using Core.Dtos.Conversations;
 using Core.Models;
-using Application.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using WebApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Application.Services;
 
 namespace WebApi.Controllers;
 
@@ -25,8 +24,11 @@ public class ChatController : ControllerBase
         _hub = hub;
     }
 
-    private string UserId => User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+    private string UserId =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new UnauthorizedAccessException("User is not authenticated");
 
+    // ✅ список моих диалогов (отсюда берешь conversationId)
     [HttpGet("conversations")]
     public async Task<IActionResult> GetMyConversations()
     {
@@ -34,15 +36,24 @@ public class ChatController : ControllerBase
         return Ok(list);
     }
 
-    // открыть/создать чат из стартапа
-    [HttpPost("startup/{startupId}")]
-    public async Task<IActionResult> OpenFromStartup(string startupId)
+    // ✅ универсально открыть/создать чат из любой карточки (startup/business/investor/developer)
+    [HttpPost("open")]
+    public async Task<IActionResult> Open([FromBody] OpenChatDto dto)
     {
-        var conv = await _chatService.GetOrCreateForStartupAsync(UserId, startupId);
+        if (!Enum.IsDefined(typeof(ConversationContextType), dto.ItemType))
+            return BadRequest("Invalid itemType");
+
+        var conv = await _chatService.GetOrCreateAsync(
+            UserId,
+            (ConversationContextType)dto.ItemType,
+            dto.ItemId
+        );
+
         return Ok(new { conversationId = conv.Id });
     }
 
-    // получить сообщения по conversationId
+
+    // ✅ получить сообщения по conversationId
     [HttpGet("{conversationId}")]
     public async Task<IActionResult> GetChat(string conversationId)
     {
@@ -56,7 +67,7 @@ public class ChatController : ControllerBase
     {
         var msg = await _chatService.SendMessageAsync(conversationId, UserId, dto.Text);
 
-        // разослать всем участникам диалога (не partnerId)
+        // разослать всем участникам диалога
         var participantIds = await _chatService.GetConversationParticipantIdsAsync(UserId, conversationId);
         foreach (var pid in participantIds)
             await _hub.Clients.Group(pid).SendAsync("ReceiveMessage", msg);

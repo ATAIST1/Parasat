@@ -1,11 +1,11 @@
-namespace Core.Dtos;
+using Core.Models;
+namespace Core.Dtos.Conversations;
 
 public class ConversationListItemDto
 {
-    public string Id { get; set; } = null!;
-    public string StartupId { get; set; } = null!;
-    public string PartnerId { get; set; } = null!;
-    public string PartnerName { get; set; } = null!;
-    public string? LastText { get; set; }
-    public DateTime? LastSentAt { get; set; }
+    public string ConversationId { get; set; } = null!;
+    public int ItemType { get; set; }
+    public string ItemId { get; set; } = null!;
+    public string OwnerId { get; set; } = null!;
+    public DateTime CreatedAtUtc { get; set; }
 }

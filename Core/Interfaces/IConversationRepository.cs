@@ -4,8 +4,15 @@ namespace Core.Interfaces;
 
 public interface IConversationRepository
 {
-    Task<List<Conversation>> GetByParticipantAsync(string userId);
     Task<Conversation?> GetByIdAsync(string id);
-    Task<Conversation?> GetByStartupAndUsersAsync(string startupId, string ownerId, string initiatorId);
-    Task CreateAsync(Conversation c);
+
+    Task<Conversation?> GetByContextAndUsersAsync(
+        ConversationContextType type,
+        string contextId,
+        string userId1,
+        string userId2);
+
+    Task<List<Conversation>> GetByUserAsync(string userId);
+
+    Task CreateAsync(Conversation conversation);
 }

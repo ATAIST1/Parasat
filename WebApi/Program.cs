@@ -70,6 +70,7 @@ builder.Services.AddScoped<InvestorProfileService>();
 builder.Services.AddScoped<InvestorContactsService>();
 builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IConversationContextOwnerResolver, ConversationContextOwnerResolver>();
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
