@@ -124,6 +124,43 @@ public class MessageService
 
         return conv.ParticipantIds;
     }
+    public async Task<List<ConversationListItemDto>> GetMyConversationsAsync(string userId)
+    {
+        var convs = await _conversationRepo.GetByParticipantAsync(userId);
+
+        // партнёры
+        var partnerIds = convs
+            .Select(c => c.ParticipantIds.First(x => x != userId))
+            .Distinct()
+            .ToList();
+
+        var users = await _userRepo.GetByIdsAsync(partnerIds);
+        var names = users.ToDictionary(u => u.Id, u => u.Name);
+
+        // последние сообщения (если у тебя сообщения по conversationId)
+        // если нет — просто верни без lastText/lastSentAt
+        var result = new List<ConversationListItemDto>();
+
+        foreach (var c in convs)
+        {
+            var partnerId = c.ParticipantIds.First(x => x != userId);
+
+            var last = await _chatRepo.GetLastByConversationAsync(c.Id); // сделай метод в репо
+
+            result.Add(new ConversationListItemDto
+            {
+                Id = c.Id,
+                StartupId = c.StartupId,
+                PartnerId = partnerId,
+                PartnerName = names.TryGetValue(partnerId, out var n) ? n : "Unknown",
+                LastText = last?.Text,
+                LastSentAt = last?.SentAt
+            });
+        }
+
+        return result;
+    }
+
 
 
 }

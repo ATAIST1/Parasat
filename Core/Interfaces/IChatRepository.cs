@@ -8,4 +8,5 @@ public interface IChatRepository
     Task SendMessageAsync(Message message);
     Task<List<string>> GetChatPartnersAsync(string userId);
     Task<List<Message>> GetByConversationAsync(string conversationId);
+    Task<Message?> GetLastByConversationAsync(string conversationId);
 }

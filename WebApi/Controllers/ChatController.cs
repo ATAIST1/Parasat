@@ -27,6 +27,13 @@ public class ChatController : ControllerBase
 
     private string UserId => User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
+    [HttpGet("conversations")]
+    public async Task<IActionResult> GetMyConversations()
+    {
+        var list = await _chatService.GetMyConversationsAsync(UserId);
+        return Ok(list);
+    }
+
     // открыть/создать чат из стартапа
     [HttpPost("startup/{startupId}")]
     public async Task<IActionResult> OpenFromStartup(string startupId)

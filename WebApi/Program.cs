@@ -65,6 +65,7 @@ builder.Services.AddScoped<IInvestmentRequestRepository, InvestmentRequestReposi
 builder.Services.AddScoped<InvestmentRequestService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IInvestorProfileRepository, InvestorProfileRepository>();
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<InvestorProfileService>();
 builder.Services.AddScoped<InvestorContactsService>();
 builder.Services.AddScoped<SubscriptionService>();

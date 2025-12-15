@@ -50,5 +50,13 @@ public class ChatRepository : IChatRepository
     => await _messages.Find(m => m.ConversationId == conversationId)
         .SortBy(m => m.SentAt)
         .ToListAsync();
+        
+    public async Task<Message?> GetLastByConversationAsync(string conversationId)
+    {
+        return await _messages
+            .Find(m => m.ConversationId == conversationId)
+            .SortByDescending(m => m.SentAt)
+            .FirstOrDefaultAsync();
+    }
 
 }
