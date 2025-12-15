@@ -85,8 +85,6 @@ public class InvestmentRequestRepository : IInvestmentRequestRepository
     public async Task<InvestmentRequest?> GetByIdAsync(string id)
         => await _collection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    public async Task<InvestmentRequest?> GetByStartupIdAsync(string startupId)
-        => await _collection.Find(x => x.StartupId == startupId).FirstOrDefaultAsync();
 
     public async Task AddAsync(InvestmentRequest request)
         => await _collection.InsertOneAsync(request);
