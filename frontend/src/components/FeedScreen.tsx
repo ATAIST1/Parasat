@@ -16,12 +16,15 @@ import { investorService } from '../services/investorService';
 import { investmentRequestService } from '../services/investmentRequestService';
 import { bookmarkService, BookmarkItemType } from '../services/bookmarkService';
 import type { InvestorProfileResponseDto } from '../types/investor';
+import { startConversationWithStartup } from '../services/chatService';
 
 
 interface FeedScreenProps {
   onProjectClick: (projectId: string) => void;
-  navigateTo: (screen: any) => void;
+  navigateTo: (screen: Screen) => void;
+  openChat: (conversationId: string, title: string) => void;
 }
+
 
 /*
 // ⛔ Моковые стартапы — оставляю как пример, но теперь не используем
@@ -82,6 +85,9 @@ const mockProjects = [
 ];
 */
 
+
+
+/*
 const mockDevelopers = [
   {
     id: 'dev1',
@@ -198,6 +204,7 @@ const mockBusinesses = [
     verified: true,
   },
 ];
+*/
 
 const DEV_TYPE_LABELS: Record<string, string> = {
   FullStack: 'Full-Stack разработка',
@@ -254,7 +261,7 @@ const formatDateRu = (dateStr?: string) => {
 };
 
 
-export default function FeedScreen({ onProjectClick, navigateTo }: FeedScreenProps) {
+export default function FeedScreen({ onProjectClick, navigateTo, openChat }: FeedScreenProps) {
   const [savedBookmarks, setSavedBookmarks] = useState<Map<string, BookmarkItemType>>(new Map());
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
@@ -269,6 +276,18 @@ const [isLoadingDevelopers, setIsLoadingDevelopers] = useState<boolean>(true);
 // Инвесторы с бэка
 const [investors, setInvestors] = useState<any[]>([]);
 const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
+
+
+const handleOpenStartupChat = async (project: any) => {
+  try {
+    const conversationId = await startConversationWithStartup(project.id);
+    openChat(conversationId, project.name);
+  } catch (e) {
+    console.error('Не удалось открыть чат', e);
+    toast('Не удалось открыть чат');
+  }
+};
+
 
 const [businesses, setBusinesses] = useState<any[]>([]);
 const [isLoadingBusinesses, setIsLoadingBusinesses] = useState<boolean>(true);
@@ -657,15 +676,19 @@ const filteredDevelopers = developers.filter((developer) => {
                 Загрузка стартапов…
               </div>
             ) : filteredProjects.length > 0 ? (
-              filteredProjects.map((project: any) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  isSaved={savedBookmarks.has(project.id) && savedBookmarks.get(project.id) === BookmarkItemType.Startup}
-                  onSave={() => handleBookmarkToggle(project.id, BookmarkItemType.Startup)}
-                  onClick={onProjectClick}
-                />
-              ))
+filteredProjects.map((project: any) => (
+  <ProjectCard
+    key={project.id}
+    project={project}
+    isSaved={
+      savedBookmarks.has(project.id) &&
+      savedBookmarks.get(project.id) === BookmarkItemType.Startup
+    }
+    onSave={() => handleBookmarkToggle(project.id, BookmarkItemType.Startup)}
+    onClick={onProjectClick}
+    onContact={() => handleOpenStartupChat(project)}
+  />
+))
             ) : (
               <div className="text-center py-12 text-gray-500">
                 <p>Ничего не найдено</p>
@@ -855,7 +878,8 @@ const filteredDevelopers = developers.filter((developer) => {
   );
 }
 
-function ProjectCard({ project, isSaved, onSave, onClick }: any) {
+function ProjectCard({ project, isSaved, onSave, onClick, onContact }: any) {
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -927,15 +951,16 @@ function ProjectCard({ project, isSaved, onSave, onClick }: any) {
         >
           Подробнее
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1.5"
-          onClick={() => toast('Интерес отправлен')}
-        >
-          <MessageCircle className="w-4 h-4" />
-          Связаться
-        </Button>
+<Button
+  variant="outline"
+  size="sm"
+  className="flex items-center gap-1.5"
+  onClick={onContact}
+>
+  <MessageCircle className="w-4 h-4" />
+  Связаться
+</Button>
+
       </div>
     </div>
   );
