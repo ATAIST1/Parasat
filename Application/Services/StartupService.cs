@@ -206,5 +206,11 @@ namespace Application.Services
                 TimeSpan.FromMinutes(10),
                 ct);
         }
+
+        public async Task<List<StartupResponseDto>> GetByOwnerAsync(string ownerId)
+        {
+            var list = await _repo.GetByOwnerAsync(ownerId);
+            return list.Select(StartupResponseDto.FromModel).ToList();
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace Core.Interfaces
         Task AddAsync(Startup startup);
         Task<bool> UpdateAsync(Startup startup);
         Task<bool> DeleteAsync(string id);
+        Task<IEnumerable<Startup>> GetByOwnerAsync(string ownerId);
 
          Task<IEnumerable<Startup>> GetAllAsync(
             string? search = null,

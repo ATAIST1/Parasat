@@ -129,4 +129,12 @@ public class StartupController : ControllerBase
         var url = await _service.GetFinancialModelUrlAsync(id);
         return url == null ? NotFound() : Ok(new { url });
     }
+
+    [HttpGet("my")]
+    public async Task<ActionResult<List<StartupResponseDto>>> GetMy()
+    {
+        var userId = CurrentUserId;
+        var startups = await _service.GetByOwnerAsync(userId);
+        return Ok(startups);
+    }
 }

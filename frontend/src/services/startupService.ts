@@ -42,4 +42,9 @@ export const startupService = {
     const res = await api.get(`/api/Startup/${id}/financialmodel`);
     return res.data as { url: string };
   },
+
+  getMine: async () => {
+    const res = await api.get('/api/Startup/my');
+    return Array.isArray(res.data) ? res.data : [];
+  },
 };

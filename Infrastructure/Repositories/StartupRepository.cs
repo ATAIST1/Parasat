@@ -92,5 +92,13 @@ namespace Infrastructure.Repositories
             var result = await _collection.DeleteOneAsync(x => x.Id == id);
             return result.DeletedCount > 0;
         }
+
+        public async Task<IEnumerable<Startup>> GetByOwnerAsync(string ownerId)
+        {
+            return await _collection
+                .Find(x => x.OwnerId == ownerId)
+                .SortByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

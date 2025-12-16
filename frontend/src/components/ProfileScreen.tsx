@@ -17,6 +17,8 @@ import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import MyProjectsScreen from './MyProjectsScreen';
 import FavoritesScreen from './FavoritesScreen';
 import { bookmarkService } from '../services/bookmarkService';
+import { startupService } from '../services/startupService';
+
 
 interface ProfileScreenProps {
   user: any;
@@ -33,13 +35,21 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
     });
   }, []);
 
-  const myProjectsCount = 2;
+  const [myProjectsCount, setMyProjectsCount] = useState(0);
+
+  useEffect(() => {
+    startupService.getMine().then(list => setMyProjectsCount(list.length)).catch(() => setMyProjectsCount(0));
+  }, []);
 
   if (currentScreen === 'my-projects') {
     return (
       <MyProjectsScreen
         navigateTo={(screen) => {
-          if (screen === 'back') setCurrentScreen('profile');
+          if (screen === 'back') {
+            startupService.getMine().then(list => setMyProjectsCount(list.length));
+            setCurrentScreen('profile');
+          }
+
           else navigateTo(screen);
         }}
       />
