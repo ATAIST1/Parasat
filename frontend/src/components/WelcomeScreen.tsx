@@ -36,7 +36,7 @@ export default function WelcomeScreen({ onLogin, onRegister, onContinueAsGuest }
           </Button>
           
           <Button
-            onClick={onRegister}
+            onClick={() => onRegister()}
             variant="outline"
             className="w-full"
             size="lg"

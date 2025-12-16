@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -13,10 +13,21 @@ interface AuthScreenProps {
   onLogin: (email: string, role: UserRole) => void;
   onRegister: (email: string) => void;
   onBack: () => void;
+  mode?: 'login' | 'register';
 }
 
-export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenProps) {
-  const [isLogin, setIsLogin] = useState(true);
+export default function AuthScreen({
+  onLogin,
+  onRegister,
+  onBack,
+  mode = 'login',
+}: AuthScreenProps) {
+  const [isLogin, setIsLogin] = useState(mode !== 'register');
+useEffect(() => {
+  setIsLogin(mode !== 'register');
+  setIsForgotPasswordMode(false);
+}, [mode]);
+
   const [isForgotPasswordMode, setIsForgotPasswordMode] = useState(false);
 
   const [name, setName] = useState('');        // для регистрации
@@ -89,12 +100,12 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
 
       // === ВХОД ===
       if (isLogin) {
-        const res = await authService.login({ email, password });
+        const data = await authService.login({ email, password });
 
-        const { accessToken, refreshToken } = res.data;
+        const { accessToken, refreshToken } = data || {};
 
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        if (accessToken) localStorage.setItem('accessToken', accessToken);
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
 
         toast.success('Успешный вход');
 
@@ -132,7 +143,6 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
         toast.success('Мы отправили письмо для подтверждения email. Проверьте почту.');
 
         onRegister(email);
-        setIsLogin(true);
       }
 
     } catch (err: any) {
@@ -259,7 +269,7 @@ export default function AuthScreen({ onLogin, onRegister, onBack }: AuthScreenPr
                 />
                 <label
                   htmlFor="terms"
-                  className="text-sm text-gray-600 leading-tight"
+                  className="text-sm text-black leading-tight"
                 >
                   Принимаю Условия и Политику конфиденциальности
                 </label>

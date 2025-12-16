@@ -69,6 +69,7 @@ function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
   const [chatParams, setChatParams] = useState<{ conversationId: string; title: string } | null>(null);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   const openChat = (conversationId: string, title: string) => {
   setChatParams({ conversationId, title });
@@ -125,22 +126,31 @@ const navigateTo = (screen: Screen) => {
     switch (currentScreen) {
       case 'welcome':
         return (
-          <WelcomeScreen
-            onLogin={() => setCurrentScreen('auth')}
-            onRegister={() => setCurrentScreen('auth')}
-            onContinueAsGuest={() => {
-              setUser({ id: 'guest', email: '', role: null });
-              setCurrentScreen('feed');
-            }}
-          />
+<WelcomeScreen
+  onLogin={() => {
+    setAuthMode('login');
+    setCurrentScreen('auth');
+  }}
+  onRegister={() => {
+    setAuthMode('register');
+    setCurrentScreen('auth');
+  }}
+  onContinueAsGuest={() => {
+    setUser({ id: 'guest', email: '', role: null });
+    setCurrentScreen('feed');
+  }}
+/>
+
         );
       case 'auth':
         return (
-          <AuthScreen
-            onLogin={handleLogin}
-            onRegister={handleRegister}
-            onBack={() => setCurrentScreen('welcome')}
-          />
+<AuthScreen
+  onLogin={handleLogin}
+  onRegister={handleRegister}
+  onBack={() => setCurrentScreen('welcome')}
+  mode={authMode}
+/>
+
         );
       case 'role-selection':
         return (
