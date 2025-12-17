@@ -198,10 +198,10 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
 
       <form onSubmit={handleSubmit} className="p-4 pb-32 space-y-6">
         {/* Основная информация */}
-        <div className="bg-white rounded-2xl p-6 space-y-5">
+        <div className="bg-white rounded-2xl p-6 space-y-5 text-gray-900">
           <h3 className="text-lg font-medium text-gray-900">Основная информация</h3>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-gray-900">
             <Label htmlFor="fullName">ФИО инвестора *</Label>
             <Input
               id="fullName"
@@ -211,7 +211,7 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-gray-900">
             <Label htmlFor="city">Город *</Label>
             <Input
               id="city"
@@ -221,7 +221,7 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-gray-900">
             <Label htmlFor="about">Кратко о себе / опыт *</Label>
             <Textarea
               id="about"
@@ -269,11 +269,11 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
         </div>
 
         {/* Модели */}
-        <div className="bg-white rounded-2xl p-6 space-y-4">
+        <div className="bg-white rounded-2xl p-6 space-y-4 text-gray-900">
           <h3 className="text-lg font-medium text-gray-900">Модель стартапов *</h3>
           <p className="text-sm text-gray-600">Форматы бизнес-моделей, в которые инвестор заходит.</p>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 text-gray-900">
             {modelOptions.map((item) => {
               const active = models.includes(item);
               return (
@@ -293,7 +293,7 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
         </div>
 
         {/* Инвестиционные параметры */}
-        <div className="bg-white rounded-2xl p-6 space-y-5">
+        <div className="bg-white rounded-2xl p-6 space-y-5 text-gray-900">
           <h3 className="text-lg font-medium text-gray-900">Инвестиционные параметры</h3>
 
           <div className="space-y-2">
