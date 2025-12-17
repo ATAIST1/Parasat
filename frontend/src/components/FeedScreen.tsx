@@ -613,7 +613,7 @@ const filteredDevelopers = developers.filter((developer) => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <div className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-slate-900 rounded-lg p-1.5">
@@ -625,12 +625,56 @@ const filteredDevelopers = developers.filter((developer) => {
 
       <Tabs defaultValue="for-you" className="w-full">
         <div className="bg-white border-b border-gray-200 px-4">
-          <TabsList className="w-full grid grid-cols-4">
-            <TabsTrigger value="for-you">Стартапы</TabsTrigger>
-            <TabsTrigger value="trends">Инвесторы</TabsTrigger>
-            <TabsTrigger value="new">Разработчики</TabsTrigger>
-            <TabsTrigger value="businesses">Бизнесы</TabsTrigger>
-          </TabsList>
+<TabsList className="w-full grid grid-cols-4 bg-white p-1 rounded-2xl border border-gray-200">
+  <TabsTrigger
+    value="for-you"
+    className="
+      text-gray-900
+      data-[state=active]:bg-blue-600 data-[state=active]:text-white
+      hover:bg-gray-100
+      rounded-xl
+    "
+  >
+    Стартапы
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="trends"
+    className="
+      text-gray-900
+      data-[state=active]:bg-blue-600 data-[state=active]:text-white
+      hover:bg-gray-100
+      rounded-xl
+    "
+  >
+    Инвесторы
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="new"
+    className="
+      text-gray-900
+      data-[state=active]:bg-blue-600 data-[state=active]:text-white
+      hover:bg-gray-100
+      rounded-xl
+    "
+  >
+    Разработчики
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="businesses"
+    className="
+      text-gray-900
+      data-[state=active]:bg-blue-600 data-[state=active]:text-white
+      hover:bg-gray-100
+      rounded-xl
+    "
+  >
+    Бизнесы
+  </TabsTrigger>
+</TabsList>
+
         </div>
 
         {/* СТАРТАПЫ */}

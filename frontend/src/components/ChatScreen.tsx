@@ -87,16 +87,16 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col text-gray-900">
       {/* header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10 text-gray-900text-gray-900">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
             <button
               onClick={onBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-900"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-gray-900" />
             </button>
             <Avatar className="w-10 h-10">
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">

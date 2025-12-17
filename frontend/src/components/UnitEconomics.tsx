@@ -41,7 +41,7 @@ export default function UnitEconomics({ onBack }: UnitEconomicsProps) {
           onClick={onBack}
           className="flex items-center gap-2 text-white mb-4"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 text-gray-900" />
           <span className="text-sm">Назад</span>
         </button>
 

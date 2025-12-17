@@ -209,7 +209,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-gray-900" />
           </button>
           <h1 className="text-gray-900">Создать проект</h1>
         </div>
@@ -217,11 +217,51 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
       <div className="px-4 py-6 max-w-2xl mx-auto text-gray-900">
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 text-gray-900">
-            <TabsTrigger value="basic">Основное</TabsTrigger>
-            <TabsTrigger value="investment">Инвестиции</TabsTrigger>
-            <TabsTrigger value="metrics">Метрики</TabsTrigger>
-          </TabsList>
+<TabsList className="grid w-full grid-cols-3 bg-white border border-gray-200 rounded-xl p-1">
+  <TabsTrigger
+    value="basic"
+    className="
+      text-gray-600
+      transition
+      hover:bg-gray-100 hover:text-gray-900
+      data-[state=active]:bg-blue-600
+      data-[state=active]:text-white
+      data-[state=active]:shadow
+    "
+  >
+    Основное
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="investment"
+    className="
+      text-gray-600
+      transition
+      hover:bg-gray-100 hover:text-gray-900
+      data-[state=active]:bg-blue-600
+      data-[state=active]:text-white
+      data-[state=active]:shadow
+    "
+  >
+    Инвестиции
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="metrics"
+    className="
+      text-gray-600
+      transition
+      hover:bg-gray-100 hover:text-gray-900
+      data-[state=active]:bg-blue-600
+      data-[state=active]:text-white
+      data-[state=active]:shadow
+    "
+  >
+    Метрики
+  </TabsTrigger>
+</TabsList>
+
+
 
           {/* ===== Основное ===== */}
           <TabsContent value="basic" className="space-y-6 mt-6 text-gray-900">

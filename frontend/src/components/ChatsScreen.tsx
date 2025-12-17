@@ -40,8 +40,8 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
           <h1 className="text-gray-900">Чаты</h1>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder="Поиск по диалогам" className="pl-10" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-900" />
+          <Input placeholder="Поиск по диалогам" className="pl-10 text-gray-900" />
         </div>
       </div>
 
