@@ -490,7 +490,7 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
             )}
           </section>
 
-          <section className="parasat-about-card">
+          {/*<section className="parasat-about-card">
             <h3>О Parasat Business Club</h3>
             <p>
               Мы создаём экосистему для развития предпринимательства в Казахстане и странах СНГ. Наша платформа помогает стартапам
@@ -501,7 +501,7 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
               <div className="parasat-about-item"><div className="parasat-about-dot" /><span>Проверенные участники платформы</span></div>
               <div className="parasat-about-item"><div className="parasat-about-dot" /><span>Поддержка на всех этапах сделки</span></div>
             </div>
-          </section>
+          </section>*/}
         </div>
       </div>
     </div>

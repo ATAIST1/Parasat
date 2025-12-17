@@ -216,7 +216,7 @@ useEffect(() => {
             </h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 text-gray-900">
             {/* Имя только при регистрации */}
             {!isLogin && !isForgotPasswordMode && (
               <div className="space-y-2">
@@ -232,7 +232,7 @@ useEffect(() => {
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -246,7 +246,7 @@ useEffect(() => {
 
             {/* Пароль не нужен в режиме "забыли пароль" */}
             {!isForgotPasswordMode && (
-              <div className="space-y-2">
+              <div className="space-y-2 text-gray-900">
                 <Label htmlFor="password">Пароль</Label>
                 <Input
                   id="password"
@@ -269,7 +269,7 @@ useEffect(() => {
                 />
                 <label
                   htmlFor="terms"
-                  className="text-sm text-black leading-tight"
+                  className="text-sm text-black leading-tight text-gray-900"
                 >
                   Принимаю Условия и Политику конфиденциальности
                 </label>
