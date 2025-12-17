@@ -14,6 +14,21 @@ interface SubscriptionsScreenProps {
 
 const PRICE_PER_MONTH = 30000;
 
+const DISCOUNTS: Record<PlanMonths, number> = {
+  1: 0,     // без скидки
+  3: 0.05,   // -5%
+  6: 0.1,   // -10%
+  12: 0.15,  // -15%
+};
+
+const PLAN_GRADIENTS: Record<PlanMonths, string> = {
+  1:  'from-blue-500/10 to-blue-600/20',
+  3:  'from-indigo-500/10 to-indigo-600/20',
+  6:  'from-sky-500/10 to-sky-600/20',
+  12: 'from-violet-500/10 to-violet-600/20',
+};
+
+
 export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsScreenProps) {
   const [status, setStatus] = useState<SubscriptionStatusDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,7 +38,8 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
     () =>
       ([1, 3, 6, 12] as PlanMonths[]).map((m) => ({
         months: m,
-        total: m * PRICE_PER_MONTH,
+        total: Math.round(m * PRICE_PER_MONTH * (1 - DISCOUNTS[m])),
+        discountPercent: DISCOUNTS[m] * 100,
         label: `${m} ${m === 1 ? 'месяц' : m < 5 ? 'месяца' : 'месяцев'}`,
       })),
     []
@@ -113,8 +129,13 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <Badge variant="outline">30 000 ₸ / месяц</Badge>
-                <Badge variant="outline">1 / 3 / 6 / 12 месяцев</Badge>
+                <Badge variant="outline" className="text-gray-900">
+                  30 000 ₸ / месяц
+                </Badge>
+
+                <Badge variant="outline" className="text-gray-900">
+                  1 / 3 / 6 / 12 месяцев
+                </Badge>
               </div>
 
               <div className="mt-4 text-sm text-gray-700">
@@ -147,23 +168,47 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
 
           <div className="mt-4 grid grid-cols-1 gap-3">
             {plans.map((p) => (
-              <div
-                key={p.months}
-                className="rounded-2xl border border-gray-200 p-4 flex items-center justify-between gap-3"
-              >
+                <div
+                    key={p.months}
+                    className={`
+    rounded-2xl border p-6
+    bg-gradient-to-br ${PLAN_GRADIENTS[p.months]}
+    shadow-sm hover:shadow-md
+    transition-all
+    flex items-center justify-between gap-4
+  `}
+                >
                 <div className="min-w-0">
-                  <div className="text-gray-900">{p.label}</div>
-                  <div className="text-sm text-gray-500">
-                    {PRICE_PER_MONTH.toLocaleString('ru-RU')} ₸ × {p.months} ={' '}
-                    <b className="text-gray-900">{p.total.toLocaleString('ru-RU')} ₸</b>
+                  <div className="min-w-0">
+                    <div className="text-xl font-semibold text-gray-900">{p.label}</div>
+
+                    <div className="mt-1 text-sm text-gray-500">
+                      {p.discountPercent > 0 && (
+                          <div
+                              className="text-xs text-gray-400"
+                              style={{ textDecoration: 'line-through' }}
+                          >
+                            {(PRICE_PER_MONTH * p.months).toLocaleString('ru-RU')} ₸
+                          </div>
+                      )}
+
+                      <div className="text-base">
+                        <b className="text-gray-900">{p.total.toLocaleString('ru-RU')} ₸</b>
+                        <span className="text-gray-500"> / {p.months} мес</span>
+                      </div>
+
+                      {p.discountPercent > 0 && (
+                          <div className="mt-1 text-xs text-green-600">Скидка −{p.discountPercent}%</div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <Button
-                  disabled={!canBuy || buyingMonths !== null}
-                  onClick={() => onBuy(p.months)}
-                  className="shrink-0"
-                >
+                  <Button
+                      disabled={!canBuy || buyingMonths !== null}
+                      onClick={() => onBuy(p.months)}
+                      className="shrink-0 h-11 px-5 rounded-xl"
+                  >
                   <CreditCard className="w-4 h-4 mr-2" />
                   {buyingMonths === p.months ? 'Оформляем...' : active ? 'Продлить' : 'Купить'}
                 </Button>
@@ -171,10 +216,10 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
             ))}
           </div>
 
-          <div className="mt-4 text-xs text-gray-500">
-            Сейчас это “включатель доступа” через API (без реальной оплаты). Когда подключишь оплату — просто
-            заменишь `createOrExtend` на оплату → подтверждение → этот же POST.
-          </div>
+          {/*<div className="mt-4 text-xs text-gray-500">*/}
+          {/*  Сейчас это “включатель доступа” через API (без реальной оплаты). Когда подключишь оплату — просто*/}
+          {/*  заменишь `createOrExtend` на оплату → подтверждение → этот же POST.*/}
+          {/*</div>*/}
         </div>
 
         <div className="pb-16" />
