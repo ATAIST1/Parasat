@@ -257,22 +257,23 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
                 </div>
               </div>
 
-              <div className="parasat-founder-card parasat-founder-card--right">
-                <div className="parasat-founder-image-wrap">
-                  <img src={jakishevImg} alt="Мухтар Джакишев" className="parasat-founder-image" />
-                </div>
-                <div className="parasat-founder-content">
+<div className="parasat-founder-card parasat-founder-card--right">
+  <div className="parasat-founder-image-wrap">
+    <img src={jakishevImg} alt="Мухтар Джакишев" className="parasat-founder-image" />
+  </div>
 
-                  <p className="parasat-founder-name-top">Мухтар</p>
-                  <p className="parasat-founder-name-main">Джакишев</p>
-                  <p className="parasat-founder-description">
-                    Казахстанский бизнесмен и бывший глава Казатомпром.
-                  </p>
-                  <p className="parasat-founder-instagram">
-                    Instagram: <span>@dzhakishevmukhtar</span>
-                  </p>
-                </div>
-              </div>
+  <div className="parasat-founder-content text-left items-start">
+    <p className="parasat-founder-name-top text-left">Мухтар</p>
+    <p className="parasat-founder-name-main text-left">Джакишев</p>
+    <p className="parasat-founder-description text-left">
+      Казахстанский бизнесмен и бывший глава Казатомпром.
+    </p>
+    <p className="parasat-founder-instagram text-left">
+      Instagram: <span>@dzhakishevmukhtar</span>
+    </p>
+  </div>
+</div>
+
             </div>
           </section>
 

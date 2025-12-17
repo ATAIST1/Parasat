@@ -159,7 +159,7 @@
 
 .parasat-founder-card--right .parasat-founder-image-wrap {
   left: auto;
-  right: -32px;
+  right: -22px;
 }
 
 .parasat-founder-image {
@@ -168,36 +168,8 @@
   filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.6));
 }
 
-/* общий контент как у Байтасова */
-.parasat-founder-content {
-  margin-left: 130px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  max-width: 520px; /* было 320 — это и делало текст "коротким" */
-  text-align: left;
-  align-items: flex-start;
-}
 
 
-
-/* Джакишев: фото справа, контент слева (как Байтасов), но оставляем место под фото справа */
-.parasat-founder-card--right .parasat-founder-content {
-  margin-left: 130px;   /* как у Байтасова */
-  margin-right: 260px;  /* место под фото справа, но больше не душим текст */
-  max-width: 520px;
-  text-align: left;
-  align-items: flex-start;
-}
-
-
-/* старый класс больше не нужен, но оставлю нейтральным на случай если он ещё в JSX */
-.parasat-founder-content-right {
-  margin-left: 130px;
-  margin-right: 170px;
-  text-align: left;
-  align-items: flex-start;
-}
 
 @media (min-width: 1024px) {
   .parasat-founder-content {
@@ -206,9 +178,11 @@
   }
 
   .parasat-founder-card--right .parasat-founder-content {
-    margin-left: 150px;
-    margin-right: 300px;
-    max-width: 560px;
+    margin-left: 50px;
+    margin-right: 200px;
+    margin-top: 0px;
+    max-width: 400px;
+    margin-bottom: 10px;
   }
 
 
