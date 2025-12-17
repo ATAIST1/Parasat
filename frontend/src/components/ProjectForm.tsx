@@ -203,7 +203,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 z-10">
+      <div className="sticky top-0 bg-white border-b border-black-200 px-4 py-4 z-10">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -215,17 +215,17 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
         </div>
       </div>
 
-      <div className="px-4 py-6 max-w-2xl mx-auto">
+      <div className="px-4 py-6 max-w-2xl mx-auto text-gray-900">
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 text-gray-900">
             <TabsTrigger value="basic">Основное</TabsTrigger>
             <TabsTrigger value="investment">Инвестиции</TabsTrigger>
             <TabsTrigger value="metrics">Метрики</TabsTrigger>
           </TabsList>
 
           {/* ===== Основное ===== */}
-          <TabsContent value="basic" className="space-y-6 mt-6">
-            <div className="space-y-2">
+          <TabsContent value="basic" className="space-y-6 mt-6 text-gray-900">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="name">Название</Label>
               <Input
                 id="name"
@@ -237,7 +237,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="slogan">Слоган</Label>
               <Input
                 id="slogan"
@@ -249,7 +249,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="pitch">Короткий питч</Label>
               <Textarea
                 id="pitch"
@@ -263,7 +263,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="description">Описание</Label>
               <Textarea
                 id="description"
@@ -279,7 +279,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label>Отрасль</Label>
               <Select
                 onValueChange={(value: string) =>
@@ -317,7 +317,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 text-gray-900">
                 <Label>Стадия</Label>
                 <Select
                   value={formData.stage}
@@ -337,7 +337,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 text-gray-900">
                 <Label>Модель</Label>
                 <Select
                   value={formData.model}
@@ -359,7 +359,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label>Технологии</Label>
               <Select
                 onValueChange={(value: any) =>
@@ -377,7 +377,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2 text-gray-900">
                 {formData.technologies.map((tech) => (
                   <Badge key={tech} variant="secondary" className="gap-1">
                     {tech}
@@ -392,7 +392,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="teamMembers">
                 Сколько человек в команде?
               </Label>
@@ -409,7 +409,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="location">Город</Label>
               <Input
                 id="location"
@@ -424,7 +424,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="country">Страна</Label>
               <Input
                 id="country"
@@ -442,7 +442,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
 
           {/* ===== Инвестиции ===== */}
           <TabsContent value="investment" className="space-y-6 mt-6">
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label htmlFor="investment">Ищу сумму</Label>
               <Input
                 id="investment"
@@ -455,13 +455,13 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
                   }))
                 }
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-900 ">
                 Поддерживаем KZT и USD и другие валюты. Пример: 25 000 000 KZT
                 или 50 000 USD.
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label>Валюта</Label>
               <Select
                 value={formData.currency}
@@ -482,7 +482,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label>Структура сделки</Label>
               <Select
                 value={formData.dealStructure}
@@ -506,7 +506,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-gray-900">
               <Label>Доказательства</Label>
               <Textarea
                 placeholder="Любые доказательства спроса или заинтересованности клиентов, партнеров или инвесторов"
@@ -523,7 +523,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
           </TabsContent>
 
           {/* ===== Метрики ===== */}
-          <TabsContent value="metrics" className="space-y-6 mt-6">
+          <TabsContent value="metrics" className="space-y-6 mt-6 text-gray-900">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="mrr">MRR</Label>
@@ -539,7 +539,7 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
                   }
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 text-gray-900">
                 <Label htmlFor="users">Пользователи</Label>
                 <Input
                   id="users"
@@ -555,8 +555,8 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="growth">Рост MoM</Label>
+            <div className="space-y-2 text-gray-900">
+              <Label htmlFor="growth ">Рост MoM</Label>
               <Input
                 id="growth"
                 placeholder="%"
@@ -570,15 +570,15 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
               />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 text-gray-900">
               <Label>Документы</Label>
 
 {/* Питч-дек */}
-<div className="border border-gray-200 rounded-lg p-4 space-y-3">
+<div className="border border-gray-900 rounded-lg p-4 space-y-3">
   <div className="flex items-center justify-between">
     <div>
-      <p className="text-sm">Питч-дек (PDF)</p>
-      <p className="text-xs text-gray-500">до 25 MB</p>
+      <p className="text-sm text-gray-900">Питч-дек (PDF)</p>
+      <p className="text-xs text-gray-900">до 25 MB</p>
     </div>
 
     <div>

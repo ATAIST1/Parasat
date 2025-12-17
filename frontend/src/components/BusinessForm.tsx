@@ -265,7 +265,7 @@ try {
       </div>
 
       {/* УБРАЛ max-w-2xl mx-auto — теперь полноэкранно */}
-      <form onSubmit={handleSubmit} className="p-4 pb-32 space-y-6">
+      <form onSubmit={handleSubmit} className="p-4 pb-32 space-y-6 text-gray-900">
         {/* Основная информация */}
         <div className="bg-white rounded-2xl p-6 space-y-5">
           <h3 className="text-lg font-medium text-gray-900">Основная информация</h3>

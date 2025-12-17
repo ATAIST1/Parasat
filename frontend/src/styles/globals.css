@@ -209,3 +209,43 @@
 html {
   font-size: var(--font-size);
 }
+
+/* NO GRAY MODE: весь текст = foreground */
+:root {
+  --muted-foreground: var(--foreground);
+  --color-muted-foreground: var(--foreground);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--foreground);
+  opacity: 1;
+}
+
+/* ⬇️ ДОБАВЬ ВОТ ЭТО НИЖЕ (самый конец файла) */
+.text-muted-foreground,
+[class*="text-muted-foreground"] {
+  color: var(--foreground) !important;
+  opacity: 1 !important;
+}
+
+[class*="text-gray-"],
+[class*="text-slate-"],
+[class*="text-zinc-"],
+[class*="text-neutral-"],
+[class*="text-stone-"] {
+  color: var(--foreground) !important;
+  opacity: 1 !important;
+}
+
+/* если серость из-за opacity-** (шадцн любит это на disabled/secondary) */
+[class*="opacity-"] {
+  opacity: 1 !important;
+}
+
+/* чтобы вводимый текст в полях точно был чёрный */
+input, textarea, select {
+  color: var(--foreground) !important;
+  opacity: 1 !important;
+}
+
