@@ -10,6 +10,7 @@ import CreateScreen from './components/CreateScreen';
 import ChatsScreen from './components/ChatsScreen';
 import ChatScreen from './components/ChatScreen';
 import ProfileScreen from './components/ProfileScreen';
+import FavoritesScreen from './components/FavoritesScreen';
 import ProjectDetailScreen from './components/ProjectDetailScreen';
 import SettingsScreen from './components/SettingsScreen';
 import PricingScreen from './components/PricingScreen';
@@ -34,7 +35,7 @@ export interface User {
   onboarded?: boolean;
 }
 
-export type Screen = 
+export type Screen =
   | 'welcome'
   | 'auth'
   | 'role-selection'
@@ -45,6 +46,7 @@ export type Screen =
   | 'chats'
   | 'chat'
   | 'profile'
+  | 'favorites'
   | 'project-detail'
   | 'settings'
   | 'pricing'
@@ -64,17 +66,20 @@ function App() {
     );
   }
 
-  const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
+    const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
+    const [lastScreen, setLastScreen] = useState<Screen | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
   const [chatParams, setChatParams] = useState<{ conversationId: string; title: string } | null>(null);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  const openChat = (conversationId: string, title: string) => {
-  setChatParams({ conversationId, title });
-  setCurrentScreen('chat');
-};
+    const openChat = (conversationId: string, title: string) => {
+        setChatParams({ conversationId, title });
+        setLastScreen(currentScreen);
+        setCurrentScreen('chat');
+    };
+
 
 
   const handleLogin = (email: string, role: UserRole) => {
@@ -111,15 +116,16 @@ function App() {
     }
   };
 
-  const handleProjectClick = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    setCurrentScreen('project-detail');
-  };
+    const handleProjectClick = (projectId: string) => {
+        setSelectedProjectId(projectId);
+        setLastScreen(currentScreen);
+        setCurrentScreen('project-detail');
+    };
 
-const navigateTo = (screen: Screen) => {
-  setCurrentScreen(screen);
-};
-
+    const navigateTo = (screen: Screen) => {
+        setLastScreen(currentScreen);
+        setCurrentScreen(screen);
+    };
 
 
   const renderScreen = () => {
@@ -188,12 +194,13 @@ case 'feed':
             navigateTo={navigateTo}
           />
         );
-      case 'chats':
-        return (
-          <ChatsScreen
-            navigateTo={navigateTo}
-          />
-        );
+        case 'chats':
+            return (
+                <ChatsScreen
+                    navigateTo={navigateTo}
+                    openChat={openChat}
+                />
+            );
 case 'chat':
   return (
     chatParams && (
@@ -213,13 +220,22 @@ case 'chat':
             navigateTo={navigateTo}
           />
         );
+      case 'favorites':
+        return (
+            <FavoritesScreen
+                onProjectClick={handleProjectClick}
+                navigateTo={navigateTo}
+            />
+        );
       case 'project-detail':
         return (
-          <ProjectDetailScreen
-            projectId={selectedProjectId || '1'}
-            onBack={() => setCurrentScreen('feed')}
-            navigateTo={navigateTo}
-          />
+            <ProjectDetailScreen
+                projectId={selectedProjectId || '1'}
+                onBack={() => {
+                    setCurrentScreen(lastScreen ?? 'feed');
+                }}
+                navigateTo={navigateTo}
+            />
         );
       case 'settings':
         return (
@@ -245,8 +261,10 @@ case 'chat':
           newsId={selectedNewsId || ''}
           onBack={() => setCurrentScreen('parasat')}
           onOpenNews={(id) => {
-            setSelectedNewsId(id);
-            setCurrentScreen('parasat-news-detail');
+              setSelectedNewsId(id);
+              setLastScreen(currentScreen);
+              setCurrentScreen('parasat-news-detail');
+
           }}
         />
       );
@@ -259,8 +277,10 @@ case 'chat':
           <ParasatScreen
             navigateTo={navigateTo}
             openNews={(id: string) => {
-              setSelectedNewsId(id);
-              setCurrentScreen('parasat-news-detail');
+                setSelectedNewsId(id);
+                setLastScreen(currentScreen);
+                setCurrentScreen('parasat-news-detail');
+
             }}
           />
         );

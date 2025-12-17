@@ -4,6 +4,13 @@ export interface ChatUserDto {
   id: string;
   name: string;
 }
+export interface ConversationListItemDto {
+  conversationId: string;
+  itemType: number;
+  itemId: string;
+  ownerId: string;
+  createdAtUtc: string;
+}
 
 export interface ChatMessageDto {
   id: string;
@@ -39,5 +46,10 @@ export async function getConversationMessages(conversationId: string) {
 
 export async function sendMessageToConversation(conversationId: string, text: string) {
   const res = await api.post(`/api/chat/${conversationId}`, { text });
+  return res.data;
+}
+
+export async function getMyConversations(): Promise<ConversationListItemDto[]> {
+  const res = await api.get<ConversationListItemDto[]>('/api/chat/conversations');
   return res.data;
 }
