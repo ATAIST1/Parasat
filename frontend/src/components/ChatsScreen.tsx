@@ -53,7 +53,9 @@ export default function ChatsScreen({ navigateTo }: ChatsScreenProps) {
           {mockChats.map((chat) => (
             <button
               key={chat.id}
-              onClick={() => navigateTo('chat')}
+              onClick={() =>
+                navigateTo({ screen: 'chat', conversationId: chat.id, title: chat.name })
+              }
               className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors bg-white"
             >
               <Avatar className="w-12 h-12 flex-shrink-0">

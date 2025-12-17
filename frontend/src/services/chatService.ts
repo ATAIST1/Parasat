@@ -15,27 +15,29 @@ export interface ChatMessageDto {
   to: ChatUserDto;
 }
 
-// создать/найти диалог по стартапу
-export async function startConversationWithStartup(startupId: string): Promise<string> {
-  const res = await api.post<{ conversationId: string }>(
-    `/api/chat/startup/${startupId}`
-  );
-  return res.data.conversationId;
+export enum ConversationContextType {
+  Startup = 0,
+  Business = 1,
+  Investor = 2,
+  Developer = 3,
 }
 
-// получить историю сообщений
-export async function getConversationMessages(
-  conversationId: string
-): Promise<ChatMessageDto[]> {
-  const res = await api.get<ChatMessageDto[]>(`/api/chat/${conversationId}`);
+
+// создать/найти диалог по стартапу
+export async function openChat(itemType: ConversationContextType, itemId: string): Promise<string> {
+  const res = await api.post('/api/chat/open', { itemType, itemId });
+  const id = res.data?.conversationId;
+  if (!id) throw new Error('conversationId not returned');
+  return String(id);
+}
+
+
+export async function getConversationMessages(conversationId: string) {
+  const res = await api.get(`/api/chat/${conversationId}`);
   return res.data;
 }
 
-// отправить сообщение
-export async function sendMessageToConversation(
-  conversationId: string,
-  text: string
-): Promise<ChatMessageDto> {
-  const res = await api.post<ChatMessageDto>(`/api/chat/${conversationId}`, { text });
+export async function sendMessageToConversation(conversationId: string, text: string) {
+  const res = await api.post(`/api/chat/${conversationId}`, { text });
   return res.data;
 }

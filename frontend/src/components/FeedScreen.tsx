@@ -16,7 +16,9 @@ import { investorService } from '../services/investorService';
 import { investmentRequestService } from '../services/investmentRequestService';
 import { bookmarkService, BookmarkItemType } from '../services/bookmarkService';
 import type { InvestorProfileResponseDto } from '../types/investor';
-import { startConversationWithStartup } from '../services/chatService';
+import { openChat as openChatApi, ConversationContextType } from '../services/chatService';
+
+
 
 
 interface FeedScreenProps {
@@ -261,7 +263,7 @@ const formatDateRu = (dateStr?: string) => {
 };
 
 
-export default function FeedScreen({ onProjectClick, navigateTo, openChat }: FeedScreenProps) {
+export default function FeedScreen({ onProjectClick, navigateTo, openChat: openChatScreen }: FeedScreenProps) {
   const [savedBookmarks, setSavedBookmarks] = useState<Map<string, BookmarkItemType>>(new Map());
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
@@ -280,13 +282,17 @@ const [isLoadingInvestors, setIsLoadingInvestors] = useState<boolean>(true);
 
 const handleOpenStartupChat = async (project: any) => {
   try {
-    const conversationId = await startConversationWithStartup(project.id);
-    openChat(conversationId, project.name);
-  } catch (e) {
+    const conversationId = await openChatApi(ConversationContextType.Startup, project.id);
+    openChatScreen(conversationId, project.name);
+  } catch (e: any) {
     console.error('Не удалось открыть чат', e);
-    toast('Не удалось открыть чат');
+    console.log('Backend response:', e?.response?.status, e?.response?.data);
+    toast(e?.response?.data?.message || 'Не удалось открыть чат');
   }
 };
+
+
+
 
 
 const [businesses, setBusinesses] = useState<any[]>([]);
@@ -1318,11 +1324,19 @@ function BusinessCard({ business, isSaved, onSave, onClick }: any) {
           variant="outline"
           size="sm"
           className="flex items-center gap-1.5"
-          onClick={() => toast('Чат создан')}
+          onClick={async () => {
+            try {
+              const conversationId = await openChatApi(ConversationContextType.Business, business.id);
+              openChat(conversationId, business.name);
+            } catch {
+              toast('Не удалось открыть чат');
+            }
+          }}
         >
           <MessageCircle className="w-4 h-4" />
           Обсудить
         </Button>
+
       </div>
     </div>
   );
