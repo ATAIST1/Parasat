@@ -16,6 +16,8 @@ import SettingsScreen from './components/SettingsScreen';
 import PricingScreen from './components/PricingScreen';
 import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
+import SubscriptionsScreen from './components/SubscriptionsScreen';
+
 
 import NewsDetailScreen from './components/NewsDetailScreen'; 
 import ResetPasswordScreen from './components/ResetPasswordScreen';
@@ -52,7 +54,9 @@ export type Screen =
   | 'pricing'
   | 'calculator'
   | 'parasat'
+  | 'subscriptions'
   | 'parasat-news-detail';
+  
 
 function App() {
   const path = window.location.pathname;
@@ -255,6 +259,13 @@ case 'chat':
             navigateTo={navigateTo}
           />
         );
+      case 'subscriptions':
+  return (
+    <SubscriptionsScreen
+      onBack={() => setCurrentScreen('profile')}
+      userRole={user?.role}
+    />
+  );
       case 'parasat-news-detail':
       return (
         <NewsDetailScreen
