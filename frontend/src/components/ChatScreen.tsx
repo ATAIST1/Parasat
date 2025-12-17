@@ -5,6 +5,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useEffect, useState } from 'react';
 import { Badge } from './ui/badge';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import {
   ChatMessageDto,
   getConversationMessages,
@@ -28,6 +29,23 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+    const connection = new HubConnectionBuilder()
+        .withUrl('/hubs/chat')
+        .withAutomaticReconnect()
+        .build();
+
+    connection.start().catch(console.error);
+
+    connection.on('ReceiveMessage', (msg: ChatMessageDto) => {
+      setMessages((prev) => (prev.some((x) => x.id === msg.id) ? prev : [...prev, msg]));
+    });
+
+    return () => {
+      connection.stop().catch(() => {});
+    };
+  }, []);
 
   // загрузка истории при открытии
   useEffect(() => {

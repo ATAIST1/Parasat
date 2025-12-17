@@ -2,37 +2,34 @@ import { MessageCircle, Search } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { useEffect, useState } from 'react';
+import { getMyConversations, ConversationListItemDto } from '../services/chatService';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
+
 
 interface ChatsScreenProps {
   navigateTo: (screen: any) => void;
+  openChat: (conversationId: string, title: string) => void;
 }
 
-const mockChats = [
-  {
-    id: '1',
-    name: 'PayFlow Team',
-    lastMessage: 'Спасибо за интерес! Готовы обсудить детали',
-    time: '2ч',
-    unread: 2,
-  },
-  {
-    id: '2',
-    name: 'Александр Иванов',
-    lastMessage: 'Пришлите финмодель, пожалуйста',
-    time: '5ч',
-    unread: 0,
-  },
-  {
-    id: '3',
-    name: 'EduKZ',
-    lastMessage: 'Готовы к 15-минутному коллу?',
-    time: 'вчера',
-    unread: 1,
-  },
-];
 
-export default function ChatsScreen({ navigateTo }: ChatsScreenProps) {
+export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps) {
+  const [chats, setChats] = useState<ConversationListItemDto[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getMyConversations();
+        setChats(data);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-10">
@@ -48,32 +45,35 @@ export default function ChatsScreen({ navigateTo }: ChatsScreenProps) {
         </div>
       </div>
 
-      {mockChats.length > 0 ? (
+      {isLoading ? (
+          <div className="p-4 text-sm text-gray-500">Загрузка…</div>
+      ) : chats.length > 0 ? (
         <div className="divide-y divide-gray-200">
-          {mockChats.map((chat) => (
-            <button
-              key={chat.id}
-              onClick={() => navigateTo('chat')}
-              className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors bg-white"
-            >
-              <Avatar className="w-12 h-12 flex-shrink-0">
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                  {chat.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-baseline justify-between mb-1">
-                  <h3 className="text-gray-900 truncate">{chat.name}</h3>
-                  <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{chat.time}</span>
+          {chats.map((c) => (
+              <button
+                  key={c.conversationId}
+                  onClick={() => openChat(c.conversationId, 'Чат')}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors bg-white"
+              >
+                <Avatar className="w-12 h-12 flex-shrink-0">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                    {String(c.itemType)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="flex items-baseline justify-between mb-1">
+                    <h3 className="text-gray-900 truncate">
+                      Диалог #{c.conversationId.slice(-6)}
+                    </h3>
+                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+          {new Date(c.createdAtUtc).toLocaleDateString('ru-RU')}
+        </span>
+                  </div>
+                  <p className="text-sm text-gray-600 truncate">
+                    Нажмите, чтобы открыть
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
-              </div>
-              {chat.unread > 0 && (
-                <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs flex-shrink-0">
-                  {chat.unread}
-                </div>
-              )}
-            </button>
+              </button>
           ))}
         </div>
       ) : (

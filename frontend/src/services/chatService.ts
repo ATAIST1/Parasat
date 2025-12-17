@@ -15,13 +15,21 @@ export interface ChatMessageDto {
   to: ChatUserDto;
 }
 
-// создать/найти диалог по стартапу
-export async function startConversationWithStartup(startupId: string): Promise<string> {
-  const res = await api.post<{ conversationId: string }>(
-    `/api/chat/startup/${startupId}`
-  );
-  return res.data.conversationId;
+export interface ConversationListItemDto {
+  conversationId: string;
+  itemType: number;
+  itemId: string;
+  ownerId: string;
+  createdAtUtc: string;
 }
+
+// создать/найти диалог по стартапу
+  export async function startConversationWithStartup(startupId: string): Promise<string> {
+    const res = await api.post<{ conversationId: string }>(
+      `/api/chat/startup/${startupId}`
+    );
+    return res.data.conversationId;
+  }
 
 // получить историю сообщений
 export async function getConversationMessages(
@@ -37,5 +45,10 @@ export async function sendMessageToConversation(
   text: string
 ): Promise<ChatMessageDto> {
   const res = await api.post<ChatMessageDto>(`/api/chat/${conversationId}`, { text });
+  return res.data;
+}
+
+export async function getMyConversations(): Promise<ConversationListItemDto[]> {
+  const res = await api.get<ConversationListItemDto[]>('/api/chat/conversations');
   return res.data;
 }

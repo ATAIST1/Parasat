@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 
 interface FavoritesScreenProps {
   navigateTo: (screen: any) => void;
+  onProjectClick: (projectId: string) => void;
 }
 
 type FavoriteCardType = {
@@ -37,7 +38,7 @@ type FavoriteCardType = {
   data: any;
 };
 
-export default function FavoritesScreen({ navigateTo }: FavoritesScreenProps) {
+export default function FavoritesScreen({ navigateTo, onProjectClick  }: FavoritesScreenProps) {
   const [favorites, setFavorites] = useState<FavoriteCardType[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -96,6 +97,8 @@ export default function FavoritesScreen({ navigateTo }: FavoritesScreenProps) {
     }
   };
 
+  // const openDetails = (id: string) => onProjectClick(id);
+
   const renderCard = (fav: FavoriteCardType) => {
     const { type, data } = fav;
 
@@ -120,7 +123,7 @@ export default function FavoritesScreen({ navigateTo }: FavoritesScreenProps) {
               project={project}
               isSaved={true}
               onSave={() => removeFavorite(fav)}
-              onClick={(id: string) => navigateTo({ screen: 'ProjectDetail', projectId: id })}
+              onClick={() => onProjectClick(project.id)}
           />
       );
     }
@@ -202,7 +205,7 @@ export default function FavoritesScreen({ navigateTo }: FavoritesScreenProps) {
               business={business}
               isSaved={true}
               onSave={() => removeFavorite(fav)}
-              onClick={(id: string) => navigateTo({ screen: 'ProjectDetail', projectId: id })}
+              onClick={() => onProjectClick(business.id)}
           />
       );
     }
@@ -320,7 +323,11 @@ function ProjectCard({ project, isSaved, onSave, onClick }: any) {
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={() => onClick?.(project.id)} className="flex-1" size="sm">
+          <Button
+              onClick={() => onClick?.(project.id)}
+              className="flex-1"
+              size="sm"
+          >
             Подробнее
           </Button>
           <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={() => toast('Интерес отправлен')}>
@@ -566,7 +573,11 @@ function BusinessCard({ business, isSaved, onSave, onClick }: any) {
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={() => onClick?.(business.id)} className="flex-1" size="sm">
+          <Button
+              onClick={() => onClick?.(business.id)}
+              className="flex-1"
+              size="sm"
+          >
             Подробнее
           </Button>
           <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={() => toast('Чат создан')}>
