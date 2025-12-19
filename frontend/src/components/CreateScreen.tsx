@@ -6,6 +6,8 @@ import InvestorMandateForm from './InvestorMandateForm';
 import DeveloperForm from './DeveloperForm';
 import BusinessForm from './BusinessForm';
 import InvestorsForm from './InvestorsForm';
+import ClubMemberForm from './ClubMemberForm';
+
 
 interface CreateScreenProps {
   userRole: 'startup' | 'investor' | 'mentor' | null;
@@ -13,9 +15,10 @@ interface CreateScreenProps {
 }
 
 export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps) {
-  const [selectedType, setSelectedType] = useState<
-    'project' | 'investorProfile' | 'mandate' | 'developer' | 'business' | null
-  >(null);
+const [selectedType, setSelectedType] = useState<
+  'project' | 'investorProfile' | 'mandate' | 'developer' | 'business' | 'club' | null
+>(null);
+
 
   if (selectedType === 'project') {
     return (
@@ -75,6 +78,11 @@ export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps
       />
     );
   }
+
+  if (selectedType === 'club') {
+  return <ClubMemberForm onClose={() => setSelectedType(null)} />;
+}
+
 
   return (
     <div className="min-h-screen bg-white p-6">
@@ -172,6 +180,27 @@ export default function CreateScreen({ userRole, navigateTo }: CreateScreenProps
               Создать запрос
             </Button>
           </div>
+
+          <div className="border border-gray-200 rounded-2xl p-6 space-y-4 hover:border-blue-300 hover:shadow-md transition-all">
+  <div className="flex items-start gap-4">
+    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center flex-shrink-0">
+      <UserCircle2 className="w-6 h-6 text-white" />
+    </div>
+    <div className="flex-1">
+      <h3 className="text-gray-900 mb-1">
+        Член Бизнес Клуба Parasat
+      </h3>
+      <p className="text-gray-600 text-sm">
+        Подайте заявку на вступление в закрытый бизнес-клуб
+      </p>
+    </div>
+  </div>
+
+  <Button onClick={() => setSelectedType('club')} className="w-full">
+    Стать резидентом клуба
+  </Button>
+</div>
+
         </div>
       </div>
     </div>

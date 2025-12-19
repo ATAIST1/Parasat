@@ -71,6 +71,9 @@ builder.Services.AddScoped<InvestorContactsService>();
 builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IConversationContextOwnerResolver, ConversationContextOwnerResolver>();
+builder.Services.AddScoped<IClubMembershipRepository, ClubMembershipRepository>();
+builder.Services.AddScoped<ClubMembershipService>();
+
 
 // === JWT Authentication ===
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
