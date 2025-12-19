@@ -26,17 +26,33 @@ namespace Application.Services
             return item == null ? null : ClubMembershipMapper.ToResponseDto(item);
         }
 
-        public async Task CreateAsync(CreateClubMembershipApplicationDto dto, string userId)
-        {
-            var active = await _repo.GetActiveOrPendingByUserIdAsync(userId);
-            if (active != null)
-            {
-                throw new InvalidOperationException("У вас уже есть активная или ожидающая заявка.");
-            }
+public async Task<ClubMembershipApplicationResponseDto> CreateAsync(
+    CreateClubMembershipApplicationDto dto,
+    string? userId
+)
+{
+    // ✅ если залогинен — проверяем по userId
+    if (!string.IsNullOrWhiteSpace(userId))
+    {
+        var active = await _repo.GetActiveOrPendingByUserIdAsync(userId);
+        if (active != null)
+            throw new InvalidOperationException("У вас уже есть активная или ожидающая заявка.");
+    }
+    else
+    {
+        // ✅ если НЕ залогинен — проверяем по контакту (email/phone)
+        // чтобы не спамили одинаковыми заявками
+        var activeByContact = await _repo.GetActiveOrPendingByContactAsync(dto.Email, dto.Phone);
+        if (activeByContact != null)
+            throw new InvalidOperationException("У вас уже есть активная или ожидающая заявка.");
+    }
 
-            var model = ClubMembershipMapper.ToModel(dto, userId);
-            await _repo.AddAsync(model);
-        }
+    var model = ClubMembershipMapper.ToModel(dto, userId);
+    await _repo.AddAsync(model);
+
+    return ClubMembershipMapper.ToResponseDto(model);
+}
+
 
         public async Task<bool> ApproveAsync(string id, string decidedByUserId, string? comment)
         {

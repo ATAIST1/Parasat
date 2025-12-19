@@ -48,5 +48,15 @@ namespace Infrastructure.Repositories
             var result = await _collection.ReplaceOneAsync(x => x.Id == application.Id, application);
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
+
+        public async Task<ClubMembershipApplication?> GetActiveOrPendingByContactAsync(string email, string phone)
+    => await _collection.Find(x =>
+            x.Email == email &&
+            x.Phone == phone &&
+            (x.Status == ClubMembershipStatus.Pending || x.Status == ClubMembershipStatus.Approved)
+        )
+        .SortByDescending(x => x.CreatedAtUtc)
+        .FirstOrDefaultAsync();
+
     }
 }

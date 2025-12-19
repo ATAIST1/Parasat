@@ -15,6 +15,11 @@ import { newsService, type NewsDto } from '../services/newsService';
 
 import type { Screen } from '../App';
 
+// ✅ club membership
+import { toast } from 'sonner';
+import { clubMembershipService } from '../services/clubMembershipService';
+import type { CreateClubMembershipApplicationDto } from '../types/clubMembership';
+
 // основатели
 import baitasovImg from '../assets/parasat-baitasov.png';
 import jakishevImg from '../assets/parasat-jakishev.png';
@@ -87,9 +92,88 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
   const [typedText, setTypedText] = useState('');
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-  const handleJoinSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // ✅ modal form state
+  const [joinForm, setJoinForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    industry: '',
+    position: '',
+    motivation: '',
+  });
+
+  const [myStatus, setMyStatus] = useState<'none' | 'Pending' | 'Approved' | 'Rejected'>('none');
+  const [isChecking, setIsChecking] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ✅ при открытии модалки — подтягиваем статус
+  useEffect(() => {
+    if (!isJoinModalOpen) return;
+
+    const load = async () => {
+      try {
+        setIsChecking(true);
+        const me = await clubMembershipService.getMy();
+        setMyStatus(me.status);
+      } catch (e: any) {
+        if (e?.response?.status !== 404) {
+          console.error('club getMy error:', e?.response?.data || e);
+        }
+        setMyStatus('none');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    load();
+  }, [isJoinModalOpen]);
+
+  const handleJoinSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsJoinModalOpen(false);
+
+    if (!joinForm.firstName || !joinForm.lastName || !joinForm.email || !joinForm.phone) {
+      toast('Заполните обязательные поля (*)');
+      return;
+    }
+
+    if (myStatus === 'Pending') {
+      toast('Ваша заявка уже в обработке');
+      return;
+    }
+    if (myStatus === 'Approved') {
+      toast('Вы уже являетесь членом клуба');
+      return;
+    }
+
+    const payload: CreateClubMembershipApplicationDto = {
+      firstName: joinForm.firstName.trim(),
+      lastName: joinForm.lastName.trim(),
+      email: joinForm.email.trim(),
+      phone: joinForm.phone.trim(),
+      industry: joinForm.industry?.trim() || null,
+      position: joinForm.position?.trim() || null,
+      motivation: joinForm.motivation?.trim() || null,
+    };
+
+    try {
+      setIsSubmitting(true);
+      await clubMembershipService.create(payload);
+
+      setMyStatus('Pending');
+      toast.success('Ваша заявка в обработке, ожидайте');
+
+      setIsJoinModalOpen(false);
+    } catch (err: any) {
+      console.error('club create error:', err?.response?.data || err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.title ||
+        'Не удалось отправить заявку';
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -150,6 +234,15 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
               <div className="parasat-modal-avatar" />
               <h2>ФОРМА ЗАЯВКИ ДЛЯ РЕЗИДЕНТОВ КЛУБА</h2>
               <p>Заполните форму и мы с вами свяжемся в ближайшее время</p>
+
+              {/* ✅ статус */}
+              {!isChecking && myStatus !== 'none' && (
+                <div style={{ marginTop: 10, opacity: 0.9, fontSize: 13 }}>
+                  {myStatus === 'Pending' && 'Статус: заявка в обработке'}
+                  {myStatus === 'Approved' && 'Статус: вы резидент клуба'}
+                  {myStatus === 'Rejected' && 'Статус: заявка отклонена'}
+                </div>
+              )}
             </div>
 
             <div className="parasat-modal-price">
@@ -161,42 +254,106 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
               <div className="parasat-modal-grid">
                 <div className="parasat-modal-field">
                   <label>Ваше имя *</label>
-                  <input type="text" placeholder="Введите ваше имя" required />
+                  <input
+                    type="text"
+                    placeholder="Введите ваше имя"
+                    required
+                    value={joinForm.firstName}
+                    onChange={(e) => setJoinForm({ ...joinForm, firstName: e.target.value })}
+                  />
                 </div>
                 <div className="parasat-modal-field">
                   <label>Ваша фамилия *</label>
-                  <input type="text" placeholder="Введите вашу фамилию" required />
+                  <input
+                    type="text"
+                    placeholder="Введите вашу фамилию"
+                    required
+                    value={joinForm.lastName}
+                    onChange={(e) => setJoinForm({ ...joinForm, lastName: e.target.value })}
+                  />
                 </div>
               </div>
 
               <div className="parasat-modal-field">
                 <label>Ваш email *</label>
-                <input type="email" placeholder="example@email.com" required />
+                <input
+                  type="email"
+                  placeholder="example@email.com"
+                  required
+                  value={joinForm.email}
+                  onChange={(e) => setJoinForm({ ...joinForm, email: e.target.value })}
+                />
               </div>
 
               <div className="parasat-modal-field">
                 <label>Ваш номер телефона *</label>
-                <input type="tel" placeholder="+7 777 777 77 77" required />
+                <input
+                  type="tel"
+                  placeholder="+7 777 777 77 77"
+                  required
+                  value={joinForm.phone}
+                  onChange={(e) => setJoinForm({ ...joinForm, phone: e.target.value })}
+                />
               </div>
 
               <div className="parasat-modal-grid">
                 <div className="parasat-modal-field">
                   <label>Отрасль компании, в которой вы работаете</label>
-                  <input type="text" placeholder="IT, Финансы, Медицина..." />
+                  <input
+                    type="text"
+                    placeholder="IT, Финансы, Медицина..."
+                    value={joinForm.industry}
+                    onChange={(e) => setJoinForm({ ...joinForm, industry: e.target.value })}
+                  />
                 </div>
                 <div className="parasat-modal-field">
                   <label>Ваша должность</label>
-                  <input type="text" placeholder="Ваша должность" />
+                  <input
+                    type="text"
+                    placeholder="Ваша должность"
+                    value={joinForm.position}
+                    onChange={(e) => setJoinForm({ ...joinForm, position: e.target.value })}
+                  />
                 </div>
               </div>
 
               <div className="parasat-modal-field">
                 <label>Почему вы хотите стать резидентом клуба</label>
-                <textarea placeholder="Расскажите о ваших целях и мотивации..." rows={4} required />
+                <textarea
+                  placeholder="Расскажите о ваших целях и мотивации..."
+                  rows={4}
+                  required
+                  value={joinForm.motivation}
+                  onChange={(e) => setJoinForm({ ...joinForm, motivation: e.target.value })}
+                />
               </div>
 
-              <button type="submit" className="parasat-modal-submit">
-                ОТПРАВИТЬ
+              <button
+                type="submit"
+                className="parasat-modal-submit"
+                disabled={
+                  isSubmitting || isChecking || myStatus === 'Pending' || myStatus === 'Approved'
+                }
+                style={{
+                  opacity:
+                    isSubmitting || isChecking || myStatus === 'Pending' || myStatus === 'Approved'
+                      ? 0.7
+                      : 1,
+                  cursor:
+                    isSubmitting || isChecking || myStatus === 'Pending' || myStatus === 'Approved'
+                      ? 'not-allowed'
+                      : 'pointer',
+                }}
+              >
+                {isChecking
+                  ? 'ПРОВЕРЯЕМ...'
+                  : myStatus === 'Approved'
+                    ? 'ВЫ УЖЕ В КЛУБЕ'
+                    : myStatus === 'Pending'
+                      ? 'ЗАЯВКА В ОБРАБОТКЕ'
+                      : isSubmitting
+                        ? 'ОТПРАВЛЯЕМ...'
+                        : 'ОТПРАВИТЬ'}
               </button>
             </form>
           </div>
@@ -257,23 +414,22 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
                 </div>
               </div>
 
-<div className="parasat-founder-card parasat-founder-card--right">
-  <div className="parasat-founder-image-wrap">
-    <img src={jakishevImg} alt="Мухтар Джакишев" className="parasat-founder-image" />
-  </div>
+              <div className="parasat-founder-card parasat-founder-card--right">
+                <div className="parasat-founder-image-wrap">
+                  <img src={jakishevImg} alt="Мухтар Джакишев" className="parasat-founder-image" />
+                </div>
 
-  <div className="parasat-founder-content text-left items-start">
-    <p className="parasat-founder-name-top text-left">Мухтар</p>
-    <p className="parasat-founder-name-main text-left">Джакишев</p>
-    <p className="parasat-founder-description text-left">
-      Казахстанский бизнесмен и бывший глава Казатомпром.
-    </p>
-    <p className="parasat-founder-instagram text-left">
-      Instagram: <span>@dzhakishevmukhtar</span>
-    </p>
-  </div>
-</div>
-
+                <div className="parasat-founder-content text-left items-start">
+                  <p className="parasat-founder-name-top text-left">Мухтар</p>
+                  <p className="parasat-founder-name-main text-left">Джакишев</p>
+                  <p className="parasat-founder-description text-left">
+                    Казахстанский бизнесмен и бывший глава Казатомпром.
+                  </p>
+                  <p className="parasat-founder-instagram text-left">
+                    Instagram: <span>@dzhakishevmukhtar</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -489,19 +645,6 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
               </div>
             )}
           </section>
-
-          {/*<section className="parasat-about-card">
-            <h3>О Parasat Business Club</h3>
-            <p>
-              Мы создаём экосистему для развития предпринимательства в Казахстане и странах СНГ. Наша платформа помогает стартапам
-              находить инвесторов, разработчиков и менторов, а инвесторам — перспективные проекты.
-            </p>
-            <div className="parasat-about-list">
-              <div className="parasat-about-item"><div className="parasat-about-dot" /><span>Прозрачные условия — 2,5% от сделки</span></div>
-              <div className="parasat-about-item"><div className="parasat-about-dot" /><span>Проверенные участники платформы</span></div>
-              <div className="parasat-about-item"><div className="parasat-about-dot" /><span>Поддержка на всех этапах сделки</span></div>
-            </div>
-          </section>*/}
         </div>
       </div>
     </div>

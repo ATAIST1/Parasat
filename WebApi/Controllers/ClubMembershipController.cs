@@ -18,10 +18,16 @@ namespace WebApi.Controllers
             _service = service;
         }
 
+        // ✅ для защищённых эндпоинтов (где [Authorize] обязателен)
         private string UserId =>
             User.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? throw new UnauthorizedAccessException("User is not authenticated");
 
+        // ✅ для публичного эндпоинта — НЕ кидаем exception
+        private string? UserIdOrNull =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // 🔒 только для залогиненного: "мой статус/заявка"
         [HttpGet("me")]
         public async Task<ActionResult<ClubMembershipApplicationResponseDto>> GetMy()
         {
@@ -30,13 +36,30 @@ namespace WebApi.Controllers
             return Ok(item);
         }
 
+        // ✅ ЕДИНСТВЕННЫЙ публичный эндпоинт
+        // Можно отправить заявку вообще без токена
+        [AllowAnonymous]
         [HttpPost("applications")]
         public async Task<IActionResult> Create([FromBody] CreateClubMembershipApplicationDto dto)
         {
-            await _service.CreateAsync(dto, UserId);
-            return Ok(new { message = "Заявка создана" });
+            // если пользователь залогинен — userId будет; если нет — null
+            var userId = UserIdOrNull;
+
+            // ⚠️ Важно: сервис должен уметь принять nullable userId
+            // Если сейчас сигнатура CreateAsync(dto, string userId) — поменяй на string? userId
+            var result = await _service.CreateAsync(dto, userId);
+
+            // Рекомендую возвращать статус, чтобы фронт показал "В обработке"
+            // result.Status например: Pending / Approved / Rejected
+            return Ok(new
+            {
+                message = "Ваша заявка в обработке, ожидайте",
+                status = result.Status,
+                applicationId = result.Id
+            });
         }
 
+        // 🔒 админка
         [Authorize(Roles = "Admin")]
         [HttpGet("applications")]
         public async Task<ActionResult<List<ClubMembershipApplicationResponseDto>>> GetAll()

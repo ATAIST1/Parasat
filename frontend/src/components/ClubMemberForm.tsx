@@ -1,11 +1,14 @@
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
+
+import { clubMembershipService } from '../services/clubMembershipService';
+import type { CreateClubMembershipApplicationDto } from '../types/clubMembership';
 
 interface ClubMemberFormProps {
   onBack: () => void;
@@ -25,8 +28,9 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
     motivation: '',
   });
 
-  // ⚠️ у тебя в приложении есть нижний таббар. Поднимем нашу панель выше него.
-  // Если у тебя таббар другой высоты — поменяй на 64/72/80.
+  const [myStatus, setMyStatus] = useState<'none' | 'Pending' | 'Approved' | 'Rejected'>('none');
+  const [isChecking, setIsChecking] = useState(true);
+
   const APP_BOTTOM_NAV_PX = 72;
 
   const inputCls =
@@ -37,23 +41,67 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
     'bg-white/5 text-white placeholder:text-[var(--color_c)] border-white/15 rounded-2xl px-4 py-3 ' +
     'focus-visible:ring-0 focus-visible:border-[var(--color_b)] min-h-[220px] resize-y';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // ✅ подтянуть статус заявки, если уже есть
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const me = await clubMembershipService.getMy();
+        setMyStatus(me.status);
+      } catch (e: any) {
+        // 404 = заявки нет
+        if (e?.response?.status !== 404) {
+          console.error('club getMy error:', e?.response?.data || e);
+        }
+        setMyStatus('none');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+    load();
+  }, []);
 
+  const submitToBackend = async () => {
     if (!form.firstName || !form.lastName || !form.email || !form.phone) {
       toast('Заполните обязательные поля (*)');
       return;
     }
 
+    if (myStatus === 'Pending') {
+      toast('Ваша заявка уже в обработке');
+      return;
+    }
+    if (myStatus === 'Approved') {
+      toast('Вы уже являетесь членом клуба');
+      return;
+    }
+
+    const payload: CreateClubMembershipApplicationDto = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      industry: form.industry?.trim() || null,
+      position: form.position?.trim() || null,
+      motivation: form.motivation?.trim() || null,
+    };
+
     try {
       setIsSubmitting(true);
-      await new Promise((r) => setTimeout(r, 400));
+      await clubMembershipService.create(payload);
 
-      toast.success('Заявка отправлена');
+      setMyStatus('Pending');
+      toast.success('Ваша заявка в обработке, ожидайте');
       onSubmit?.();
+
+      // ✅ вернуться обратно на ParasatScreen (твой экран, откуда ты открыл форму)
       onBack();
-    } catch {
-      toast.error('Не удалось отправить заявку');
+    } catch (error: any) {
+      console.error('club create error:', error?.response?.data || error);
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.title ||
+        'Не удалось отправить заявку';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -90,13 +138,16 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
 
       {/* Body */}
       <form
-        onSubmit={handleSubmit}
+        // ⚠️ form оставляем для семантики, но submit делаем кнопкой снизу вручную
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submitToBackend();
+        }}
         className="p-4"
-        // ✅ реальный запас снизу: высота нашей панели + таббар + воздух
+        // ✅ запас снизу: таббар + наша панель + воздух
         style={{ paddingBottom: `calc(${APP_BOTTOM_NAV_PX}px + 220px)` }}
       >
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* CARD */}
           <div
             className="rounded-[28px] p-6 border shadow-2xl space-y-6"
             style={{
@@ -110,12 +161,23 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
                 className="mx-auto w-14 h-14 rounded-full border"
                 style={{ borderColor: 'rgba(255,255,255,0.18)' }}
               />
+
               <h1 className="text-white font-semibold tracking-wide">
                 ФОРМА ЗАЯВКИ ДЛЯ РЕЗИДЕНТОВ КЛУБА
               </h1>
+
               <p className="text-sm" style={{ color: 'var(--color_d)' }}>
                 Заполните форму и мы свяжемся с вами в ближайшее время
               </p>
+
+              {/* Мини-статус */}
+              {!isChecking && myStatus !== 'none' && (
+                <div className="text-sm" style={{ color: 'var(--color_d)' }}>
+                  {myStatus === 'Pending' && 'Статус: заявка в обработке'}
+                  {myStatus === 'Approved' && 'Статус: вы резидент клуба'}
+                  {myStatus === 'Rejected' && 'Статус: заявка отклонена'}
+                </div>
+              )}
             </div>
 
             {/* Price */}
@@ -130,7 +192,6 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
             </div>
 
             {/* Fields */}
-            {/* ✅ 2 колонки начиная уже с 520px (а на телефоне 1 колонка) */}
             <div className="grid grid-cols-1 min-[520px]:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">Ваше имя *</Label>
@@ -152,7 +213,6 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
                 />
               </div>
 
-              {/* ✅ всегда во всю ширину грида */}
               <div className="space-y-2 min-[520px]:col-span-2">
                 <Label className="text-white">Email *</Label>
                 <Input
@@ -204,7 +264,7 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
                 />
               </div>
 
-              {/* ✅ ВОТ ТВОЁ “ПРОСТРАНСТВО” после поля: доп. воздух внутри контента */}
+              {/* дополнительный воздух внутри, чтобы поле не упиралось в низ */}
               <div className="min-[520px]:col-span-2 h-10" />
             </div>
           </div>
@@ -215,7 +275,6 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
       <div
         className="fixed left-0 right-0 p-4 border-t"
         style={{
-          // ✅ поднимаем выше таббара приложения
           bottom: `${APP_BOTTOM_NAV_PX}px`,
           backgroundColor: 'rgba(8,26,95,0.92)',
           borderColor: 'rgba(255,255,255,0.10)',
@@ -223,20 +282,57 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
         }}
       >
         <div className="max-w-2xl mx-auto space-y-3">
+          {/* ⚠️ ВАЖНО: кнопка вне формы, поэтому type=button и вручную submit */}
           <Button
-            type="submit"
+            type="button"
             className="w-full h-14 rounded-2xl text-white font-semibold shadow-lg"
             style={{ backgroundColor: 'var(--color_g)' }}
-            disabled={isSubmitting}
+            disabled={
+              isSubmitting ||
+              isChecking ||
+              myStatus === 'Pending' ||
+              myStatus === 'Approved'
+            }
+            onClick={() => void submitToBackend()}
           >
-            {isSubmitting ? 'Отправляем...' : 'ОТПРАВИТЬ'}
+            {isChecking
+              ? 'Проверяем...'
+              : myStatus === 'Approved'
+                ? 'ВЫ УЖЕ В КЛУБЕ'
+                : myStatus === 'Pending'
+                  ? 'ЗАЯВКА В ОБРАБОТКЕ'
+                  : isSubmitting
+                    ? 'Отправляем...'
+                    : 'ОТПРАВИТЬ'}
           </Button>
 
           <button
             type="button"
             className="w-full text-sm"
             style={{ color: 'var(--color_d)' }}
-            onClick={() => toast('Тут потом будет логика входа/проверки членства')}
+            onClick={async () => {
+              try {
+                const me = await clubMembershipService.getMy();
+                if (me.status === 'Approved') {
+                  toast.success('Вы уже член клуба ✅');
+                  return;
+                }
+                if (me.status === 'Pending') {
+                  toast('Заявка ещё на рассмотрении');
+                  return;
+                }
+                if (me.status === 'Rejected') {
+                  toast('Заявка была отклонена');
+                  return;
+                }
+              } catch (e: any) {
+                if (e?.response?.status === 404) {
+                  toast('Заявки ещё нет — заполните форму и отправьте');
+                  return;
+                }
+                toast('Ошибка проверки статуса');
+              }
+            }}
           >
             Если вы уже являетесь членом клуба — войти
           </button>
