@@ -46,6 +46,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IDealRepository, DealRepository>();
+
 
 // Infrastructure (S3, etc.)
 builder.Services.AddInfrastructure(builder.Configuration);
