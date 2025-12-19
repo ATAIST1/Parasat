@@ -14,14 +14,16 @@ public class MessageService
     private readonly IStartupRepository _startupRepo;
     private readonly IConversationRepository _conversationRepo;
     private readonly IConversationContextOwnerResolver _ownerResolver;
+    private readonly IDealRepository _dealRepo;
 
-    public MessageService(IChatRepository chatRepo, IUserRepository userRepo, IStartupRepository startupRepo, IConversationRepository conversationRepo, IConversationContextOwnerResolver ownerResolver)
+    public MessageService(IChatRepository chatRepo, IUserRepository userRepo, IStartupRepository startupRepo, IConversationRepository conversationRepo, IConversationContextOwnerResolver ownerResolver, IDealRepository dealRepo)
     {
         _chatRepo = chatRepo;
         _userRepo = userRepo;
         _startupRepo = startupRepo;
         _conversationRepo = conversationRepo;
-        _ownerResolver = ownerResolver; 
+        _ownerResolver = ownerResolver;
+        _dealRepo = dealRepo;
     }
 
     public async Task<List<MessageDto>> GetChatAsync(string currentUserId, string partnerId)
@@ -140,6 +142,18 @@ public class MessageService
         };
 
         await _conversationRepo.CreateAsync(conv);
+        var deal = new Deal
+        {
+            ConversationId = conv.Id,
+            OwnerId = ownerId,
+            InitiatorId = currentUserId,
+            OwnerAccepted = false,
+            InitiatorAccepted = false,
+            Status = DealStatus.Pending,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        await _dealRepo.CreateAsync(deal);
         return conv;
     }
 
