@@ -75,6 +75,10 @@ public class MessageService
 
         await _chatRepo.SendMessageAsync(message);
 
+        // Update conversation's UpdatedAtUtc
+        conv.UpdatedAtUtc = DateTime.UtcNow;
+        await _conversationRepo.UpdateAsync(conv);
+
         var users = await _userRepo.GetByIdsAsync(new List<string> { fromId, toId });
         var names = users.ToDictionary(u => u.Id, u => u.Name);
 
@@ -85,6 +89,9 @@ public class MessageService
     {
         var conv = await _conversationRepo.GetByIdAsync(conversationId) ?? throw new Exception("Conversation not found");
         if (!conv.ParticipantIds.Contains(userId)) throw new UnauthorizedAccessException("Not a participant");
+
+        // Mark messages as read when viewing
+        await _chatRepo.MarkAsReadAsync(conversationId, userId);
 
         var messages = await _chatRepo.GetByConversationAsync(conversationId);
         var ids = messages.SelectMany(m => new[] { m.FromId, m.ToId }).Distinct().ToList();
@@ -108,14 +115,23 @@ public class MessageService
     {
         var list = await _conversationRepo.GetByUserAsync(userId);
 
-        return list.Select(c => new ConversationListItemDto
+        var result = new List<ConversationListItemDto>();
+        foreach (var c in list)
         {
-            ConversationId = c.Id,
-            ItemType = (int)c.ContextType,
-            ItemId = c.ContextId,
-            OwnerId = c.OwnerId,
-            CreatedAtUtc = c.CreatedAtUtc
-        }).ToList();
+            var unreadCount = await _chatRepo.GetUnreadCountAsync(c.Id, userId);
+            result.Add(new ConversationListItemDto
+            {
+                ConversationId = c.Id,
+                ItemType = (int)c.ContextType,
+                ItemId = c.ContextId,
+                OwnerId = c.OwnerId,
+                CreatedAtUtc = c.CreatedAtUtc,
+                UpdatedAtUtc = c.UpdatedAtUtc,
+                UnreadCount = unreadCount
+            });
+        }
+
+        return result;
     }
      public async Task<Conversation> GetOrCreateAsync(
         string currentUserId,

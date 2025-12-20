@@ -22,7 +22,15 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
       try {
         setIsLoading(true);
         const data = await getMyConversations();
-        setChats(data);
+        console.log('Raw conversations:', data);
+        // Sort by latest update (descending), fallback to createdAtUtc if updatedAtUtc missing
+        const sorted = data.sort((a, b) => {
+          const timeB = new Date(b.updatedAtUtc || b.createdAtUtc).getTime();
+          const timeA = new Date(a.updatedAtUtc || a.createdAtUtc).getTime();
+          return timeB - timeA;
+        });
+        console.log('Sorted conversations:', sorted);
+        setChats(sorted);
       } finally {
         setIsLoading(false);
       }
@@ -62,12 +70,19 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
                 </Avatar>
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-baseline justify-between mb-1">
-                    <h3 className="text-gray-900 truncate">
+                    <h3 className={`truncate ${c.unreadCount > 0 ? 'font-semibold text-gray-900' : 'text-gray-900'}`}>
                       Диалог #{c.conversationId.slice(-6)}
                     </h3>
-                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
-          {new Date(c.createdAtUtc).toLocaleDateString('ru-RU')}
-        </span>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      {c.unreadCount > 0 && (
+                        <span className="bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                          {c.unreadCount > 99 ? '99+' : c.unreadCount}
+                        </span>
+                      )}
+                      <span className="text-xs text-gray-500">
+                        {new Date(c.updatedAtUtc).toLocaleDateString('ru-RU')}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-sm text-gray-600 truncate">
                     Нажмите, чтобы открыть

@@ -8,4 +8,6 @@ public class ConversationListItemDto
     public string ItemId { get; set; } = null!;
     public string OwnerId { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
+    public DateTime UpdatedAtUtc { get; set; }
+    public int UnreadCount { get; set; }
 }

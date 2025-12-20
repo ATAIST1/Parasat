@@ -32,10 +32,27 @@ public class ConversationRepository : IConversationRepository
     }
 
     public async Task<List<Conversation>> GetByUserAsync(string userId)
-        => await _conversations.Find(x => x.ParticipantIds.Contains(userId))
-            .SortByDescending(x => x.CreatedAtUtc)
+    {
+        var conversations = await _conversations.Find(x => x.ParticipantIds.Contains(userId))
             .ToListAsync();
+        
+        // Ensure all conversations have UpdatedAtUtc set (for backwards compatibility)
+        var needsUpdate = conversations.Where(c => c.UpdatedAtUtc == default).ToList();
+        foreach (var conv in needsUpdate)
+        {
+            conv.UpdatedAtUtc = conv.CreatedAtUtc;
+            await UpdateAsync(conv);
+        }
+        
+        // Re-fetch and sort by UpdatedAtUtc
+        return await _conversations.Find(x => x.ParticipantIds.Contains(userId))
+            .SortByDescending(x => x.UpdatedAtUtc)
+            .ToListAsync();
+    }
 
     public async Task CreateAsync(Conversation conversation)
         => await _conversations.InsertOneAsync(conversation);
+
+    public async Task UpdateAsync(Conversation conversation)
+        => await _conversations.ReplaceOneAsync(x => x.Id == conversation.Id, conversation);
 }

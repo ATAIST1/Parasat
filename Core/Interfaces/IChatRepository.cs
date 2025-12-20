@@ -9,4 +9,6 @@ public interface IChatRepository
     Task<List<string>> GetChatPartnersAsync(string userId);
     Task<List<Message>> GetByConversationAsync(string conversationId);
     Task<Message?> GetLastByConversationAsync(string conversationId);
+    Task<int> GetUnreadCountAsync(string conversationId, string userId);
+    Task MarkAsReadAsync(string conversationId, string userId);
 }

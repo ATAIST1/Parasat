@@ -59,4 +59,24 @@ public class ChatRepository : IChatRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<int> GetUnreadCountAsync(string conversationId, string userId)
+    {
+        var count = await _messages.CountDocumentsAsync(m => 
+            m.ConversationId == conversationId && 
+            m.ToId == userId && 
+            !m.IsRead);
+        return (int)count;
+    }
+
+    public async Task MarkAsReadAsync(string conversationId, string userId)
+    {
+        var filter = Builders<Message>.Filter.And(
+            Builders<Message>.Filter.Eq(m => m.ConversationId, conversationId),
+            Builders<Message>.Filter.Eq(m => m.ToId, userId),
+            Builders<Message>.Filter.Eq(m => m.IsRead, false)
+        );
+
+        var update = Builders<Message>.Update.Set(m => m.IsRead, true);
+        await _messages.UpdateManyAsync(filter, update);
+    }
 }

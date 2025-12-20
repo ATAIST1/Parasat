@@ -3,7 +3,7 @@ import { ArrowLeft, Send, Paperclip, Video, MoreVertical } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Badge } from './ui/badge';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import {
@@ -29,6 +29,15 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
@@ -164,6 +173,7 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
             </div>
           );
         })}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* быстрые шаблоны — если история пустая */}

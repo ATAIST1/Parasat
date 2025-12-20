@@ -10,6 +10,8 @@ export interface ConversationListItemDto {
   itemId: string;
   ownerId: string;
   createdAtUtc: string;
+  updatedAtUtc: string;
+  unreadCount: number;
 }
 
 export interface ChatMessageDto {
