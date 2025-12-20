@@ -246,15 +246,25 @@ textarea::placeholder {
 
 /* Цветовая схема — используем фон из parasat.css (#081a5f) */
 :root {
-  --dark-bg: #081a5f;      /* parasat background */
-  --card-bg: #081a5f;      /* карточки теперь совпадают с фоном (по желанию) */
-  --card-hover: #0b255f;   /* когда ховерил — чуть светлее, но не белый */
-  --field-bg: rgba(255,255,255,0.04); /* фон полей ввода, тонкий контраст */
-  --input-text: #e6fbff;   /* более светлый, почти белый текст в полях */
-  --text-color: #e2e6f3;   /* основной текст похож на parasat.css */
+  --dark-bg: #081a5f;      /* deep/navy */
+  --primary: #0b3a8f;      /* primary blue (used for accents & active states) */
+  --primary-soft: #0e59b3; /* slightly lighter */
+  --accent: #17b7d8;       /* soft cyan accent - sparing use */
+  --muted-blue: #0b255f;   /* hover/tonal blue */
+
+  /* Surfaces */
+  --surface-1: rgba(255,255,255,0.04); /* very subtle */
+  --surface-2: rgba(255,255,255,0.06); /* elevated */
+  --surface-3: rgba(255,255,255,0.08); /* highest card */
+
   --background: var(--dark-bg);
-  --card: var(--card-bg);
-  --card-foreground: var(--text-color);
+  --card: var(--surface-1);
+  --card-elevated: var(--surface-2);
+  --card-foreground: #e6fbff; /* near-white/cyan for important text */
+  --muted-foreground: #d6e6f8; /* softer text */
+  --input-text: #e6fbff;
+  --field-bg: var(--surface-1);
+  --card-hover: var(--muted-blue);
 }
 
 /* Поля ввода и селекты: одинаковое оформление */
@@ -345,5 +355,63 @@ button[data-slot="select-trigger"] {
 /* Иконка стрелки в SelectTrigger */
 [data-slot="select-trigger"] svg {
   color: rgba(230, 251, 255, 0.6) !important;
+}
+
+/* Polished UI additions */
+/* Make cards slightly translucent, add soft border and subtle shadow */
+.bg-white {
+  background-color: var(--card-elevated) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  box-shadow: 0 6px 18px rgba(5,10,25,0.35);
+  color: var(--card-foreground) !important;
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+.bg-white {
+  background-color: var(--card-elevated) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  box-shadow: 0 6px 18px rgba(5,10,25,0.35);
+  color: var(--card-foreground) !important;
+  backdrop-filter: blur(6px) saturate(120%);
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms;
+}
+.bg-white:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(5,10,25,0.45);
+}
+
+/* Buttons (global affordance) */
+button, .btn {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 220ms ease;
+}
+button:hover, .btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Primary button appearance (for Button component using bg-blue-600 etc.) */
+.bg-blue-600 {
+  background-image: linear-gradient(180deg, var(--primary) 0%, var(--primary-soft) 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(11,58,143,0.18);
+}
+
+/* Input and select focus */
+input, textarea, select, [data-slot="select-trigger"] {
+  transition: box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+input:focus, textarea:focus, select:focus, [data-slot="select-trigger"]:focus {
+  box-shadow: 0 6px 18px rgba(11,58,143,0.18);
+  outline: none !important;
+  border-color: rgba(17,122,196,0.55) !important;
+}
+
+/* Accent usage for subtle highlights */
+.accent-border {
+  border: 1px solid rgba(23,183,216,0.12) !important;
+}
+
+/* Small utility for subtle label text */
+.muted-text {
+  color: var(--muted-foreground) !important;
 }
 
