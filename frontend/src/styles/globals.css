@@ -250,7 +250,7 @@ textarea::placeholder {
   --card-bg: #081a5f;      /* карточки теперь совпадают с фоном (по желанию) */
   --card-hover: #0b255f;   /* когда ховерил — чуть светлее, но не белый */
   --field-bg: rgba(255,255,255,0.04); /* фон полей ввода, тонкий контраст */
-  --input-text: #7eefff;   /* мягкий cyan для текста в полях */
+  --input-text: #e6fbff;   /* более светлый, почти белый текст в полях */
   --text-color: #e2e6f3;   /* основной текст похож на parasat.css */
   --background: var(--dark-bg);
   --card: var(--card-bg);
@@ -262,17 +262,17 @@ input, textarea, select, .select, [role="listbox"], .dropdown {
   color: var(--input-text) !important;
   opacity: 1 !important;
   background-color: var(--field-bg) !important;
-  border-color: rgba(126, 239, 255, 0.12) !important;
+  border-color: rgba(230, 251, 255, 0.12) !important;
 }
 
 /* плейсхолдеры */
 input::placeholder, textarea::placeholder, select::placeholder {
-  color: rgba(126, 239, 255, 0.45) !important;
+  color: rgba(230, 251, 255, 0.6) !important;
 }
 
-/* опции селекта — такие же как поля */
+/* опции селекта — синим как поля ввода */
 select option, [role="option"] {
-  background-color: var(--field-bg) !important;
+  background-color: #081a5f !important;
   color: var(--input-text) !important;
 }
 
@@ -301,13 +301,49 @@ select option, [role="option"] {
   color: var(--card-foreground) !important;
 }
 
-/* Ховеры: не белые — чуть светлее карточек */
+/* Ховеры: чуть светлее текущего цвета, не белые */
 .hover\:bg-white:hover,
-.hover\:bg-gray-50:hover,
-.hover\:bg-white\/10:hover,
-.hover\:bg-white\/20:hover,
-[class*="hover:bg-white"]:hover {
+.hover\:bg-gray-50:hover {
   background-color: var(--card-hover) !important;
   color: var(--card-foreground) !important;
+  transition: background-color 0.3s ease-in-out !important;
+}
+
+[class*="hover:bg-white"]:hover,
+[class*="hover:bg-gray"]:hover {
+  background-color: var(--card-hover) !important !important;
+  color: var(--card-foreground) !important;
+  transition: background-color 0.3s ease-in-out !important;
+}
+
+/* Вкладки с синим ховером и плавной анимацией */
+.hover\:tab-hover-blue:hover {
+  background-color: #0b3a8f !important;
+  color: #ffffff !important;
+  transition: background-color 0.3s ease-in-out !important;
+}
+
+/* Убедимся, что select элементы сами по себе синие */
+select {
+  background-color: #081a5f !important;
+  color: var(--input-text) !important;
+  border: 1px solid rgba(230, 251, 255, 0.2) !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+}
+
+/* SelectTrigger (поля выбора в фильтрах) - синий фон */
+[data-slot="select-trigger"],
+[role="combobox"],
+.react-select__control,
+button[data-slot="select-trigger"] {
+  background-color: #081a5f !important;
+  color: var(--input-text) !important;
+  border-color: rgba(230, 251, 255, 0.2) !important;
+}
+
+/* Иконка стрелки в SelectTrigger */
+[data-slot="select-trigger"] svg {
+  color: rgba(230, 251, 255, 0.6) !important;
 }
 

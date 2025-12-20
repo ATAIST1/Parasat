@@ -624,15 +624,16 @@ const filteredDevelopers = developers.filter((developer) => {
       </div>
 
       <Tabs defaultValue="for-you" className="w-full">
-        <div className="bg-white border-b border-gray-200 px-4">
-<TabsList className="w-full grid grid-cols-4 bg-white p-1 rounded-2xl border border-gray-200">
+        <div className="bg-card-bg border-b border-gray-700 px-4">
+<TabsList className="w-full grid grid-cols-4 bg-card-bg p-1 rounded-2xl border border-gray-700">
   <TabsTrigger
     value="for-you"
     className="
-      text-gray-900
+      text-white
       data-[state=active]:bg-blue-600 data-[state=active]:text-white
-      hover:bg-gray-100
+      hover:tab-hover-blue
       rounded-xl
+      transition-colors duration-300
     "
   >
     Стартапы
@@ -641,10 +642,11 @@ const filteredDevelopers = developers.filter((developer) => {
   <TabsTrigger
     value="trends"
     className="
-      text-gray-900
+      text-white
       data-[state=active]:bg-blue-600 data-[state=active]:text-white
-      hover:bg-gray-100
+      hover:tab-hover-blue
       rounded-xl
+      transition-colors duration-300
     "
   >
     Инвесторы
@@ -653,10 +655,11 @@ const filteredDevelopers = developers.filter((developer) => {
   <TabsTrigger
     value="new"
     className="
-      text-gray-900
+      text-white
       data-[state=active]:bg-blue-600 data-[state=active]:text-white
-      hover:bg-gray-100
+      hover:tab-hover-blue
       rounded-xl
+      transition-colors duration-300
     "
   >
     Разработчики
@@ -665,10 +668,11 @@ const filteredDevelopers = developers.filter((developer) => {
   <TabsTrigger
     value="businesses"
     className="
-      text-gray-900
+      text-white
       data-[state=active]:bg-blue-600 data-[state=active]:text-white
-      hover:bg-gray-100
+      hover:tab-hover-blue
       rounded-xl
+      transition-colors duration-300
     "
   >
     Бизнесы
