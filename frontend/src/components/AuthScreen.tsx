@@ -13,8 +13,10 @@ interface AuthScreenProps {
   onLogin: (email: string, role: UserRole) => void;
   onRegister: (email: string) => void;
   onBack: () => void;
+  navigateTo: (screen: any) => void;
   mode?: 'login' | 'register';
 }
+
 
 export default function AuthScreen({
   onLogin,
@@ -143,6 +145,7 @@ useEffect(() => {
         toast.success('Мы отправили письмо для подтверждения email. Проверьте почту.');
 
         onRegister(email);
+        navigateTo('role-selection');
       }
 
     } catch (err: any) {

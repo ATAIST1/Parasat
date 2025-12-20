@@ -103,7 +103,7 @@ function App() {
       role: null,
       onboarded: false,
     });
-    setCurrentScreen('role-selection');
+    setCurrentScreen('create');
   };
 
   const handleRoleSelect = (role: UserRole) => {

@@ -11,10 +11,11 @@
   --color_e: #e2e6f3;   /* светлый голубовато-серый */
   --color_f: #ffffff;   /* белый */
   --color_g: #005CFA;   /* ярко-синий акцент */
+--color_z: #001155; 
 
   /* БАЗОВЫЕ ТОКЕНЫ */
   --background: var(--color_a);       /* тёмно-синий фон под контентом */
-  --foreground: #111827;              /* ЧЁРНЫЙ/очень тёмный текст */
+  --foreground: #ffffff;              /* Белый текст на тёмном фоне */
   --background-hover: #0b2375; 
   --card: #ffffff;
   --card-foreground: #111827;
@@ -243,9 +244,70 @@ textarea::placeholder {
   opacity: 1 !important;
 }
 
-/* чтобы вводимый текст в полях точно был чёрный */
-input, textarea, select {
-  color: var(--foreground) !important;
+/* Цветовая схема — используем фон из parasat.css (#081a5f) */
+:root {
+  --dark-bg: #081a5f;      /* parasat background */
+  --card-bg: #081a5f;      /* карточки теперь совпадают с фоном (по желанию) */
+  --card-hover: #0b255f;   /* когда ховерил — чуть светлее, но не белый */
+  --field-bg: rgba(255,255,255,0.04); /* фон полей ввода, тонкий контраст */
+  --input-text: #7eefff;   /* мягкий cyan для текста в полях */
+  --text-color: #e2e6f3;   /* основной текст похож на parasat.css */
+  --background: var(--dark-bg);
+  --card: var(--card-bg);
+  --card-foreground: var(--text-color);
+}
+
+/* Поля ввода и селекты: одинаковое оформление */
+input, textarea, select, .select, [role="listbox"], .dropdown {
+  color: var(--input-text) !important;
   opacity: 1 !important;
+  background-color: var(--field-bg) !important;
+  border-color: rgba(126, 239, 255, 0.12) !important;
+}
+
+/* плейсхолдеры */
+input::placeholder, textarea::placeholder, select::placeholder {
+  color: rgba(126, 239, 255, 0.45) !important;
+}
+
+/* опции селекта — такие же как поля */
+select option, [role="option"] {
+  background-color: var(--field-bg) !important;
+  color: var(--input-text) !important;
+}
+
+/* Синий фон для основных экранов (основной canvas) */
+.min-h-screen {
+  background-color: var(--background) !important;
+}
+
+/* Карточки: используем текущий фон (не слишком тёмно) */
+.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.bg-gray-50,
+.bg-slate-50 {
+  background-color: var(--background) !important;
+}
+
+/* Применяем к кастомным card-классам */
+[class*="bg-white"] {
+  background-color: var(--card-bg) !important;
+}
+
+[class*="card"], [class*="Card"] {
+  background-color: var(--card-bg) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* Ховеры: не белые — чуть светлее карточек */
+.hover\:bg-white:hover,
+.hover\:bg-gray-50:hover,
+.hover\:bg-white\/10:hover,
+.hover\:bg-white\/20:hover,
+[class*="hover:bg-white"]:hover {
+  background-color: var(--card-hover) !important;
+  color: var(--card-foreground) !important;
 }
 
