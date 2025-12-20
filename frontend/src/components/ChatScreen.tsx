@@ -16,6 +16,7 @@ interface ChatScreenProps {
   onBack: () => void;
   conversationId: string;
   title: string;
+  currentUserId: string;
 }
 
 const quickTemplates = [
@@ -24,7 +25,7 @@ const quickTemplates = [
   'Расскажите про юнит-экономику.',
 ];
 
-export default function ChatScreen({ onBack, conversationId, title }: ChatScreenProps) {
+export default function ChatScreen({ onBack, conversationId, title, currentUserId }: ChatScreenProps) {
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,16 +44,36 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
   // Initialize SignalR connection
   useEffect(() => {
     const connection = new HubConnectionBuilder()
-        .withUrl('/hubs/chat')
+        .withUrl('http://localhost:5073/hubs/chat', {
+          accessTokenFactory: () => localStorage.getItem('accessToken') || ''
+        })
         .withAutomaticReconnect()
         .build();
 
     connectionRef.current = connection;
 
-    connection.start().catch(console.error);
+    connection.start()
+      .then(() => console.log('SignalR connected'))
+      .catch(err => console.error('SignalR connection error:', err));
 
     connection.on('ReceiveMessage', (msg: ChatMessageDto) => {
-      setMessages((prev) => (prev.some((x) => x.id === msg.id) ? prev : [...prev, msg]));
+      console.log('Received message:', msg);
+      setMessages((prev) => {
+        // Check if message already exists by ID
+        if (prev.some((x) => x.id === msg.id)) return prev;
+        
+        // Check if this is a duplicate of an optimistic message
+        // (same sender, same text, sent within last 2 seconds)
+        const isDuplicate = prev.some((x) => 
+          x.from.id === msg.from.id && 
+          x.text === msg.text &&
+          Math.abs(new Date(x.sentAt).getTime() - new Date(msg.sentAt).getTime()) < 2000
+        );
+        
+        if (isDuplicate) return prev;
+        
+        return [...prev, msg];
+      });
     });
 
     return () => {
@@ -85,18 +106,44 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
 
     try {
       setIsSending(true);
-      if (connectionRef.current?.state === 'Connected') {
-        // Use SignalR to send message
-        await connectionRef.current.invoke('SendMessage', conversationId, text);
-      } else {
-        // Fallback to HTTP if SignalR is not connected
-        const sent = await sendMessageToConversation(conversationId, text);
-        setMessages((prev) => [...prev, sent]);
-      }
+      
+      // Create optimistic message to show immediately
+      const optimisticMessage: ChatMessageDto = {
+        id: `temp-${Date.now()}`,
+        text,
+        sentAt: new Date().toISOString(),
+        isRead: true,
+        from: { id: currentUserId, name: 'You' },
+        to: { id: '', name: '' },
+      };
+      
+      // Add message to UI immediately (optimistic update)
+      setMessages((prev) => [...prev, optimisticMessage]);
       setMessage('');
+      setIsSending(false);
+      
+      // Send to server in background (fire and forget, but handle errors)
+      try {
+        if (connectionRef.current?.state === 1) {
+          // Use SignalR to send message (don't await, fire and forget)
+          connectionRef.current.invoke('SendMessage', conversationId, text)
+            .catch((err) => {
+              console.error('Failed to send via SignalR:', err);
+              // Fallback to HTTP
+              sendMessageToConversation(conversationId, text)
+                .catch((err) => console.error('Failed to send via HTTP:', err));
+            });
+        } else {
+          // Fallback to HTTP if SignalR is not connected
+          console.log('SignalR not connected, using HTTP fallback');
+          sendMessageToConversation(conversationId, text)
+            .catch((err) => console.error('Failed to send message:', err));
+        }
+      } catch (e) {
+        console.error('Error sending message in background:', e);
+      }
     } catch (e) {
       console.error('Failed to send message', e);
-    } finally {
       setIsSending(false);
     }
   };
@@ -152,7 +199,10 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
             minute: '2-digit',
           });
 
-          if (!msg.isMine) {
+          // Determine if this message is from the current user
+          const isMine = msg.from.id === currentUserId;
+
+          if (!isMine) {
             // входящее
             return (
               <div key={msg.id} className="flex gap-2 items-start">

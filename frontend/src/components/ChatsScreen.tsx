@@ -42,16 +42,27 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
   // Set up SignalR connection for real-time updates
   useEffect(() => {
     const connection = new HubConnectionBuilder()
-        .withUrl('/hubs/chat')
+        .withUrl('http://localhost:5073/hubs/chat', {
+          accessTokenFactory: () => localStorage.getItem('accessToken') || ''
+        })
         .withAutomaticReconnect()
         .build();
 
     connectionRef.current = connection;
 
-    connection.start().catch(console.error);
+    connection.start()
+      .then(() => console.log('ChatsScreen SignalR connected'))
+      .catch(err => console.error('ChatsScreen SignalR connection error:', err));
 
     // When a conversation is updated (new message), reload the conversation list
     connection.on('ConversationUpdated', (conversationId: string) => {
+      console.log('ConversationUpdated:', conversationId);
+      loadConversations();
+    });
+
+    // Also listen for received messages to update unread counts in real-time
+    connection.on('ReceiveMessage', () => {
+      console.log('Message received, updating chat list');
       loadConversations();
     });
 

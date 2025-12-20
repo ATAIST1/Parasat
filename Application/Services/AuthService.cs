@@ -148,7 +148,8 @@ public class AuthService
                 AccessToken: accessToken,
                 RefreshToken: refreshToken,
                 TemporaryToken: null,
-                Role: user.Role
+                Role: user.Role,
+                Id: user.Id
             );
         }
 
@@ -180,7 +181,8 @@ public class AuthService
             AccessToken: null,
             RefreshToken: null,
             TemporaryToken: user.TwoFactorTempToken,
-            Role: user.Role
+            Role: user.Role,
+            Id: user.Id
         );
     }
 

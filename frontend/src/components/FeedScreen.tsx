@@ -959,8 +959,8 @@ function ProjectCard({ project, isSaved, onSave, onClick, onContact }: any) {
             {project.stage && <Badge variant="secondary">{project.stage}</Badge>}
             {project.industry && <Badge variant="outline">{project.industry}</Badge>}
             {project.location && <Badge variant="outline">{project.location}</Badge>}
-            {project.tags?.map((tag: string) => (
-              <Badge key={tag} variant="outline" className="text-xs">
+            {project.tags?.map((tag: string, index: number) => (
+              <Badge key={`tag-${index}-${tag}`} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
@@ -1062,8 +1062,8 @@ function InvestorCard({ investor, isSaved, onSave }: any) {
       <p className="text-gray-600 text-sm leading-relaxed">{investor.bio}</p>
 
       <div className="flex flex-wrap gap-1.5">
-        {investor.industries.map((industry: string) => (
-          <Badge key={industry} variant="secondary" className="text-xs">
+        {investor.industries.map((industry: string, index: number) => (
+          <Badge key={`industry-${index}-${industry}`} variant="secondary" className="text-xs">
             {industry}
           </Badge>
         ))}
@@ -1176,8 +1176,8 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
       {/* стек технологий */}
       {developer.stack?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {developer.stack.map((tech: string) => (
-            <Badge key={tech} variant="outline" className="text-xs">
+          {developer.stack.map((tech: string, index: number) => (
+            <Badge key={`tech-${index}-${tech}`} variant="outline" className="text-xs">
               {tech}
             </Badge>
           ))}

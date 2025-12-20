@@ -90,9 +90,9 @@ function App() {
 
 
 
-  const handleLogin = (email: string, role: UserRole) => {
+  const handleLogin = (email: string, role: UserRole, userId: string) => {
     setUser({
-      id: '1',
+      id: userId,
       email,
       role,
       onboarded: true,
@@ -211,11 +211,12 @@ case 'feed':
             );
 case 'chat':
   return (
-    chatParams && (
+    chatParams && user && (
       <ChatScreen
         onBack={() => setCurrentScreen('chats')}
         conversationId={chatParams.conversationId}
         title={chatParams.title}
+        currentUserId={user.id}
       />
     )
   );

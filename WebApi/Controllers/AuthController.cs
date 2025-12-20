@@ -38,12 +38,12 @@ public class AuthController : ControllerBase
 
 // ЛИАНА ДОБАВИЛА ЕС ЧО УБЕРЕМ Улучшенный метод логина с разными ответами для неподтвержденного email и неверных данных 
 [HttpPost("login")]
-    public async Task<ActionResult<TokenResponse>> Login(LoginDto dto)
+    public async Task<ActionResult<LoginResponse>> Login(LoginDto dto)
     {
         try
         {
-            var tokens = await _authService.LoginAsync(dto);
-            return Ok(tokens);
+            var response = await _authService.LoginAsync(dto);
+            return Ok(response);
         }
         catch (UnauthorizedAccessException)
         {

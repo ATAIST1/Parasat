@@ -9,11 +9,11 @@ public record LoginResponse(
     string? AccessToken,
     string? RefreshToken,
     string? TemporaryToken,
-    string? Role
-
+    string? Role,
+    string? Id = null
 );
 
-public record TokenResponse(string AccessToken, string RefreshToken);
+public record TokenResponse(string AccessToken, string RefreshToken, string? Id = null, string? Role = null);
 public record RefreshTokenRequest(string RefreshToken);
 public record LogoutDto(string? RefreshToken = null);
 public record ResendConfirmationDto(string Email);

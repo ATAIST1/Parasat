@@ -10,7 +10,7 @@ import { authService } from '../services/authService';
 import { toast } from 'sonner';
 
 interface AuthScreenProps {
-  onLogin: (email: string, role: UserRole) => void;
+  onLogin: (email: string, role: UserRole, userId: string) => void;
   onRegister: (email: string) => void;
   onBack: () => void;
   navigateTo: (screen: any) => void;
@@ -104,14 +104,14 @@ useEffect(() => {
       if (isLogin) {
         const data = await authService.login({ email, password });
 
-        const { accessToken, refreshToken } = data || {};
+        const { accessToken, refreshToken, id } = data || {};
 
         if (accessToken) localStorage.setItem('accessToken', accessToken);
         if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
 
         toast.success('Успешный вход');
 
-        onLogin(email, data.role);
+        onLogin(email, data.role, id || '');
       } else {
         // === РЕГИСТРАЦИЯ ===
         if (!acceptTerms) {

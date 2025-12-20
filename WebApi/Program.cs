@@ -103,9 +103,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -150,14 +151,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// CORS must be BEFORE Authentication and Authorization
+app.UseCors("AllowAll");
+
 // ВАЖНО: порядок именно такой!
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors(builder => builder
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
