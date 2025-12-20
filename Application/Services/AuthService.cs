@@ -147,7 +147,8 @@ public class AuthService
                 RequiresTwoFactor: false,
                 AccessToken: accessToken,
                 RefreshToken: refreshToken,
-                TemporaryToken: null
+                TemporaryToken: null,
+                Role: user.Role
             );
         }
 
@@ -178,7 +179,8 @@ public class AuthService
             RequiresTwoFactor: true,
             AccessToken: null,
             RefreshToken: null,
-            TemporaryToken: user.TwoFactorTempToken
+            TemporaryToken: user.TwoFactorTempToken,
+            Role: user.Role
         );
     }
 

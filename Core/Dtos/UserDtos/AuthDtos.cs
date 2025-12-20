@@ -8,7 +8,9 @@ public record LoginResponse(
     bool RequiresTwoFactor,
     string? AccessToken,
     string? RefreshToken,
-    string? TemporaryToken
+    string? TemporaryToken,
+    string? Role
+
 );
 
 public record TokenResponse(string AccessToken, string RefreshToken);

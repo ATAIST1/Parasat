@@ -121,6 +121,15 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
     },
   ];
 
+  if (user?.role === 'Admin') {
+    menuItems.unshift({
+      icon: Shield,
+      title: 'Admin Panel',
+      subtitle: 'Управление системой',
+      action: () => navigateTo('admin'),
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 px-4 py-4">

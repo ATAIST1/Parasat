@@ -21,12 +21,14 @@ import SubscriptionsScreen from './components/SubscriptionsScreen';
 
 import NewsDetailScreen from './components/NewsDetailScreen'; 
 import ResetPasswordScreen from './components/ResetPasswordScreen';
+import AdminPanel from './components/AdminPanel';
+
 
 import { Toaster } from './components/ui/sonner';
 
 
 
-export type UserRole = 'startup' | 'investor' | 'mentor' | null;
+export type UserRole = 'startup' | 'investor' | 'mentor' | 'Admin' | null;
 
 export interface User {
   id: string;
@@ -55,7 +57,9 @@ export type Screen =
   | 'calculator'
   | 'parasat'
   | 'subscriptions'
+    | 'admin'
   | 'parasat-news-detail';
+
   
 
 function App() {
@@ -215,7 +219,22 @@ case 'chat':
       />
     )
   );
+        case 'admin':
+            if (user?.role !== 'Admin') {
+                return (
+                    <FeedScreen
+                        onProjectClick={handleProjectClick}
+                        navigateTo={navigateTo}
+                        openChat={openChat}
+                    />
+                );
+            }
 
+            return (
+                <AdminPanel
+                    onBack={() => setCurrentScreen('profile')}
+                />
+            );
 
       case 'profile':
         return (
@@ -266,6 +285,8 @@ case 'chat':
       userRole={user?.role}
     />
   );
+
+
       case 'parasat-news-detail':
       return (
         <NewsDetailScreen
