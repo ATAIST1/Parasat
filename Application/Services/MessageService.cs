@@ -111,6 +111,19 @@ public class MessageService
 
         return conv.ParticipantIds;
     }
+
+    /// <summary>Get a conversation (for accessing participant IDs).</summary>
+    public async Task<Conversation> GetConversationAsync(string conversationId, string userId)
+    {
+        var conv = await _conversationRepo.GetByIdAsync(conversationId)
+            ?? throw new Exception("Conversation not found");
+
+        if (!conv.ParticipantIds.Contains(userId))
+            throw new UnauthorizedAccessException("Not a participant");
+
+        return conv;
+    }
+
     public async Task<List<ConversationListItemDto>> GetMyConversationsAsync(string userId)
     {
         var list = await _conversationRepo.GetByUserAsync(userId);

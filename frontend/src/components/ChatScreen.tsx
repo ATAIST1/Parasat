@@ -30,6 +30,7 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const connectionRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,11 +40,14 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
     scrollToBottom();
   }, [messages]);
 
+  // Initialize SignalR connection
   useEffect(() => {
     const connection = new HubConnectionBuilder()
         .withUrl('/hubs/chat')
         .withAutomaticReconnect()
         .build();
+
+    connectionRef.current = connection;
 
     connection.start().catch(console.error);
 
@@ -81,8 +85,14 @@ export default function ChatScreen({ onBack, conversationId, title }: ChatScreen
 
     try {
       setIsSending(true);
-      const sent = await sendMessageToConversation(conversationId, text);
-      setMessages((prev) => [...prev, sent]);
+      if (connectionRef.current?.state === 'Connected') {
+        // Use SignalR to send message
+        await connectionRef.current.invoke('SendMessage', conversationId, text);
+      } else {
+        // Fallback to HTTP if SignalR is not connected
+        const sent = await sendMessageToConversation(conversationId, text);
+        setMessages((prev) => [...prev, sent]);
+      }
       setMessage('');
     } catch (e) {
       console.error('Failed to send message', e);

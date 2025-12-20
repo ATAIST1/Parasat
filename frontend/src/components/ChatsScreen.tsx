@@ -2,8 +2,9 @@ import { MessageCircle, Search } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getMyConversations, ConversationListItemDto } from '../services/chatService';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 
 
@@ -16,27 +17,47 @@ interface ChatsScreenProps {
 export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps) {
   const [chats, setChats] = useState<ConversationListItemDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const connectionRef = useRef<any>(null);
+
+  const loadConversations = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getMyConversations();
+      // Sort by latest update (descending), fallback to createdAtUtc if updatedAtUtc missing
+      const sorted = data.sort((a, b) => {
+        const timeB = new Date(b.updatedAtUtc || b.createdAtUtc).getTime();
+        const timeA = new Date(a.updatedAtUtc || a.createdAtUtc).getTime();
+        return timeB - timeA;
+      });
+      setChats(sorted);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getMyConversations();
-        console.log('Raw conversations:', data);
-        // Sort by latest update (descending), fallback to createdAtUtc if updatedAtUtc missing
-        const sorted = data.sort((a, b) => {
-          const timeB = new Date(b.updatedAtUtc || b.createdAtUtc).getTime();
-          const timeA = new Date(a.updatedAtUtc || a.createdAtUtc).getTime();
-          return timeB - timeA;
-        });
-        console.log('Sorted conversations:', sorted);
-        setChats(sorted);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    loadConversations();
+  }, []);
 
-    load();
+  // Set up SignalR connection for real-time updates
+  useEffect(() => {
+    const connection = new HubConnectionBuilder()
+        .withUrl('/hubs/chat')
+        .withAutomaticReconnect()
+        .build();
+
+    connectionRef.current = connection;
+
+    connection.start().catch(console.error);
+
+    // When a conversation is updated (new message), reload the conversation list
+    connection.on('ConversationUpdated', (conversationId: string) => {
+      loadConversations();
+    });
+
+    return () => {
+      connection.stop().catch(() => {});
+    };
   }, []);
   return (
     <div className="min-h-screen bg-gray-50">
