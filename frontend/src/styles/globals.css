@@ -291,23 +291,26 @@ select option, [role="option"] {
   background-color: var(--background) !important;
 }
 
-/* Карточки: используем текущий фон (не слишком тёмно) */
-.bg-white {
-  background-color: var(--card-bg) !important;
-}
-
+/* Цвета поверхностей */
 .bg-gray-50,
 .bg-slate-50 {
   background-color: var(--background) !important;
 }
 
-/* Применяем к кастомным card-классам */
+/* Базовая поверхность для элементов с белым фоном (не поднимаются по ховеру) */
+.bg-white {
+  background-color: var(--card-elevated) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid rgba(255,255,255,0.03) !important;
+}
+
+/* Кастомные card-классы наследуют базовую поверхность */
 [class*="bg-white"] {
-  background-color: var(--card-bg) !important;
+  background-color: var(--card-elevated) !important;
 }
 
 [class*="card"], [class*="Card"] {
-  background-color: var(--card-bg) !important;
+  background-color: var(--card-elevated) !important;
   color: var(--card-foreground) !important;
 }
 
@@ -358,34 +361,28 @@ button[data-slot="select-trigger"] {
 }
 
 /* Polished UI additions */
-/* Make cards slightly translucent, add soft border and subtle shadow */
-.bg-white {
-  background-color: var(--card-elevated) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
-  box-shadow: 0 6px 18px rgba(5,10,25,0.35);
-  color: var(--card-foreground) !important;
+/* Card base: subtle translucency and soft border */
+.card-base, .bg-white {
+  border: 1px solid rgba(255,255,255,0.03) !important;
   backdrop-filter: blur(6px) saturate(120%);
 }
 
-.bg-white {
-  background-color: var(--card-elevated) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
+/* Lift effect: only for surfaced cards (use .card-lift or elements with both .bg-white and .rounded-2xl) */
+.card-lift, .bg-white.rounded-2xl, [class*="card"].rounded-2xl {
   box-shadow: 0 6px 18px rgba(5,10,25,0.35);
-  color: var(--card-foreground) !important;
-  backdrop-filter: blur(6px) saturate(120%);
   transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms;
 }
-.bg-white:hover {
+.card-lift:hover, .bg-white.rounded-2xl:hover, [class*="card"].rounded-2xl:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(5,10,25,0.45);
 }
 
-/* Buttons (global affordance) */
+/* Buttons (global affordance) - no translate/shift, only subtle color/shadow changes */
 button, .btn {
-  transition: transform 180ms ease, box-shadow 180ms ease, background-color 220ms ease;
+  transition: background-color 180ms ease, box-shadow 180ms ease;
 }
 button:hover, .btn:hover {
-  transform: translateY(-2px);
+  /* intentionally no transform to keep header/footer/buttons static */
 }
 
 /* Primary button appearance (for Button component using bg-blue-600 etc.) */
