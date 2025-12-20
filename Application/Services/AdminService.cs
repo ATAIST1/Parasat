@@ -50,4 +50,13 @@ public class AdminService
             await _userRepo.UpdateAsync(user);
         }
 
+    public async Task UnbanUserAsync(string userId)
+        {
+        var user = await _userRepo.GetByIdAsync(userId)
+                   ?? throw new Exception("User not found");
+
+        user.IsBanned = false;
+        user.BannedUntil = null;
+        await _userRepo.UpdateAsync(user);
+        }
 }

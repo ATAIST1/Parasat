@@ -44,4 +44,11 @@ public class AdminController : ControllerBase
         await _adminService.BanUserAsync(id);
         return Ok(new { message = "User banned" });
     }
+
+    [HttpPost("users/{id}/unban")]
+    public async Task<IActionResult> UnbanUser(string id)
+    {
+        await _adminService.UnbanUserAsync(id);
+        return Ok(new { message = "User unbanned" });
+    }
 }
