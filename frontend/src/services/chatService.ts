@@ -1,4 +1,6 @@
 import api from '../lib/api';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+
 
 export interface ChatUserDto {
   id: string;
@@ -31,6 +33,8 @@ export enum ConversationContextType {
   Developer = 3,
 }
 
+const CHAT_HUB_URL = '/hubs/chat';
+
 
 // создать/найти диалог по стартапу
 export async function openChat(itemType: ConversationContextType, itemId: string): Promise<string> {
@@ -54,4 +58,19 @@ export async function sendMessageToConversation(conversationId: string, text: st
 export async function getMyConversations(): Promise<ConversationListItemDto[]> {
   const res = await api.get<ConversationListItemDto[]>('/api/chat/conversations');
   return res.data;
+}
+
+export function createChatHub(): HubConnection {
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+    throw new Error('No access token for SignalR');
+  }
+
+  return new HubConnectionBuilder()
+      .withUrl(CHAT_HUB_URL, {
+        accessTokenFactory: () => token,
+      })
+      .withAutomaticReconnect()
+      .build();
 }

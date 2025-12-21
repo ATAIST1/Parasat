@@ -17,7 +17,11 @@ import PricingScreen from './components/PricingScreen';
 import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
 import SubscriptionsScreen from './components/SubscriptionsScreen';
+<<<<<<< HEAD
 import TechSupportScreen from './components/TechSupportScreen';
+=======
+import AboutUs from './components/AboutUs';
+>>>>>>> f332c49dbfa7f7b5f697d91e8a5bb185bb3b3f43
 
 import NewsDetailScreen from './components/NewsDetailScreen';
 import ResetPasswordScreen from './components/ResetPasswordScreen';
@@ -25,6 +29,8 @@ import AdminPanel from './components/AdminPanel';
 
 import { Toaster } from './components/ui/sonner';
 import SiteNavbar from './components/siteNavbar';
+import SiteFooter from './components/SiteFooter';
+
 
 export type UserRole = 'startup' | 'investor' | 'mentor' | 'Admin' | null;
 
@@ -57,7 +63,8 @@ export type Screen =
   | 'subscriptions'
   | 'admin'
   | 'tech-support'
-  | 'parasat-news-detail';
+  | 'parasat-news-detail'
+  | 'about-us';
 
 function App() {
   const path = window.location.pathname;
@@ -145,6 +152,9 @@ function App() {
               setCurrentScreen('auth');
             }}
             onContinueAsGuest={() => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+
               setUser({ id: 'guest', email: '', role: null });
               setCurrentScreen('feed');
             }}
@@ -188,21 +198,30 @@ function App() {
         return <CreateScreen userRole={user?.role || 'startup'} navigateTo={navigateTo} />;
 
       case 'chats':
+        if (!user || user.id === 'guest') {
+          setCurrentScreen('auth');
+          return null;
+        }
         return <ChatsScreen navigateTo={navigateTo} openChat={openChat} />;
 
       case 'chat':
-        return (
-          chatParams &&
-          user && (
-            <ChatScreen
-              onBack={() => setCurrentScreen('chats')}
-              conversationId={chatParams.conversationId}
-              title={chatParams.title}
-              currentUserId={user.id}
-            />
-          )
-        );
+        // гостю запрещаем
+        if (!user || user.id === 'guest') {
+          setCurrentScreen('auth');
+          return null;
+        }
 
+        // если по какой-то причине нет chatParams — ничего не рендерим
+        if (!chatParams) return null;
+
+        return (
+            <ChatScreen
+                onBack={() => setCurrentScreen('chats')}
+                conversationId={chatParams.conversationId}
+                title={chatParams.title}
+                currentUserId={user.id}
+            />
+        );
       case 'admin':
         if (user?.role !== 'Admin') {
           return (
@@ -276,17 +295,20 @@ function App() {
             }}
           />
         );
+        case 'about-us':
+          return (
+            <AboutUs navigateTo={navigateTo} />
+          );
 
       default:
         return null;
     }
   };
 
-  // Показ навбара: скрываем на auth + welcome + onboarding + role-selection + parasat
   const isLoggedIn = !!user && user.id !== 'guest';
   const hideTopNavbarOn: Screen[] = ['welcome', 'auth', 'role-selection', 'onboarding', 'parasat'];
   const showTopNavbar = !hideTopNavbarOn.includes(currentScreen);
-
+  
   return (
     <div className="min-h-screen flex flex-col relative">
       {showTopNavbar && (
@@ -300,6 +322,8 @@ function App() {
       <main className={`flex-1 ${showTopNavbar ? 'pt-20' : ''}`}>
         {renderScreen()}
       </main>
+
+      <SiteFooter />
 
       <Toaster />
     </div>
