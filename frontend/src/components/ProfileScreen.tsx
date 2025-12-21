@@ -124,7 +124,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
   if (user?.role === 'Admin') {
     menuItems.unshift({
       icon: Shield,
-      title: 'Admin Panel',
+      title: 'Панель Администратора',
       subtitle: 'Управление системой',
       action: () => navigateTo('admin'),
     });
