@@ -17,7 +17,7 @@ export default function SiteNavbar({
       { key: "parasat", label: "Parasat", to: "parasat" },
       { key: "feed", label: "Лента", to: "feed" },
       { key: "chats", label: "Чаты", to: "chats" },
-      { key: "about", label: "О нас", to: "about" },
+        { key: "about-us", label: "О нас", to: "about-us" },
     ],
     []
   );

@@ -17,6 +17,7 @@ import PricingScreen from './components/PricingScreen';
 import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
 import SubscriptionsScreen from './components/SubscriptionsScreen';
+import AboutUs from './components/AboutUs';
 
 import NewsDetailScreen from './components/NewsDetailScreen';
 import ResetPasswordScreen from './components/ResetPasswordScreen';
@@ -57,7 +58,8 @@ export type Screen =
   | 'parasat'
   | 'subscriptions'
   | 'admin'
-  | 'parasat-news-detail';
+  | 'parasat-news-detail'
+  | 'about-us';
 
 function App() {
   const path = window.location.pathname;
@@ -277,6 +279,10 @@ function App() {
             }}
           />
         );
+        case 'about-us':
+          return (
+            <AboutUs navigateTo={navigateTo} />
+          );
 
       default:
         return null;
