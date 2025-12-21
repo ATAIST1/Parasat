@@ -55,4 +55,9 @@ public class ConversationRepository : IConversationRepository
 
     public async Task UpdateAsync(Conversation conversation)
         => await _conversations.ReplaceOneAsync(x => x.Id == conversation.Id, conversation);
+
+    public async Task<List<Conversation>> GetAllAsync()
+        => await _conversations.Find(_ => true)
+            .SortByDescending(x => x.UpdatedAtUtc)
+            .ToListAsync();
 }

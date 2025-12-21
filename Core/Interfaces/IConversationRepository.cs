@@ -17,4 +17,7 @@ public interface IConversationRepository
     Task CreateAsync(Conversation conversation);
     
     Task UpdateAsync(Conversation conversation);
+
+    Task<List<Conversation>> GetAllAsync();
+
 }

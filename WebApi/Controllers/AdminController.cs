@@ -51,4 +51,11 @@ public class AdminController : ControllerBase
         await _adminService.UnbanUserAsync(id);
         return Ok(new { message = "User unbanned" });
     }
+
+    [HttpGet("conversations")]
+    public async Task<IActionResult> GetAllConversations()
+    {
+        var list = await _adminService.GetAllConversationsAsync();
+        return Ok(list);
+    }
 }
