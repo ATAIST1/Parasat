@@ -75,7 +75,7 @@ namespace WebApi.Controllers
             return Ok(new { url });
         }
 
-        // [Authorize(Roles = "Admin,Editor")] чек на роль
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateNews([
             FromForm] CreateNewsDto dto, IFormFile? image)
@@ -87,7 +87,7 @@ namespace WebApi.Controllers
             return CreatedAtAction(nameof(GetNewsById), new { id = createdNews.Id }, createdNews);
         }
 
-        // [Authorize(Roles = "Admin,Editor")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNews(string id, [FromForm] UpdateNewsDto dto, IFormFile? image)
         {
@@ -98,7 +98,7 @@ namespace WebApi.Controllers
             return updatedNews != null ? Ok(updatedNews) : NotFound();
         }
 
-        // [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNews(string id)
         {
