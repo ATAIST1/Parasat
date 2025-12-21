@@ -412,3 +412,92 @@ input:focus, textarea:focus, select:focus, [data-slot="select-trigger"]:focus {
   color: var(--muted-foreground) !important;
 }
 
+/* Text utilities for card-friendly colors */
+.text-card-foreground {
+  color: var(--card-foreground) !important;
+}
+
+/* Primary text utility for dark blue headings */
+.text-primary {
+  color: var(--primary) !important;
+}
+
+/* Background and badge utilities for primary color */
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+.badge-primary {
+  background-color: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+/* === Disable lift/translate in structural areas (headers, footers, forms, sticky bars) === */
+header .card-lift,
+footer .card-lift,
+.sticky .card-lift,
+.top-0 .card-lift,
+form .card-lift,
+.modal .card-lift,
+.filters .card-lift,
+.search-area .card-lift,
+.tabs-area .card-lift {
+  transform: none !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+/* Also prevent lift for bg-white.rounded-2xl inside these areas */
+header .bg-white.rounded-2xl,
+footer .bg-white.rounded-2xl,
+.sticky .bg-white.rounded-2xl,
+.top-0 .bg-white.rounded-2xl,
+form .bg-white.rounded-2xl,
+.modal .bg-white.rounded-2xl,
+.filters .bg-white.rounded-2xl,
+.search-area .bg-white.rounded-2xl,
+.tabs-area .bg-white.rounded-2xl {
+  transform: none !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+/* Utility to explicitly mark areas as non-lifting */
+.no-lift * {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Blue card variants for CalculatorScreen and similar panels */
+.card-blue {
+  background: linear-gradient(180deg, rgba(11,58,143,0.06), rgba(14,89,179,0.03));
+  border: 1px solid rgba(14,89,179,0.12) !important;
+  color: var(--card-foreground) !important;
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+.card-blue-compact {
+  background: rgba(11,58,143,0.04) !important;
+  border: 1px solid rgba(11,58,143,0.06) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* Ensure typical utility text colors inside blue cards are readable */
+.card-blue .text-gray-900,
+.card-blue .text-gray-700,
+.card-blue .text-gray-600,
+.card-blue .text-gray-500,
+.card-blue .text-gray-400 {
+  color: var(--card-foreground) !important;
+}
+
+.card-blue .text-sm,
+.card-blue .text-xs,
+.card-blue .text-base {
+  color: var(--muted-foreground) !important;
+}
+
+.card-blue .text-green-700,
+.card-blue .text-purple-700 {
+  /* keep accent colors visible */
+}
+

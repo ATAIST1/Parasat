@@ -86,25 +86,25 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
       </div>
 
       <div className="p-4 space-y-4">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
               <Calculator className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-gray-900">Рассчитайте доходность</h2>
-              <p className="text-sm text-gray-600">Прогноз ROI инвестиций</p>
+              <h2 className="text-primary">Рассчитайте доходность</h2>
+              <p className="text-sm text-primary">Прогноз ROI инвестиций</p>
             </div>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-blue-900">
             Инструмент поможет оценить потенциальную доходность ваших инвестиций с учетом комиссии платформы
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 space-y-4">
+        <div className="card-blue rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-            <h3 className="text-gray-900">Параметры инвестиции</h3>
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <h3 className="text-primary text-gray-900">Параметры инвестиции</h3>
           </div>
 
           <div className="space-y-4">
@@ -171,58 +171,58 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
         </div>
 
         {results && (
-          <div className="bg-white rounded-2xl p-6 space-y-4">
+          <div className="card-blue rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
+              <Badge variant="secondary" className="bg-blue-300 text-blue-100 text-xl">
                 Результаты расчета
               </Badge>
             </div>
 
             <div className="space-y-3">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 space-y-2">
-                <p className="text-sm text-gray-600">Стоимость вашей доли при выходе</p>
-                <p className="text-2xl text-gray-900">{formatNumber(results.equityValue)} ₸</p>
+              <div className="card-white-compact rounded-xl p-4 space-y-2">
+                <p className="text-m">Стоимость вашей доли при выходе</p>
+                <p className="text-2xl">{formatNumber(results.equityValue)} ₸</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 rounded-xl p-3 space-y-1">
-                  <p className="text-xs text-gray-500">Прибыль</p>
-                  <p className="text-gray-900">{formatNumber(results.profit)} ₸</p>
+                <div className="card-white-compact rounded-xl p-3 space-y-1">
+                  <p className="text-s">Прибыль</p>
+                  <p>{formatNumber(results.profit)} ₸</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 space-y-1">
-                  <p className="text-xs text-gray-500">Комиссия (2,5%)</p>
-                  <p className="text-gray-900">{formatNumber(results.platformFee)} ₸</p>
+                <div className="card-white-compact rounded-xl p-3 space-y-1">
+                  <p className="text-s">Комиссия (2,5%)</p>
+                  <p>{formatNumber(results.platformFee)} ₸</p>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 space-y-2 border border-green-200">
-                <p className="text-sm text-gray-600">Чистая прибыль</p>
+              <div className="card-white-compact rounded-xl p-4 space-y-2 border border-blue-200">
+                <p className="text-l">Чистая прибыль</p>
                 <p className="text-2xl text-green-700">{formatNumber(results.netProfit)} ₸</p>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-gray-50 rounded-xl p-3 space-y-1">
-                  <p className="text-xs text-gray-500">ROI</p>
-                  <p className="text-gray-900">{formatPercent(results.roi)}</p>
+                <div className="card-white-compact rounded-xl p-3 space-y-1">
+                  <p className="text-s">ROI</p>
+                  <p>{formatPercent(results.roi)}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 space-y-1">
-                  <p className="text-xs text-gray-500">Чистый ROI</p>
+                <div className="card-white-compact rounded-xl p-3 space-y-1">
+                  <p className="text-s">Чистый ROI</p>
                   <p className="text-green-700">{formatPercent(results.netRoi)}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 space-y-1">
-                  <p className="text-xs text-gray-500">Множитель</p>
-                  <p className="text-gray-900">{results.multiple.toFixed(1)}x</p>
+                <div className="card-white-compact rounded-xl p-3 space-y-1">
+                  <p className="text-s">Множитель</p>
+                  <p>{results.multiple.toFixed(1)}x</p>
                 </div>
               </div>
 
-              <div className="bg-purple-50 rounded-xl p-3 space-y-1">
-                <p className="text-xs text-gray-600">Годовая доходность (CAGR)</p>
-                <p className="text-purple-700">{formatPercent(results.cagr)}</p>
+              <div className="card-white-compact rounded-xl p-3 space-y-1">
+                <p className="text-s">Годовая доходность (CAGR)</p>
+                <p className="text-green-700">{formatPercent(results.cagr)}</p>
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-xl p-4 space-y-2">
-              <p className="text-sm text-gray-700">
+            <div className="card-blue-compact rounded-xl p-4 space-y-2">
+              <p className="text-sm text-primary">
                 Справка: Расчет учитывает комиссию платформы 2,5% от суммы инвестиций. 
                 Фактическая доходность зависит от успеха компании и условий выхода.
               </p>
@@ -231,21 +231,21 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
         )}
 
         {!results && (investmentAmount || equityPercent || futureValuation || investmentPeriod) && (
-          <div className="bg-white rounded-2xl p-6">
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-sm text-gray-600">
+          <div className="card-blue rounded-2xl p-6">
+            <div className="card-blue-compact rounded-xl p-4 text-center">
+              <p className="text-sm">
                 Заполните все обязательные поля (сумма, доля, прогноз выхода) для расчета
               </p>
             </div>
           </div>
         )}
 
-<div className="bg-white rounded-2xl p-6 space-y-4">
-  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 space-y-2">
-    <p className="text-sm text-gray-700">
-      <span className="font-medium">Как пользоваться:</span>
+<div className="card-blue rounded-2xl p-6 space-y-4">
+  <div className="card-blue-compact rounded-xl p-4 space-y-2">
+    <p className="text-xl">
+      <span className="font-bold">Как пользоваться:</span>
     </p>
-    <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+    <ul className="text-m space-y-1 list-disc list-inside">
       <li>Укажите сумму, которую планируете инвестировать</li>
       <li>Введите долю в компании, которую получите</li>
       <li>Укажите текущую и прогнозную оценку компании</li>
@@ -253,12 +253,12 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
     </ul>
   </div>
 
-  <div className="bg-slate-50 rounded-xl p-4 space-y-2 border border-slate-200">
-    <p className="space-y-1 text-xl sm:text-sm font-mono text-gray-900">
+  <div className="card-blue-compact rounded-xl p-4 space-y-2 border border-blue-100">
+    <p className="space-y-1 text-xl sm:text-sm font-mono">
       Формулы расчёта
     </p>
 
-    <div className="space-y-1 text-xs sm:text-sm font-mono text-gray-700">
+    <div className="space-y-1 text-s sm:text-sm font-mono text-gray-700">
       <p>
         1. <span className="font-semibold">Стоимость доли при выходе</span> = Прогноз оценки × Доля (%) / 100
       </p>

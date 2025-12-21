@@ -373,12 +373,20 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
               </div>
             </div>
 
-            <button className="parasat-cta-btn" onClick={() => setIsJoinModalOpen(true)}>
-              <span>Вступить в клуб</span>
-              <span className="parasat-cta-circle">
-                <ChevronRight className="w-4 h-4" />
-              </span>
-            </button>
+            <div className="flex gap-3">
+              <button className="parasat-cta-btn" onClick={() => setIsJoinModalOpen(true)}>
+                <span>Вступить в клуб</span>
+                <span className="parasat-cta-circle">
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              </button>
+              <button className="parasat-cta-btn" onClick={() => navigateTo('welcome')}>
+                <span>Войти</span>
+                <span className="parasat-cta-circle">
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+              </button>
+            </div>
           </header>
 
           <div className="space-y-4 mb-12 parasat-mission">
