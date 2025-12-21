@@ -614,15 +614,6 @@ const filteredDevelopers = developers.filter((developer) => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 rounded-lg p-1.5">
-            <img src={logo} alt="Parasat Invest" className="w-full h-full object-contain" />
-          </div>
-          <h1 className="text-gray-900">Лента</h1>
-        </div>
-      </div>
-
       <Tabs defaultValue="for-you" className="w-full">
         <div className="bg-card-bg border-b border-gray-700 px-4">
 <TabsList className="w-full grid grid-cols-4 bg-card-bg p-1 rounded-2xl border border-gray-700">
