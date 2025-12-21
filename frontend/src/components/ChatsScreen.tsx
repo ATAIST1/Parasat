@@ -3,8 +3,8 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { useEffect, useState, useRef } from 'react';
-import { getMyConversations, ConversationListItemDto } from '../services/chatService';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { getMyConversations, ConversationListItemDto, createChatHub } from '../services/chatService';
+// import { HubConnectionBuilder } from '@microsoft/signalr';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 
 
@@ -36,35 +36,28 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setChats([]);
+      return;
+    }
+
     loadConversations();
   }, []);
 
-  // Set up SignalR connection for real-time updates
   useEffect(() => {
-    const connection = new HubConnectionBuilder()
-        .withUrl('http://localhost:5073/hubs/chat', {
-          accessTokenFactory: () => localStorage.getItem('accessToken') || ''
-        })
-        .withAutomaticReconnect()
-        .build();
+    if (!localStorage.getItem('accessToken')) return;
 
+    const connection = createChatHub();
     connectionRef.current = connection;
 
-    connection.start()
-      .then(() => console.log('ChatsScreen SignalR connected'))
-      .catch(err => console.error('ChatsScreen SignalR connection error:', err));
+    connection
+        .start()
+        .then(() => console.log('ChatsScreen SignalR connected'))
+        .catch(console.error);
 
-    // When a conversation is updated (new message), reload the conversation list
-    connection.on('ConversationUpdated', (conversationId: string) => {
-      console.log('ConversationUpdated:', conversationId);
-      loadConversations();
-    });
-
-    // Also listen for received messages to update unread counts in real-time
-    connection.on('ReceiveMessage', () => {
-      console.log('Message received, updating chat list');
-      loadConversations();
-    });
+    connection.on('ConversationUpdated', loadConversations);
+    connection.on('ReceiveMessage', loadConversations);
 
     return () => {
       connection.stop().catch(() => {});

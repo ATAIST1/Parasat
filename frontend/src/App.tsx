@@ -142,6 +142,9 @@ function App() {
               setCurrentScreen('auth');
             }}
             onContinueAsGuest={() => {
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+
               setUser({ id: 'guest', email: '', role: null });
               setCurrentScreen('feed');
             }}
@@ -185,21 +188,30 @@ function App() {
         return <CreateScreen userRole={user?.role || 'startup'} navigateTo={navigateTo} />;
 
       case 'chats':
+        if (!user || user.id === 'guest') {
+          setCurrentScreen('auth');
+          return null;
+        }
         return <ChatsScreen navigateTo={navigateTo} openChat={openChat} />;
 
       case 'chat':
-        return (
-          chatParams &&
-          user && (
-            <ChatScreen
-              onBack={() => setCurrentScreen('chats')}
-              conversationId={chatParams.conversationId}
-              title={chatParams.title}
-              currentUserId={user.id}
-            />
-          )
-        );
+        // гостю запрещаем
+        if (!user || user.id === 'guest') {
+          setCurrentScreen('auth');
+          return null;
+        }
 
+        // если по какой-то причине нет chatParams — ничего не рендерим
+        if (!chatParams) return null;
+
+        return (
+            <ChatScreen
+                onBack={() => setCurrentScreen('chats')}
+                conversationId={chatParams.conversationId}
+                title={chatParams.title}
+                currentUserId={user.id}
+            />
+        );
       case 'admin':
         if (user?.role !== 'Admin') {
           return (

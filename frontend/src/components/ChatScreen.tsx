@@ -10,6 +10,7 @@ import {
   ChatMessageDto,
   getConversationMessages,
   sendMessageToConversation,
+  createChatHub
 } from '../services/chatService';
 
 interface ChatScreenProps {
@@ -43,35 +44,16 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
 
   // Initialize SignalR connection
   useEffect(() => {
-    const connection = new HubConnectionBuilder()
-        .withUrl('http://localhost:5073/hubs/chat', {
-          accessTokenFactory: () => localStorage.getItem('accessToken') || ''
-        })
-        .withAutomaticReconnect()
-        .build();
+    if (!localStorage.getItem('accessToken')) return;
 
+    const connection = createChatHub();
     connectionRef.current = connection;
 
-    connection.start()
-      .then(() => console.log('SignalR connected'))
-      .catch(err => console.error('SignalR connection error:', err));
+    connection.start().catch(console.error);
 
-    connection.on('ReceiveMessage', (msg: ChatMessageDto) => {
-      console.log('Received message:', msg);
+    connection.on('ReceiveMessage', (msg) => {
       setMessages((prev) => {
-        // Check if message already exists by ID
-        if (prev.some((x) => x.id === msg.id)) return prev;
-        
-        // Check if this is a duplicate of an optimistic message
-        // (same sender, same text, sent within last 2 seconds)
-        const isDuplicate = prev.some((x) => 
-          x.from.id === msg.from.id && 
-          x.text === msg.text &&
-          Math.abs(new Date(x.sentAt).getTime() - new Date(msg.sentAt).getTime()) < 2000
-        );
-        
-        if (isDuplicate) return prev;
-        
+        if (prev.some(x => x.id === msg.id)) return prev;
         return [...prev, msg];
       });
     });
