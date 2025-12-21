@@ -24,7 +24,6 @@ import AdminPanel from './components/AdminPanel';
 
 import { Toaster } from './components/ui/sonner';
 import SiteNavbar from './components/siteNavbar';
-import SiteFooter from './components/SiteFooter';
 
 export type UserRole = 'startup' | 'investor' | 'mentor' | 'Admin' | null;
 
@@ -289,7 +288,6 @@ function App() {
         {renderScreen()}
       </main>
 
-      <SiteFooter navigateTo={navigateTo} />
       <Toaster />
     </div>
   );
