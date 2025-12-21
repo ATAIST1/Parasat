@@ -43,18 +43,19 @@ export default function PricingScreen({ onBack }: PricingScreenProps) {
       <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 z-10">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-gray-900" />
           </button>
           <h1 className="text-gray-900">Модель оплаты</h1>
         </div>
       </div>
 
       <div className="p-4 space-y-4 pb-8">
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 mb-4 flex items-center justify-center">
+        {/*<div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 mb-4 flex items-center justify-center">
           <div className="w-32 h-32">
             <img src={logo} alt="Parasat Invest" className="w-full h-full object-contain" />
           </div>
         </div>
+        */}
 
         <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-6 text-white space-y-4">
           <div className="flex items-center gap-3">
@@ -125,29 +126,29 @@ export default function PricingScreen({ onBack }: PricingScreenProps) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 space-y-3">
-          <h3 className="text-gray-900">Как это работает?</h3>
-          <ol className="space-y-2 text-sm text-gray-700">
+        <div className="card-blue rounded-2xl p-6 space-y-3">
+          <h3 className="text-white-900">Как это работает?</h3>
+          <ol className="space-y-2 text-base muted-text">
             <li className="flex gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">
+              <span className="flex-shrink-0 w-6 h-6 badge-primary rounded-full flex items-center justify-center text-s">
                 1
               </span>
               <span>Разместите проект бесплатно на платформе</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">
+              <span className="flex-shrink-0 w-6 h-6 badge-primary rounded-full flex items-center justify-center text-s">
                 2
               </span>
               <span>Получайте отклики от заинтересованных инвесторов</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">
+              <span className="flex-shrink-0 w-6 h-6 badge-primary rounded-full flex items-center justify-center text-s">
                 3
               </span>
               <span>Проводите переговоры и заключайте сделки</span>
             </li>
             <li className="flex gap-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs">
+              <span className="flex-shrink-0 w-6 h-6 badge-primary rounded-full flex items-center justify-center text-s">
                 4
               </span>
               <span>Платите комиссию 2,5% только после получения инвестиций</span>
@@ -206,12 +207,12 @@ export default function PricingScreen({ onBack }: PricingScreenProps) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 text-center space-y-3">
-          <h3 className="text-gray-900">Готовы начать?</h3>
-          <p className="text-gray-600 text-sm">
+        <div className="card-blue rounded-2xl p-6 text-center space-y-3">
+          <h3 className="text-white-900">Готовы начать?</h3>
+          <p className="text-sm muted-text">
             Создайте проект бесплатно и получите доступ к базе инвесторов
           </p>
-          <Button onClick={onBack} size="lg" className="w-full">
+          <Button onClick={onBack} size="lg" className="w-full bg-blue-600">
             Начать бесплатно
           </Button>
         </div>
