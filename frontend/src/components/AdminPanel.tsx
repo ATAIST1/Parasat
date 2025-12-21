@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { adminService, AdminUserDto } from '../services/adminService';
+import { adminService, AdminUserDto, AdminConversationDto } from '../services/adminService';
 
 export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [users, setUsers] = useState<AdminUserDto[]>([]);
@@ -9,6 +9,8 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [banConfirm, setBanConfirm] = useState<AdminUserDto | null>(null);
     const [makeAdminConfirm, setMakeAdminConfirm] = useState<AdminUserDto | null>(null);
     const [unbanConfirm, setUnbanConfirm] = useState<AdminUserDto | null>(null);
+    const [view, setView] = useState<'users' | 'conversations'>('users');
+    const [conversations, setConversations] = useState<AdminConversationDto[]>([]);
 
     const loadUsers = async () => {
         try {
@@ -19,10 +21,19 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
         }
     };
 
-    useEffect(() => {
-        loadUsers();
-    }, []);
+    const loadConversations = async () => {
+        try {
+            setIsLoading(true);
+            setConversations(await adminService.getConversations());
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
+        if (view === 'users') loadUsers();
+        else loadConversations();
+    }, [view]);
     const makeAdmin = async (id: string) => {
         await adminService.makeAdmin(id);
         loadUsers();
@@ -55,7 +66,9 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                         </Button>
                         <div>
                             <h1 className="text-gray-900 text-lg font-semibold">Админ-панель</h1>
-                            <p className="text-sm text-gray-500">Управление пользователями</p>
+                            <p className="text-sm text-gray-500">
+                                {view === 'users' ? 'Управление пользователями' : 'Все конверсейшены'}
+                            </p>
                         </div>
                     </div>
 
@@ -64,7 +77,35 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                         <Badge variant="outline">Админов: {stats.admins}</Badge>
                         <Badge variant="outline">Забанено: {stats.banned}</Badge>
 
-                        <Button variant="outline" onClick={loadUsers} disabled={isLoading}>
+                        <div className="flex items-center gap-2 ml-2">
+                            <Button
+                                variant={view === 'users' ? 'default' : 'outline'}
+                                onClick={() => {
+                                    setView('users');
+                                    loadUsers();
+                                }}
+                                size="sm"
+                            >
+                                Пользователи
+                            </Button>
+
+                            <Button
+                                variant={view === 'conversations' ? 'default' : 'outline'}
+                                onClick={() => {
+                                    setView('conversations');
+                                    loadConversations();
+                                }}
+                                size="sm"
+                            >
+                                Конверсейшены
+                            </Button>
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            onClick={view === 'users' ? loadUsers : loadConversations}
+                            disabled={isLoading}
+                        >
                             {isLoading ? '...' : 'Обновить'}
                         </Button>
                     </div>
@@ -72,82 +113,128 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
             </div>
 
             <div className="p-4">
-                <div className="bg-white rounded-2xl border overflow-hidden">
-                    <div className="grid grid-cols-12 gap-2 px-4 py-3 text-xs font-medium text-gray-500 bg-gray-50 border-b">
-                        <div className="col-span-3">Имя</div>
-                        <div className="col-span-4">Email</div>
-                        <div className="col-span-2">Роль</div>
-                        <div className="col-span-1">Статус</div>
-                        <div className="col-span-2 text-right">Действия</div>
+                {view === 'users' && (
+                    <div className="space-y-4">
+                        {users.length === 0 && !isLoading && (
+                            <div className="text-center py-12 text-gray-500">Пользователей нет</div>
+                        )}
+
+                        {users.map(u => {
+                            const isAdmin = (u.role || '').toLowerCase() === 'admin';
+
+                            return (
+                                <div
+                                    key={u.id}
+                                    className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow"
+                                >
+                                    {/* header */}
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex-1 space-y-2 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h3 className="text-gray-900 font-semibold truncate">
+                                                    {u.name?.trim() ? u.name : '—'}
+                                                </h3>
+
+                                                <Badge variant={isAdmin ? 'secondary' : 'outline'}>
+                                                    {u.role || '—'}
+                                                </Badge>
+
+                                                {u.isBanned ? (
+                                                    <Badge variant="destructive">Забанен</Badge>
+                                                ) : (
+                                                    <Badge variant="outline">Активен</Badge>
+                                                )}
+                                            </div>
+
+                                            <p className="text-sm text-gray-600 truncate">{u.email}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* actions */}
+                                    <div className="flex gap-2">
+                                        {!isAdmin && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={u.isBanned}
+                                                className="flex-1"
+                                                onClick={() => setMakeAdminConfirm(u)}
+                                            >
+                                                Сделать админом
+                                            </Button>
+                                        )}
+
+                                        {!u.isBanned ? (
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="flex-1"
+                                                onClick={() => setBanConfirm(u)}
+                                            >
+                                                Забанить
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() => setUnbanConfirm(u)}
+                                            >
+                                                Разбанить
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
+                )}
+                {view === 'conversations' && (
+                    <div className="space-y-4">
+                        {conversations.length === 0 && !isLoading && (
+                            <div className="text-center py-12 text-gray-500">Конверсейшенов нет</div>
+                        )}
 
-                    {users.length === 0 && !isLoading && (
-                        <div className="px-4 py-10 text-center text-gray-500">Пользователей нет</div>
-                    )}
-
-                    {users.map(u => {
-                        const isAdmin = (u.role || '').toLowerCase() === 'admin';
-
-                        return (
+                        {conversations.map(c => (
                             <div
-                                key={u.id}
-                                className="grid grid-cols-12 gap-2 px-4 py-3 border-b last:border-b-0 items-center"
+                                key={c.conversationId}
+                                className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow"
                             >
-                                <div className="col-span-3 text-gray-900 font-medium truncate">
-                                    {u.name?.trim() ? u.name : '—'}
+                                {/* header */}
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0 space-y-1">
+                                        <h3 className="text-gray-900 font-semibold truncate">
+                                            {c.contextTitle}
+                                        </h3>
+                                        <p className="text-xs text-gray-400 truncate">{c.contextId}</p>
+                                    </div>
+
+                                    <div className="text-xs text-gray-500">
+                                        {new Date(c.updatedAtUtc).toLocaleDateString()}
+                                    </div>
                                 </div>
 
-                                <div className="col-span-4 text-gray-700 truncate">{u.email}</div>
+                                {/* between who */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                        <p className="text-xs text-gray-500 mb-1">Owner</p>
+                                        <p className="text-sm text-gray-900 font-medium truncate">{c.owner.name}</p>
+                                        <p className="text-xs text-gray-500 truncate">{c.owner.email}</p>
+                                    </div>
 
-                                <div className="col-span-2">
-                                    <Badge variant={isAdmin ? 'secondary' : 'outline'}>
-                                        {u.role || '—'}
-                                    </Badge>
-                                </div>
-
-                                <div className="col-span-1">
-                                    {u.isBanned ? (
-                                        <Badge variant="destructive">Забанен</Badge>
-                                    ) : (
-                                        <Badge variant="outline">Активен</Badge>
-                                    )}
-                                </div>
-
-                                <div className="col-span-2 flex justify-end gap-2">
-                                    {!isAdmin && (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            disabled={u.isBanned}
-                                            onClick={() => setMakeAdminConfirm(u)}
-                                        >
-                                            Сделать админом
-                                        </Button>
-                                    )}
-
-                                    {!u.isBanned ? (
-                                        <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => setBanConfirm(u)}
-                                        >
-                                            Забанить
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setUnbanConfirm(u)}
-                                        >
-                                            Разбанить
-                                        </Button>
-                                    )}
+                                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                        <p className="text-xs text-gray-500 mb-1">Initiator</p>
+                                        <p className="text-sm text-gray-900 font-medium truncate">{c.initiator.name}</p>
+                                        <p className="text-xs text-gray-500 truncate">{c.initiator.email}</p>
+                                    </div>
                                 </div>
                             </div>
-                        );
-                    })}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
+
+
 
             {banConfirm && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
