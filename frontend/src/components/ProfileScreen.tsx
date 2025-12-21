@@ -168,7 +168,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
                 className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-gray-600" />
+                  <Icon className="w-5 h-5" color="#111827" />
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="text-gray-900">{item.title}</h3>
