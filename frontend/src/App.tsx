@@ -24,6 +24,8 @@ import AdminPanel from './components/AdminPanel';
 
 import { Toaster } from './components/ui/sonner';
 import SiteNavbar from './components/siteNavbar';
+import SiteFooter from './components/SiteFooter';
+
 
 export type UserRole = 'startup' | 'investor' | 'mentor' | 'Admin' | null;
 
@@ -281,11 +283,10 @@ function App() {
     }
   };
 
-  // Показ навбара: скрываем на auth + welcome + onboarding + role-selection + parasat
   const isLoggedIn = !!user && user.id !== 'guest';
   const hideTopNavbarOn: Screen[] = ['welcome', 'auth', 'role-selection', 'onboarding', 'parasat'];
   const showTopNavbar = !hideTopNavbarOn.includes(currentScreen);
-
+  
   return (
     <div className="min-h-screen flex flex-col relative">
       {showTopNavbar && (
@@ -299,6 +300,8 @@ function App() {
       <main className={`flex-1 ${showTopNavbar ? 'pt-20' : ''}`}>
         {renderScreen()}
       </main>
+
+      <SiteFooter />
 
       <Toaster />
     </div>
