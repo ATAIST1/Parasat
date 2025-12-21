@@ -13,6 +13,8 @@ public class AdminService
     private readonly IDeveloperProfileRepository _devRepo;
     private readonly IInvestmentRequestRepository _businessRepo;
     private readonly IInvestorProfileRepository _investorRepo;
+    private readonly IDealRepository _dealRepo;
+
 
     public AdminService(
         IUserRepository userRepo,
@@ -20,7 +22,8 @@ public class AdminService
         IStartupRepository startupRepo,
         IDeveloperProfileRepository devRepo,
         IInvestmentRequestRepository businessRepo,
-        IInvestorProfileRepository investorRepo)
+        IInvestorProfileRepository investorRepo,
+        IDealRepository dealRepo)
     {
         _userRepo = userRepo;
         _conversationRepo = conversationRepo;
@@ -28,6 +31,7 @@ public class AdminService
         _devRepo = devRepo;
         _businessRepo = businessRepo;
         _investorRepo = investorRepo;
+        _dealRepo = dealRepo;
     }
 
     public async Task<List<User>> GetAllUsersAsync()
@@ -160,5 +164,78 @@ public class AdminService
               default:
                   return $"#{contextId}";
           }
+      }
+      public async Task<List<AdminDealDto>> GetAllDealsAsync()
+      {
+          var deals = await _dealRepo.GetAllAsync();
+
+          // подтянем conversations, чтобы взять context + owner/initiator
+          var conversationIds = deals.Select(d => d.ConversationId).Distinct().ToList();
+          var conversations = new List<Conversation>();
+
+          foreach (var cid in conversationIds)
+          {
+              var c = await _conversationRepo.GetByIdAsync(cid);
+              if (c != null) conversations.Add(c);
+          }
+
+          var convMap = conversations.ToDictionary(x => x.Id, x => x);
+
+          // userIds
+          var userIds = conversations
+              .SelectMany(c => new[] { c.OwnerId, c.InitiatorId })
+              .Distinct()
+              .ToList();
+
+          var users = await _userRepo.GetByIdsAsync(userIds);
+          var userMap = users.ToDictionary(x => x.Id, x => x);
+
+          var result = new List<AdminDealDto>();
+
+          foreach (var d in deals)
+          {
+              convMap.TryGetValue(d.ConversationId, out var c);
+
+              // если конверсейшен удалили/нет — все равно покажем, но без контекста
+              var contextType = c != null ? (int)c.ContextType : -1;
+              var contextId = c != null ? c.ContextId : "—";
+              var title = c != null ? await ResolveContextTitle(c.ContextType, c.ContextId) : "—";
+
+              userMap.TryGetValue(d.OwnerId, out var owner);
+              userMap.TryGetValue(d.InitiatorId, out var initiator);
+
+              result.Add(new AdminDealDto
+              {
+                  DealId = d.Id,
+                  ConversationId = d.ConversationId,
+
+                  ContextType = contextType,
+                  ContextId = contextId,
+                  ContextTitle = title,
+
+                  Owner = new UserShort
+                  {
+                      Id = d.OwnerId,
+                      Email = owner?.Email ?? "—",
+                      Name = string.IsNullOrWhiteSpace(owner?.Name) ? "—" : owner!.Name
+                  },
+                  Initiator = new UserShort
+                  {
+                      Id = d.InitiatorId,
+                      Email = initiator?.Email ?? "—",
+                      Name = string.IsNullOrWhiteSpace(initiator?.Name) ? "—" : initiator!.Name
+                  },
+
+                  OwnerAccepted = d.OwnerAccepted,
+                  InitiatorAccepted = d.InitiatorAccepted,
+                  Status = d.Status,
+
+                  CreatedAtUtc = d.CreatedAtUtc,
+                  ActivatedAtUtc = d.ActivatedAtUtc,
+                  ClosedAtUtc = d.ClosedAtUtc
+              });
+          }
+
+          return result;
       }
 }

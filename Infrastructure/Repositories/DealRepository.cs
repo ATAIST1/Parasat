@@ -21,4 +21,9 @@ public class DealRepository : IDealRepository
 
     public async Task UpdateAsync(Deal deal)
         => await _deals.ReplaceOneAsync(x => x.Id == deal.Id, deal);
+
+    public async Task<List<Deal>> GetAllAsync()
+        => await _deals.Find(_ => true)
+            .SortByDescending(x => x.CreatedAtUtc)
+            .ToListAsync();
 }
