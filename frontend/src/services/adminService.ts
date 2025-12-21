@@ -31,6 +31,28 @@ export type AdminNewsDto = {
     imageKey: string;
 };
 
+export type DealStatus = 0 | 1 | 2 | 3 | 4;
+
+export interface AdminDealDto {
+    dealId: string;
+    conversationId: string;
+
+    contextType: number;
+    contextId: string;
+    contextTitle: string;
+
+    owner: { id: string; email: string; name: string };
+    initiator: { id: string; email: string; name: string };
+
+    ownerAccepted: boolean;
+    initiatorAccepted: boolean;
+    status: DealStatus;
+
+    createdAtUtc: string;
+    activatedAtUtc?: string | null;
+    closedAtUtc?: string | null;
+}
+
 export const adminService = {
     getUsers: async (): Promise<AdminUserDto[]> => {
         const res = await api.get('/api/admin/users');
@@ -53,6 +75,11 @@ export const adminService = {
 
     getConversations: async (): Promise<AdminConversationDto[]> => {
         const res = await api.get('/api/admin/conversations');
+        return res.data;
+    },
+
+    getDeals: async (): Promise<AdminDealDto[]> => {
+        const res = await api.get('/api/admin/deals');
         return res.data;
     },
 

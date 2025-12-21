@@ -5,7 +5,7 @@ import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Checkbox } from './ui/checkbox';
-import { adminService, AdminUserDto, AdminConversationDto, AdminNewsDto } from '../services/adminService';
+import { adminService, AdminUserDto, AdminNewsDto , AdminDealDto } from '../services/adminService';
 import NewsDetailScreen from './NewsDetailScreen';
 
 export default function AdminPanel({ onBack }: { onBack: () => void }) {
@@ -14,8 +14,8 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [banConfirm, setBanConfirm] = useState<AdminUserDto | null>(null);
     const [makeAdminConfirm, setMakeAdminConfirm] = useState<AdminUserDto | null>(null);
     const [unbanConfirm, setUnbanConfirm] = useState<AdminUserDto | null>(null);
-    const [view, setView] = useState<'users' | 'conversations'>('users');
-    const [conversations, setConversations] = useState<AdminConversationDto[]>([]);
+    const [view, setView] = useState<'users' | 'deals' | 'news'>('users');
+    // const [conversations, setConversations] = useState<AdminConversationDto[]>([]);
     const [news, setNews] = useState<AdminNewsDto[]>([]);
     const [newsLoading, setNewsLoading] = useState(false);
 
@@ -23,6 +23,8 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [newsEdit, setNewsEdit] = useState<AdminNewsDto | null>(null);
     const [newsDeleteConfirm, setNewsDeleteConfirm] = useState<AdminNewsDto | null>(null);
     const [newsPreviewId, setNewsPreviewId] = useState<string | null>(null);
+
+    const [deals, setDeals] = useState<AdminDealDto[]>([]);
 
 
     const [newsForm, setNewsForm] = useState({
@@ -54,10 +56,19 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
         }
     };
 
-    const loadConversations = async () => {
+    // const loadConversations = async () => {
+    //     try {
+    //         setIsLoading(true);
+    //         setConversations(await adminService.getConversations());
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
+    const loadDeals = async () => {
         try {
             setIsLoading(true);
-            setConversations(await adminService.getConversations());
+            setDeals(await adminService.getDeals());
         } finally {
             setIsLoading(false);
         }
@@ -65,7 +76,7 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
 
     useEffect(() => {
         if (view === 'users') loadUsers();
-        if (view === 'conversations') loadConversations();
+        if (view === 'deals') loadDeals();
         if (view === 'news') loadNews();
     }, [view]);
     const makeAdmin = async (id: string) => {
@@ -116,7 +127,9 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                         <div>
                             <h1 className="text-gray-900 text-lg font-semibold">Админ-панель</h1>
                             <p className="text-sm text-gray-500">
-                                {view === 'users' ? 'Управление пользователями' : 'Все конверсейшены'}
+                                {view === 'users' ? 'Управление пользователями'
+                                    : view === 'deals' ? 'Все сделки'
+                                        : 'Новости'}
                             </p>
                         </div>
                     </div>
@@ -139,14 +152,13 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                             </Button>
 
                             <Button
-                                variant={view === 'conversations' ? 'default' : 'outline'}
+                                variant={view === 'deals' ? 'default' : 'outline'}
                                 onClick={() => {
-                                    setView('conversations');
-                                    loadConversations();
+                                    setView('deals');
                                 }}
                                 size="sm"
                             >
-                                Конверсейшены
+                                Сделки
                             </Button>
 
                             <Button
@@ -163,7 +175,11 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
 
                         <Button
                             variant="outline"
-                            onClick={view === 'users' ? loadUsers : view === 'conversations' ? loadConversations : loadNews}
+                            onClick={view === 'users'
+                                ? loadUsers
+                                : view === 'deals'
+                                    ? loadDeals
+                                    : loadNews}
                             disabled={isLoading || newsLoading}
                         >
                             {isLoading ? '...' : 'Обновить'}
@@ -249,49 +265,49 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                         })}
                     </div>
                 )}
-                {view === 'conversations' && (
-                    <div className="space-y-4">
-                        {conversations.length === 0 && !isLoading && (
-                            <div className="text-center py-12 text-gray-500">Конверсейшенов нет</div>
-                        )}
+                {/*{view === 'conversations' && (*/}
+                {/*    <div className="space-y-4">*/}
+                {/*        {conversations.length === 0 && !isLoading && (*/}
+                {/*            <div className="text-center py-12 text-gray-500">Конверсейшенов нет</div>*/}
+                {/*        )}*/}
 
-                        {conversations.map(c => (
-                            <div
-                                key={c.conversationId}
-                                className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow"
-                            >
-                                {/* header */}
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1 min-w-0 space-y-1">
-                                        <h3 className="text-gray-900 font-semibold truncate">
-                                            {c.contextTitle}
-                                        </h3>
-                                        <p className="text-xs text-gray-400 truncate">{c.contextId}</p>
-                                    </div>
+                {/*        {conversations.map(c => (*/}
+                {/*            <div*/}
+                {/*                key={c.conversationId}*/}
+                {/*                className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow"*/}
+                {/*            >*/}
+                {/*                /!* header *!/*/}
+                {/*                <div className="flex items-start justify-between gap-3">*/}
+                {/*                    <div className="flex-1 min-w-0 space-y-1">*/}
+                {/*                        <h3 className="text-gray-900 font-semibold truncate">*/}
+                {/*                            {c.contextTitle}*/}
+                {/*                        </h3>*/}
+                {/*                        <p className="text-xs text-gray-400 truncate">{c.contextId}</p>*/}
+                {/*                    </div>*/}
 
-                                    <div className="text-xs text-gray-500">
-                                        {new Date(c.updatedAtUtc).toLocaleDateString()}
-                                    </div>
-                                </div>
+                {/*                    <div className="text-xs text-gray-500">*/}
+                {/*                        {new Date(c.updatedAtUtc).toLocaleDateString()}*/}
+                {/*                    </div>*/}
+                {/*                </div>*/}
 
-                                {/* between who */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                        <p className="text-xs text-gray-500 mb-1">Owner</p>
-                                        <p className="text-sm text-gray-900 font-medium truncate">{c.owner.name}</p>
-                                        <p className="text-xs text-gray-500 truncate">{c.owner.email}</p>
-                                    </div>
+                {/*                /!* between who *!/*/}
+                {/*                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">*/}
+                {/*                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">*/}
+                {/*                        <p className="text-xs text-gray-500 mb-1">Owner</p>*/}
+                {/*                        <p className="text-sm text-gray-900 font-medium truncate">{c.owner.name}</p>*/}
+                {/*                        <p className="text-xs text-gray-500 truncate">{c.owner.email}</p>*/}
+                {/*                    </div>*/}
 
-                                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                        <p className="text-xs text-gray-500 mb-1">Initiator</p>
-                                        <p className="text-sm text-gray-900 font-medium truncate">{c.initiator.name}</p>
-                                        <p className="text-xs text-gray-500 truncate">{c.initiator.email}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                {/*                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">*/}
+                {/*                        <p className="text-xs text-gray-500 mb-1">Initiator</p>*/}
+                {/*                        <p className="text-sm text-gray-900 font-medium truncate">{c.initiator.name}</p>*/}
+                {/*                        <p className="text-xs text-gray-500 truncate">{c.initiator.email}</p>*/}
+                {/*                    </div>*/}
+                {/*                </div>*/}
+                {/*            </div>*/}
+                {/*        ))}*/}
+                {/*    </div>*/}
+                {/*)}*/}
                 {view === 'news' && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -371,6 +387,92 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                 <p className="text-sm text-gray-700">{n.description}</p>
                             </div>
                         ))}
+                    </div>
+                )}
+                {view === 'deals' && (
+                    <div className="space-y-4">
+                        {deals.length === 0 && !isLoading && (
+                            <div className="text-center py-12 text-gray-500">Сделок нет</div>
+                        )}
+
+                        {deals.map(d => {
+                            const statusLabel =
+                                d.status === 0 ? 'Pending' :
+                                    d.status === 1 ? 'Active' :
+                                        d.status === 2 ? 'Rejected' :
+                                            d.status === 3 ? 'Cancelled' : 'Completed';
+
+                            const statusVariant =
+                                d.status === 1 ? 'secondary' :
+                                    d.status === 2 ? 'destructive' : 'outline';
+
+                            return (
+                                <div
+                                    key={d.dealId}
+                                    className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex-1 min-w-0 space-y-1">
+                                            <h3 className="text-gray-900 font-semibold truncate">{d.contextTitle}</h3>
+                                            <p className="text-xs text-gray-400 truncate">
+                                                Deal: {d.dealId} · Conv: {d.conversationId}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant={statusVariant as any}>{statusLabel}</Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-1">Владелец</p>
+                                            <p className="text-sm text-gray-900 font-medium truncate">{d.owner.name}</p>
+                                            <p className="text-xs text-gray-500 truncate">{d.owner.email}</p>
+                                            <div className="mt-2">
+                                                <Badge variant={d.ownerAccepted ? 'secondary' : 'outline'}>
+                                                    {d.ownerAccepted ? 'Accepted' : 'Not accepted'}
+                                                </Badge>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-1">Инициатор</p>
+                                            <p className="text-sm text-gray-900 font-medium truncate">{d.initiator.name}</p>
+                                            <p className="text-xs text-gray-500 truncate">{d.initiator.email}</p>
+                                            <div className="mt-2">
+                                                <Badge variant={d.initiatorAccepted ? 'secondary' : 'outline'}>
+                                                    {d.initiatorAccepted ? 'Accepted' : 'Not accepted'}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-1">Создана</p>
+                                            <p className="text-sm text-gray-900">
+                                                {new Date(d.createdAtUtc).toLocaleString()}
+                                            </p>
+                                        </div>
+
+                                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-1">Активиравана</p>
+                                            <p className="text-sm text-gray-900">
+                                                {d.activatedAtUtc ? new Date(d.activatedAtUtc).toLocaleString() : '—'}
+                                            </p>
+                                        </div>
+
+                                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                            <p className="text-xs text-gray-500 mb-1">Закрыта</p>
+                                            <p className="text-sm text-gray-900">
+                                                {d.closedAtUtc ? new Date(d.closedAtUtc).toLocaleString() : '—'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </div>
