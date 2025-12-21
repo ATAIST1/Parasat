@@ -73,12 +73,12 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3 mb-4">
+        {/* <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-slate-900 rounded-lg p-1.5">
             <img src={logo} alt="Parasat Invest" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-gray-900">Чаты</h1>
-        </div>
+        </div> */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-900" />
           <Input placeholder="Поиск по диалогам" className="pl-10 text-gray-900" />
