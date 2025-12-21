@@ -17,6 +17,7 @@ import PricingScreen from './components/PricingScreen';
 import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
 import SubscriptionsScreen from './components/SubscriptionsScreen';
+import TechSupportScreen from './components/TechSupportScreen';
 
 import NewsDetailScreen from './components/NewsDetailScreen';
 import ResetPasswordScreen from './components/ResetPasswordScreen';
@@ -55,6 +56,7 @@ export type Screen =
   | 'parasat'
   | 'subscriptions'
   | 'admin'
+  | 'tech-support'
   | 'parasat-news-detail';
 
 function App() {
@@ -74,6 +76,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
+  const [selectedSupportTicketId, setSelectedSupportTicketId] = useState<string | null>(null);
   const [chatParams, setChatParams] = useState<{ conversationId: string; title: string } | null>(null);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
@@ -211,6 +214,16 @@ function App() {
           );
         }
         return <AdminPanel onBack={() => setCurrentScreen('profile')} />;
+
+      case 'tech-support':
+        return (
+          <TechSupportScreen
+            user={user}
+            navigateTo={navigateTo}
+            selectedTicketId={selectedSupportTicketId}
+            onSelectTicket={(ticketId) => setSelectedSupportTicketId(ticketId)}
+          />
+        );
 
       case 'profile':
         return <ProfileScreen user={user} navigateTo={navigateTo} />;

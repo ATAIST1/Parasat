@@ -153,42 +153,43 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col text-gray-900">
-      {/* header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10 text-gray-900text-gray-900">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-900"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-900" />
-            </button>
-            <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                {title.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-gray-900 truncate">{title}</h2>
-              <p className="text-xs text-gray-500">
-                {isLoading ? 'Загружаем историю…' : 'Приватный чат'}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-1">
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Video className="w-5 h-5 text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <MoreVertical className="w-5 h-5 text-gray-600" />
-            </button>
+  <div className="flex-1 min-h-0 bg-gray-50 flex flex-col text-gray-900">
+    {/* header (НЕ в скролле) */}
+    <div className="bg-white border-b border-gray-200 px-4 py-3 z-10 text-gray-900 flex-shrink-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
+          <button
+            onClick={onBack}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-900"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-900" />
+          </button>
+          <Avatar className="w-10 h-10">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+              {title.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-gray-900 truncate">{title}</h2>
+            <p className="text-xs text-gray-500">
+              {isLoading ? 'Загружаем историю…' : 'Приватный чат'}
+            </p>
           </div>
         </div>
+        <div className="flex gap-1">
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <Video className="w-5 h-5 text-gray-600" />
+          </button>
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <MoreVertical className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
       </div>
+    </div>
 
-      {/* messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    {/* scroll area: messages + templates */}
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+      <div className="flex-1 p-4 space-y-4">
         {isLoading && (
           <div className="text-center text-gray-500 text-sm">Загружаем…</div>
         )}
@@ -199,11 +200,9 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
             minute: '2-digit',
           });
 
-          // Determine if this message is from the current user
           const isMine = msg.from.id === currentUserId;
 
           if (!isMine) {
-            // входящее
             return (
               <div key={msg.id} className="flex gap-2 items-start">
                 <Avatar className="w-8 h-8 flex-shrink-0">
@@ -221,7 +220,6 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
             );
           }
 
-          // исходящее
           return (
             <div key={msg.id} className="flex gap-2 items-start justify-end">
               <div className="flex-1 min-w-0 flex flex-col items-end">
@@ -236,7 +234,6 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
         <div ref={messagesEndRef} />
       </div>
 
-      {/* быстрые шаблоны — если история пустая */}
       {messages.length === 0 && (
         <div className="px-4 py-2 bg-white border-t border-gray-100">
           <p className="text-xs text-gray-500 mb-2">Быстрые шаблоны:</p>
@@ -254,37 +251,39 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
           </div>
         </div>
       )}
+    </div>
 
-      {/* input */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
-        <div className="flex gap-2 items-end">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Paperclip className="w-5 h-5 text-gray-600" />
-          </button>
-          <div className="flex-1">
-            <Input
-              placeholder="Напишите сообщение…"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              className="resize-none"
-            />
-          </div>
-          <Button
-            onClick={handleSend}
-            disabled={!message.trim() || isSending}
-            size="icon"
-            className="flex-shrink-0"
-          >
-            <Send className="w-5 h-5" />
-          </Button>
+    {/* input (снизу, не в скролле) */}
+    <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
+      <div className="flex gap-2 items-end">
+        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <Paperclip className="w-5 h-5 text-gray-600" />
+        </button>
+        <div className="flex-1">
+          <Input
+            placeholder="Напишите сообщение…"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            className="resize-none"
+          />
         </div>
+        <Button
+          onClick={handleSend}
+          disabled={!message.trim() || isSending}
+          size="icon"
+          className="flex-shrink-0"
+        >
+          <Send className="w-5 h-5" />
+        </Button>
       </div>
     </div>
-  );
+  </div>
+);
+
 }

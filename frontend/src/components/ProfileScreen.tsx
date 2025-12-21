@@ -117,7 +117,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
     {
       icon: HelpCircle,
       title: 'Справка и поддержка',
-      action: () => {},
+      action: () => navigateTo('tech-support'),
     },
   ];
 
