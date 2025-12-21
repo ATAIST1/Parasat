@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { adminService, AdminUserDto, AdminConversationDto } from '../services/adminService';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Checkbox } from './ui/checkbox';
+import { adminService, AdminUserDto, AdminConversationDto, AdminNewsDto } from '../services/adminService';
+import NewsDetailScreen from './NewsDetailScreen';
 
 export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [users, setUsers] = useState<AdminUserDto[]>([]);
@@ -11,6 +16,25 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [unbanConfirm, setUnbanConfirm] = useState<AdminUserDto | null>(null);
     const [view, setView] = useState<'users' | 'conversations'>('users');
     const [conversations, setConversations] = useState<AdminConversationDto[]>([]);
+    const [news, setNews] = useState<AdminNewsDto[]>([]);
+    const [newsLoading, setNewsLoading] = useState(false);
+
+    const [newsCreateOpen, setNewsCreateOpen] = useState(false);
+    const [newsEdit, setNewsEdit] = useState<AdminNewsDto | null>(null);
+    const [newsDeleteConfirm, setNewsDeleteConfirm] = useState<AdminNewsDto | null>(null);
+    const [newsPreviewId, setNewsPreviewId] = useState<string | null>(null);
+
+
+    const [newsForm, setNewsForm] = useState({
+        title: '',
+        description: '',
+        content: '',
+        category: '',
+        badge: '',
+        isFeatured: false,
+        date: '', // ISO строка
+        image: null as File | null,
+    });
 
     const loadUsers = async () => {
         try {
@@ -18,6 +42,15 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
             setUsers(await adminService.getUsers());
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const loadNews = async () => {
+        try {
+            setNewsLoading(true);
+            setNews(await adminService.getNews());
+        } finally {
+            setNewsLoading(false);
         }
     };
 
@@ -32,7 +65,8 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
 
     useEffect(() => {
         if (view === 'users') loadUsers();
-        else loadConversations();
+        if (view === 'conversations') loadConversations();
+        if (view === 'news') loadNews();
     }, [view]);
     const makeAdmin = async (id: string) => {
         await adminService.makeAdmin(id);
@@ -56,6 +90,21 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
         return { total, banned, admins };
     }, [users]);
 
+    const newsValidation = {
+        title:
+            newsForm.title.trim().length >= 5 &&
+            newsForm.title.trim().length <= 200,
+
+        description: newsForm.description.trim().length > 0,
+
+        content: newsForm.content.trim().length >= 20,
+
+        category: newsForm.category.trim().length > 0,
+
+        badge: newsForm.badge.trim().length > 0,
+    };
+
+    const isNewsFormValid = Object.values(newsValidation).every(Boolean);
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b border-gray-200 px-4 py-4">
@@ -99,12 +148,23 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                             >
                                 Конверсейшены
                             </Button>
+
+                            <Button
+                                variant={view === 'news' ? 'default' : 'outline'}
+                                onClick={() => {
+                                    setView('news');
+                                    loadNews();
+                                }}
+                                size="sm"
+                            >
+                                Новости
+                            </Button>
                         </div>
 
                         <Button
                             variant="outline"
-                            onClick={view === 'users' ? loadUsers : loadConversations}
-                            disabled={isLoading}
+                            onClick={view === 'users' ? loadUsers : view === 'conversations' ? loadConversations : loadNews}
+                            disabled={isLoading || newsLoading}
                         >
                             {isLoading ? '...' : 'Обновить'}
                         </Button>
@@ -232,6 +292,87 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                         ))}
                     </div>
                 )}
+                {view === 'news' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-600">
+                                Всего новостей: <span className="font-medium text-gray-900">{news.length}</span>
+                            </div>
+                            <Button onClick={() => {
+                                setNewsForm({
+                                    title: '',
+                                    description: '',
+                                    content: '',
+                                    category: '',
+                                    badge: '',
+                                    isFeatured: false,
+                                    date: '',
+                                    image: null,
+                                });
+                                setNewsCreateOpen(true);
+                            }}>
+                                + Добавить новость
+                            </Button>
+                        </div>
+
+                        {news.length === 0 && !newsLoading && (
+                            <div className="text-center py-12 text-gray-500">Новостей нет</div>
+                        )}
+
+                        {news.map(n => (
+                            <div
+                                key={n.id}
+                                className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3 shadow-sm hover:shadow-md transition-shadow"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h3 className="text-gray-900 font-semibold truncate">{n.title}</h3>
+                                            {n.isFeatured && <Badge variant="secondary">Featured</Badge>}
+                                            <Badge variant="outline">{n.category}</Badge>
+                                            <Badge variant="outline">{n.badge}</Badge>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {new Date(n.date).toLocaleDateString()}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <Button size="sm" variant="outline" onClick={() => setNewsPreviewId(n.id)}>
+                                            Просмотреть
+                                        </Button>
+
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setNewsForm({
+                                                    title: n.title,
+                                                    description: n.description,
+                                                    content: n.content,
+                                                    category: n.category,
+                                                    badge: n.badge,
+                                                    isFeatured: n.isFeatured,
+                                                    date: n.date ? new Date(n.date).toISOString().slice(0, 16) : '',
+                                                    image: null,
+                                                });
+                                                setNewsEdit(n);
+                                            }}
+                                        >
+                                            Редактировать
+                                        </Button>
+
+                                        <Button size="sm" variant="destructive" onClick={() => setNewsDeleteConfirm(n)}>
+                                            Удалить
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <p className="text-sm text-gray-700">{n.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
 
@@ -330,6 +471,283 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                 }}
                             >
                                 Разбанить
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {newsCreateOpen && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-2xl rounded-2xl border p-5 space-y-4">
+                        <div className="text-gray-900 font-semibold text-lg">Добавить новость</div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <Label>Заголовок</Label>
+                                <Input value={newsForm.title} onChange={e => setNewsForm(s => ({ ...s, title: e.target.value }))} />
+                                {!newsValidation.title && (
+                                    <p className="text-xs text-red-500">
+                                        Заголовок: 5–200 символов
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Категория</Label>
+                                <Input value={newsForm.category} onChange={e => setNewsForm(s => ({ ...s, category: e.target.value }))} />
+                                {!newsValidation.category && (
+                                    <p className="text-xs text-red-500">Категория обязательна</p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Badge</Label>
+                                <Input value={newsForm.badge} onChange={e => setNewsForm(s => ({ ...s, badge: e.target.value }))} />
+                                {!newsValidation.badge && (
+                                    <p className="text-xs text-red-500">Badge обязателен</p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Дата (опционально)</Label>
+                                <Input
+                                    type="datetime-local"
+                                    value={newsForm.date}
+                                    onChange={e => setNewsForm(s => ({ ...s, date: e.target.value }))}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label>Описание</Label>
+                            <Input value={newsForm.description} onChange={e => setNewsForm(s => ({ ...s, description: e.target.value }))} />
+                            {!newsValidation.description && (
+                                <p className="text-xs text-red-500">Описание обязательно</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label>Контент</Label>
+                            <textarea
+                                className="w-full min-h-[160px] rounded-xl border border-gray-200 p-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                                value={newsForm.content}
+                                onChange={e => setNewsForm(s => ({ ...s, content: e.target.value }))}
+                            />
+                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Минимум 20 символов</span>
+                                <span
+                                    className={
+                                        newsForm.content.trim().length < 20
+                                            ? 'text-red-500'
+                                            : 'text-green-600'
+                                    }
+                                >
+    {newsForm.content.trim().length}/20
+  </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3">
+                            <label className="flex items-center gap-2 text-sm text-gray-700">
+                                <Checkbox
+                                    checked={newsForm.isFeatured}
+                                    onCheckedChange={(v: any) => setNewsForm(s => ({ ...s, isFeatured: Boolean(v) }))}
+                                />
+                                Featured
+                            </label>
+
+                            <div className="text-sm">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => setNewsForm(s => ({ ...s, image: e.target.files?.[0] ?? null }))}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button variant="outline" onClick={() => setNewsCreateOpen(false)}>Отмена</Button>
+                            <Button
+                                disabled={!isNewsFormValid}
+                                onClick={async () => {
+                                    try {
+                                        await adminService.createNews({
+                                            title: newsForm.title,
+                                            content: newsForm.content,
+                                            description: newsForm.description,
+                                            category: newsForm.category,
+                                            badge: newsForm.badge,
+                                            isFeatured: newsForm.isFeatured,
+                                            date: newsForm.date ? new Date(newsForm.date).toISOString() : undefined,
+                                            image: newsForm.image,
+                                        });
+
+                                        toast.success('Новость создана');
+                                        setNewsCreateOpen(false);
+                                        loadNews();
+                                    } catch (e: any) {
+                                        console.log('STATUS', e?.response?.status);
+                                        console.log('DATA', e?.response?.data);
+                                        console.log('createNews error:', e?.response?.data ?? e);
+                                        const errs = e?.response?.data?.errors;
+                                        const msg = errs
+                                            ? Object.entries(errs).map(([k, v]: any) => `${k}: ${(v || []).join(', ')}`).join('\n')
+                                            : (e?.response?.data?.title || e?.response?.data?.message || 'Ошибка при сохранении');
+
+                                        toast.error(msg);
+                                    }
+                                }}
+                            >
+                                Сохранить
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {newsPreviewId && (
+                <div className="fixed inset-0 z-50 bg-black/50">
+                    <div className="h-full w-full bg-white overflow-y-auto overscroll-contain">
+                        <NewsDetailScreen
+                            newsId={newsPreviewId}
+                            onBack={() => setNewsPreviewId(null)}
+                            onOpenNews={(id) => setNewsPreviewId(id)}
+                        />
+                    </div>
+                </div>
+            )}
+            {newsEdit && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-2xl rounded-2xl border p-5 space-y-4">
+                        <div className="text-gray-900 font-semibold text-lg">Редактировать новость</div>
+
+                        {/* те же поля что и create */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <Label>Заголовок</Label>
+                                <Input value={newsForm.title} onChange={e => setNewsForm(s => ({ ...s, title: e.target.value }))} />
+                                {!newsValidation.title && (
+                                    <p className="text-xs text-red-500">
+                                        Заголовок: 5–200 символов
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Категория</Label>
+                                <Input value={newsForm.category} onChange={e => setNewsForm(s => ({ ...s, category: e.target.value }))} />
+                                {!newsValidation.category && (
+                                    <p className="text-xs text-red-500">
+                                        Категория обязательна
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Badge</Label>
+                                <Input value={newsForm.badge} onChange={e => setNewsForm(s => ({ ...s, badge: e.target.value }))} />
+                                {!newsValidation.badge && (
+                                    <p className="text-xs text-red-500">
+                                        Badge обязателен
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Дата (опционально)</Label>
+                                <Input value={newsForm.date} onChange={e => setNewsForm(s => ({ ...s, date: e.target.value }))} />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label>Описание</Label>
+                            <Input value={newsForm.description} onChange={e => setNewsForm(s => ({ ...s, description: e.target.value }))} />
+                            {!newsValidation.description && (
+                                <p className="text-xs text-red-500">
+                                    Описание обязательно
+                                </p>
+                            )}
+
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label>Контент</Label>
+                            <textarea
+                                className="w-full min-h-[160px] rounded-xl border border-gray-200 p-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                                value={newsForm.content}
+                                onChange={e => setNewsForm(s => ({ ...s, content: e.target.value }))}
+                            />
+                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Минимум 20 символов</span>
+                                <span
+                                    className={
+                                        newsForm.content.trim().length < 20
+                                            ? 'text-red-500'
+                                            : 'text-green-600'
+                                    }
+                                >
+    {newsForm.content.trim().length}/20
+  </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3">
+                            <label className="flex items-center gap-2 text-sm text-gray-700">
+                                <Checkbox
+                                    checked={newsForm.isFeatured}
+                                    onCheckedChange={(v: any) => setNewsForm(s => ({ ...s, isFeatured: Boolean(v) }))}
+                                />
+                                Featured
+                            </label>
+
+                            <div className="text-sm">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => setNewsForm(s => ({ ...s, image: e.target.files?.[0] ?? null }))}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button variant="outline" onClick={() => setNewsEdit(null)}>Отмена</Button>
+                            <Button
+                                disabled={!isNewsFormValid}
+                                onClick={async () => {
+                                    const id = newsEdit.id;
+                                    await adminService.updateNews(id, {
+                                        title: newsForm.title,
+                                        content: newsForm.content,
+                                        description: newsForm.description,
+                                        category: newsForm.category,
+                                        badge: newsForm.badge,
+                                        isFeatured: newsForm.isFeatured,
+                                        date: newsForm.date ? new Date(newsForm.date).toISOString() : undefined,
+                                        image: newsForm.image,
+                                    });
+                                    setNewsEdit(null);
+                                    loadNews();
+                                }}
+                            >
+                                Обновить
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {newsDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-md rounded-2xl border p-5 space-y-3">
+                        <div className="text-gray-900 font-semibold text-lg">Подтвердите удаление</div>
+                        <div className="text-sm text-gray-600">
+                            Удалить новость <span className="font-medium text-gray-900">{newsDeleteConfirm.title}</span>?
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button variant="outline" onClick={() => setNewsDeleteConfirm(null)}>Отмена</Button>
+                            <Button
+                                variant="destructive"
+                                onClick={async () => {
+                                    const id = newsDeleteConfirm.id;
+                                    setNewsDeleteConfirm(null);
+                                    await adminService.deleteNews(id);
+                                    loadNews();
+                                }}
+                            >
+                                Удалить
                             </Button>
                         </div>
                     </div>
