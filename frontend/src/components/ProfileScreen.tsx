@@ -142,7 +142,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
               <h2 className="text-gray-900 mb-1">{user?.name || user?.email || 'Пользователь'}</h2>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">
-                  {user?.role === 'startup' ? 'Стартап' : user?.role === 'investor' ? 'Инвестор' : 'Ментор'}
+                  {user?.role === 'startup' ? 'Стартап' : user?.role === 'investor' ? 'Инвестор' : 'ClubMember'}
                 </Badge>
                 <Badge variant="outline">Алматы, Казахстан</Badge>
               </div>

@@ -190,7 +190,7 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-gray-900" />
           </button>
           <h1 className="text-gray-900 font-medium">Профиль инвестора</h1>
         </div>
@@ -273,7 +273,7 @@ export default function InvestorsForm({ onBack, onSubmit }: InvestorsFormProps) 
           <h3 className="text-lg font-medium text-gray-900">Модель стартапов *</h3>
           <p className="text-sm text-gray-600">Форматы бизнес-моделей, в которые инвестор заходит.</p>
 
-          <div className="flex flex-wrap gap-2 text-gray-900">
+          <div className="flex flex-wrap gap-2 text-blue-900">
             {modelOptions.map((item) => {
               const active = models.includes(item);
               return (
