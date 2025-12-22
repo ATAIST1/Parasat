@@ -135,7 +135,7 @@ export default function ChatScreen({ onBack, conversationId, title, currentUserI
   };
 
   return (
-  <div className="flex-1 min-h-0 bg-gray-50 flex flex-col text-gray-900">
+<div className="flex-1 min-h-0 flex flex-col bg-gray-50 text-gray-900">
     {/* header (НЕ в скролле) */}
     <div className="bg-white border-b border-gray-200 px-4 py-3 z-10 text-gray-900 flex-shrink-0">
       <div className="flex items-center justify-between">
