@@ -42,7 +42,9 @@ namespace Core.Models
         public string? Telegram { get; set; }
 
         public bool IsBanned { get; set; } = false;
-        public DateTime? BannedUntil { get; set; } 
-         
+        public DateTime? BannedUntil { get; set; }
+        
+        public string? Location { get; set; }
+        public string? About { get; set; }
     }
 }

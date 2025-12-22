@@ -23,6 +23,7 @@ import AboutUs from './components/AboutUs';
 import NewsDetailScreen from './components/NewsDetailScreen';
 import ResetPasswordScreen from './components/ResetPasswordScreen';
 import AdminPanel from './components/AdminPanel';
+import ProfileEditScreen from './components/ProfileEditScreen';
 
 import { Toaster } from './components/ui/sonner';
 import SiteNavbar from './components/siteNavbar';
@@ -51,6 +52,7 @@ export type Screen =
   | 'chats'
   | 'chat'
   | 'profile'
+  | 'profile-edit'
   | 'favorites'
   | 'project-detail'
   | 'settings'
@@ -243,6 +245,19 @@ function App() {
 
       case 'profile':
         return <ProfileScreen user={user} navigateTo={navigateTo} />;
+
+      case 'profile-edit':
+        return (
+          <ProfileEditScreen
+            navigateTo={(screen) => {
+              if (screen === 'back') {
+                setCurrentScreen('profile');
+              } else {
+                navigateTo(screen);
+              }
+            }}
+          />
+        );
 
       case 'favorites':
         return <FavoritesScreen onProjectClick={handleProjectClick} navigateTo={navigateTo} />;

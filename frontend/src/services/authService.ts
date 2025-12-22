@@ -16,6 +16,15 @@ export interface TokenResponse {
   refreshToken: string;
 }
 
+export interface LoginResponse {
+  requiresTwoFactor: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  temporaryToken?: string;
+  role?: string;
+  id?: string;
+}
+
 export interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;
@@ -36,11 +45,12 @@ export const authService = {
     api.post<TokenResponse | any>('/api/Auth/register', data),
 
   login: async (data: LoginPayload) => {
-    const res = await api.post<TokenResponse>('/api/Auth/login', data);
-    const { accessToken, refreshToken } = res.data;
+    const res = await api.post<LoginResponse>('/api/Auth/login', data);
+    const { accessToken, refreshToken, id } = res.data;
 
-localStorage.setItem('accessToken', res.data.accessToken);
-localStorage.setItem('refreshToken', res.data.refreshToken);
+    if (accessToken) localStorage.setItem('accessToken', accessToken);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+    if (id) localStorage.setItem('userId', id);
 
     return res.data;
   },

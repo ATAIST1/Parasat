@@ -615,7 +615,7 @@ const filteredDevelopers = developers.filter((developer) => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <Tabs defaultValue="for-you" className="w-full">
-        <div className="bg-card-bg border-b border-gray-700 px-4">
+        <div className="bg-card-bg border-b border-gray-700 px-4 tabs-area no-lift">
 <TabsList className="w-full grid grid-cols-4 bg-card-bg p-1 rounded-2xl border border-gray-700">
   <TabsTrigger
     value="for-you"
@@ -1124,7 +1124,7 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
               ) : (
                 <Badge
                   variant="secondary"
-                  className="text-xs bg-gray-100 text-gray-600"
+                  className="text-xs bg-gray-100 text-blue-700"
                 >
                   Заняты
                 </Badge>

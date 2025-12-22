@@ -258,7 +258,7 @@ try {
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             type="button"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-gray-900" />
           </button>
           <h1 className="text-gray-900 font-medium">Запрос на инвестиции</h1>
         </div>
@@ -654,7 +654,7 @@ try {
 
         {/* Предупреждение */}
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
-          <p className="text-sm text-blue-800">
+          <p className="text-sm text-blue-900">
             <strong>Важно:</strong> Убедитесь, что все финансовые данные точны и актуальны. Инвесторы
             могут запросить подтверждающие документы.
           </p>

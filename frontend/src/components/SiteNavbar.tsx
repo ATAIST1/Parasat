@@ -43,7 +43,13 @@ export default function SiteNavbar({
                 <button
                   key={it.key}
                   type="button"
-                  onClick={() => navigateTo(it.to)}
+                  onClick={() => {
+                    if (it.key === 'home') {
+                      window.open('https://parasat.club/', '_blank');
+                      return;
+                    }
+                    navigateTo(it.to);
+                  }}
                   className={`sn-nav__item ${active ? "sn-nav__item--active" : ""}`}
                 >
                   {it.label}
