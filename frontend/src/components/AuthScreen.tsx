@@ -112,7 +112,7 @@ useEffect(() => {
 
         toast.success('Успешный вход');
 
-        onLogin(email, 'startup', id || 'unknown');
+        onLogin(email, data.role);
       } else {
         // === РЕГИСТРАЦИЯ ===
         if (!acceptTerms) {
