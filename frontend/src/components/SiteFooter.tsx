@@ -1,5 +1,7 @@
 import React from 'react';
 import { Phone, MessageCircle, Instagram } from 'lucide-react';
+import logo from "../assets/parasat-logo.png";
+
 
 type Props = {
   onSupportTermsClick?: () => void;
@@ -26,15 +28,21 @@ export default function SiteFooter({
 
         <div className="pb-footer__grid">
           {/* BRAND */}
-          <div className="pb-footer__brand">
-            <div className="pb-footer__mark">
-              <div className="pb-footer__logoText">PARASAT</div>
-              <div className="pb-footer__pill">BUSINESS CLUB</div>
-            </div>
-            <div className="pb-footer__desc">
-              Закрытое сообщество предпринимателей, инвесторов и основателей. Связи, возможности и рост — в одном месте.
-            </div>
-          </div>
+<div className="pb-footer__brand">
+  <div className="pb-footer__mark">
+    <img src={logo} alt="Parasat logo" className="pb-footer__logo" />
+
+    <div className="pb-footer__logoText">PARASAT</div>
+    <div className="pb-footer__pill">INVEST</div>
+  </div>
+
+  <div className="pb-footer__desc">
+    Parasat Invest — это закрытое сообщество предпринимателей, инвесторов и основателей компаний, объединённых общей целью:
+    создавать устойчивый бизнес, выстраивать сильные партнёрства и масштабировать влияние
+  </div>
+</div>
+
+
 
           {/* LINKS */}
           <div>

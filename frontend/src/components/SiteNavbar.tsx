@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import logo from "../assets/parasat-logo.png";
+
 
 type NavItem = { key: string; label: string; to: any };
 
@@ -14,7 +16,7 @@ export default function SiteNavbar({
   const items = useMemo<NavItem[]>(
     () => [
       { key: "home", label: "Главная", to: "home" },
-      { key: "parasat", label: "Parasat", to: "parasat" },
+      { key: "parasat", label: "Parasat Business Club", to: "parasat" },
       { key: "feed", label: "Лента", to: "feed" },
       { key: "chats", label: "Чаты", to: "chats" },
         { key: "about-us", label: "О нас", to: "about-us" },
@@ -26,15 +28,24 @@ export default function SiteNavbar({
     <header className="sn-nav">
       <div className="sn-nav__container">
         <div className="sn-nav__row">
-          <button
-            type="button"
-            className="sn-nav__brand"
-            onClick={() => navigateTo("home")}
-            aria-label="Parasat Home"
-          >
-            <div className="sn-nav__brandTop">PARASAT</div>
-            <div className="sn-nav__brandSub">BUSINESS CLUB</div>
-          </button>
+<button
+  type="button"
+  className="sn-nav__brand"
+  onClick={() => navigateTo("home")}
+  aria-label="Parasat Home"
+>
+  <img
+    src={logo}
+    alt="Parasat logo"
+    className="sn-nav__logo"
+  />
+
+  <div className="sn-nav__brandText">
+    <div className="sn-nav__brandTop">PARASAT</div>
+    <div className="sn-nav__brandSub">INVEST</div>
+  </div>
+</button>
+
 
           <nav className="sn-nav__menu" aria-label="Main navigation">
             {items.map((it) => {

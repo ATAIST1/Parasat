@@ -12,6 +12,7 @@
   --color_f: #ffffff;   /* белый */
   --color_g: #005CFA;   /* ярко-синий акцент */
 --color_z: #001155; 
+--parasat-gold: #e6c36a;
 
   /* БАЗОВЫЕ ТОКЕНЫ */
   --background: var(--color_a);       /* тёмно-синий фон под контентом */
@@ -553,37 +554,53 @@ form .bg-white.rounded-2xl,
 
 .pb-footer__mark {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   line-height: 1;
 }
 
 .pb-footer__logoText {
-  font-weight: 900;
-  font-size: 34px; /* меньше, чтобы не быть копией */
-  letter-spacing: 0.06em;
+  font-weight: 700;      /* было 900 */
+  font-size: 26px;       /* было 38 */
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: #fff;
+  /*color: #e6c36a; */
 }
 
 .pb-footer__pill {
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.9);
+
+  background: rgba(202, 163, 74, 0.14);
+  border: 1px solid rgba(202, 163, 74, 0.40);
+  color: rgba(230, 195, 106, 0.95);
 }
 
-.pb-footer__desc {
-  max-width: 460px;
-  color: rgba(255,255,255,0.78);
-  font-size: 14px;
-  line-height: 1.5;
+
+.pb-footer__brandTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
 }
+
+
+.pb-footer__brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.pb-footer__desc {
+  max-width: 480px;
+  margin-top: 6px;
+  color: rgba(255,255,255,0.78);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
 
 /* LINKS */
 .pb-footer__blockTitle {
@@ -723,6 +740,11 @@ form .bg-white.rounded-2xl,
   color: rgba(255,255,255,0.60);
   font-weight: 700;
 }
+.pb-footer__logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
 
 /* Responsive */
 @media (max-width: 980px) {
@@ -769,9 +791,22 @@ form .bg-white.rounded-2xl,
   all: unset;
   cursor: pointer;
   display: flex;
+  align-items: center;
+  gap: 12px; /* расстояние между лого и текстом */
+  user-select: none;
+  margin-left: -120px; /* компенсируем padding контейнера */
+}
+
+.sn-nav__logo {
+  width: 34px;   /* можешь поставить 32–36 */
+  height: 34px;
+  object-fit: contain;
+}
+
+.sn-nav__brandText {
+  display: flex;
   flex-direction: column;
   line-height: 1;
-  user-select: none;
 }
 
 .sn-nav__brandTop {
@@ -779,6 +814,7 @@ form .bg-white.rounded-2xl,
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #fff;
+  /*color: var(--parasat-gold);*/
   font-size: 20px;
 }
 
@@ -789,6 +825,7 @@ form .bg-white.rounded-2xl,
   letter-spacing: 0.30em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.72);
+  color: var(--parasat-gold);
 }
 
 .sn-nav__menu {
@@ -796,6 +833,15 @@ form .bg-white.rounded-2xl,
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
+  /* было: margin-left: -102px; */
+  margin-left: 0;
+
+  /* новое: меню занимает всё пространство и прижимается к левому краю своего блока */
+  flex: 1;
+  justify-content: flex-start;
+
+  /* отступ от бренда — регулируй это число вместо минуса */
+  padding-left: 24px; /* попробуй 16-32px */
 }
 
 .sn-nav__item {
@@ -804,17 +850,19 @@ form .bg-white.rounded-2xl,
   position: relative;
   font-size: 15px;
   font-weight: 700;
-  color: rgba(255,255,255,0.80);
   padding: 8px 0;
   transition: color 160ms ease, opacity 160ms ease;
+  /*color: rgba(230, 195, 106, 0.88);*/
 }
 
 .sn-nav__item:hover {
-  color: rgba(255,255,255,0.94);
+  /*color: rgba(230, 195, 106, 0.98);*/
+  color: rgba(255,255,255,0.72);
 }
 
 .sn-nav__item--active {
-  color: #fff;
+  /*color: var(--parasat-gold);*/
+  color: rgba(255,255,255,0.72);
 }
 
 .sn-nav__item--active::after {
@@ -826,6 +874,7 @@ form .bg-white.rounded-2xl,
   height: 2px;
   border-radius: 999px;
   background: rgba(255,255,255,0.85);
+  /*background: rgba(230, 195, 106, 0.90);*/
 }
 
 /* responsive */
