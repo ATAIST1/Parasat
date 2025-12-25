@@ -23,6 +23,7 @@ import AboutUs from './components/AboutUs';
 import NewsDetailScreen from './components/NewsDetailScreen';
 import ResetPasswordScreen from './components/ResetPasswordScreen';
 import AdminPanel from './components/AdminPanel';
+import ProfileEditScreen from './components/ProfileEditScreen';
 
 import { Toaster } from './components/ui/sonner';
 import SiteNavbar from './components/siteNavbar';
@@ -51,6 +52,7 @@ export type Screen =
   | 'chats'
   | 'chat'
   | 'profile'
+  | 'profile-edit'
   | 'favorites'
   | 'project-detail'
   | 'settings'
@@ -244,6 +246,19 @@ function App() {
       case 'profile':
         return <ProfileScreen user={user} navigateTo={navigateTo} />;
 
+      case 'profile-edit':
+        return (
+          <ProfileEditScreen
+            navigateTo={(screen) => {
+              if (screen === 'back') {
+                setCurrentScreen('profile');
+              } else {
+                navigateTo(screen);
+              }
+            }}
+          />
+        );
+
       case 'favorites':
         return <FavoritesScreen onProjectClick={handleProjectClick} navigateTo={navigateTo} />;
 
@@ -305,7 +320,9 @@ function App() {
   const isLoggedIn = !!user && user.id !== 'guest';
   const hideTopNavbarOn: Screen[] = ['welcome', 'auth', 'role-selection', 'onboarding', 'parasat'];
   const showTopNavbar = !hideTopNavbarOn.includes(currentScreen);
-  
+  const hideFooterOn: Screen[] = ['chat']; // только внутри диалога
+  const showFooter = !hideFooterOn.includes(currentScreen);
+
   return (
     <div className="min-h-screen flex flex-col relative">
       {showTopNavbar && (
@@ -316,11 +333,11 @@ function App() {
         />
       )}
 
-      <main className={`flex-1 ${showTopNavbar ? 'pt-20' : ''}`}>
+<main className={`flex-1 min-h-0 flex flex-col ${showTopNavbar ? 'pt-20' : ''}`}>
         {renderScreen()}
       </main>
 
-      <SiteFooter />
+      {showFooter && <SiteFooter />}
 
       <Toaster />
     </div>

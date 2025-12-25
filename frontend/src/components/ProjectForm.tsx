@@ -215,7 +215,8 @@ export default function ProjectForm({ onBack, onSubmit }: ProjectFormProps) {
         </div>
       </div>
 
-      <div className="px-4 py-6 max-w-2xl mx-auto text-gray-900">
+      <div className="px-4 py-6 pb-28 max-w-2xl mx-auto text-gray-900">
+
         <Tabs defaultValue="basic" className="w-full">
 <TabsList className="grid w-full grid-cols-3 bg-white border border-gray-200 rounded-xl p-1">
   <TabsTrigger

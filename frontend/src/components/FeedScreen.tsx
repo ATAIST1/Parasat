@@ -19,194 +19,11 @@ import type { InvestorProfileResponseDto } from '../types/investor';
 import { openChat as openChatApi, ConversationContextType } from '../services/chatService';
 
 
-
-
 interface FeedScreenProps {
   onProjectClick: (projectId: string) => void;
   navigateTo: (screen: Screen) => void;
   openChat: (conversationId: string, title: string) => void;
 }
-
-
-/*
-// ⛔ Моковые стартапы — оставляю как пример, но теперь не используем
-const mockProjects = [
-  {
-    id: '1',
-    name: 'PayFlow',
-    stage: 'MVP',
-    industry: 'Fintech',
-    location: 'Алматы',
-    pitch: 'Упрощаем платежи для малого бизнеса в СНГ через единое API',
-    mrr: '450,000',
-    users: '1,200',
-    team: '4',
-    tags: ['B2B', 'SaaS'],
-  },
-  ...
-];
-*/
-
-/*const mockInvestors = [
-  {
-    id: 'inv1',
-    name: 'Кайрат Сатыбалды',
-    title: 'Серийный инвестор, основатель Parasat Business Club',
-    location: 'Алматы',
-    bio: 'Инвестирую в ранние стадии технологических стартапов СНГ. Портфолио: 15+ компаний, 3 выхода.',
-    checkSize: '$50K - $500K',
-    industries: ['Fintech', 'AI/ML', 'B2B SaaS'],
-    deals: '15',
-    exits: '3',
-    verified: true,
-  },
-  {
-    id: 'inv2',
-    name: 'Алия Нурбекова',
-    title: 'Managing Partner, Central Asia Ventures',
-    location: 'Астана',
-    bio: 'Фокус на EdTech и HealthTech проектах с доказанной бизнес-моделью и растущей выручкой.',
-    checkSize: '$100K - $1M',
-    industries: ['EdTech', 'HealthTech', 'Enterprise'],
-    deals: '22',
-    exits: '5',
-    verified: true,
-  },
-  {
-    id: 'inv3',
-    name: 'Тимур Жумабеков',
-    title: 'Angel Investor, ex-CEO KASE',
-    location: 'Алматы',
-    bio: 'Поддерживаю основателей с опытом в финансах и блокчейне. Активный ментор.',
-    checkSize: '$25K - $250K',
-    industries: ['Fintech', 'Blockchain', 'RegTech'],
-    deals: '8',
-    exits: '1',
-    verified: true,
-  },
-];
-*/
-
-
-
-/*
-const mockDevelopers = [
-  {
-    id: 'dev1',
-    name: 'TechForge Team',
-    type: 'Full-Stack разработка',
-    location: 'Алматы',
-    description: 'Команда из 5 разработчиков с опытом создания MVP для стартапов за 4-8 недель.',
-    stack: ['React', 'Node.js', 'PostgreSQL', 'AWS'],
-    projects: '12',
-    experience: '5+ лет',
-    rate: '800,000 ₸/месяц',
-    available: true,
-  },
-  {
-    id: 'dev2',
-    name: 'AI Solutions KZ',
-    type: 'AI/ML разработка',
-    location: 'Астана',
-    description: 'Специализируемся на интеграции AI и машинного обучения в существующие продукты.',
-    stack: ['Python', 'TensorFlow', 'FastAPI', 'Docker'],
-    projects: '8',
-    experience: '3+ года',
-    rate: '1,200,000 ₸/месяц',
-    available: true,
-  },
-  {
-    id: 'dev3',
-    name: 'Mobile Masters',
-    type: 'Мобильная разработка',
-    location: 'Шымкент',
-    description: 'Разрабатываем нативные и кросс-платформенные мобильные приложения под iOS и Android.',
-    stack: ['React Native', 'Swift', 'Kotlin', 'Firebase'],
-    projects: '15',
-    experience: '4+ года',
-    rate: '950,000 ₸/месяц',
-    available: false,
-  },
-];
-
-const mockBusinesses = [
-  {
-    id: 'biz1',
-    name: 'Сеть кофеен CoffeeHub',
-    industry: 'HoReCa',
-    location: 'Алматы',
-    description: 'Сеть из 8 кофеен с устойчивой клиентской базой. Планируем открыть 5 новых точек в Астане и расширить линейку продуктов.',
-    revenue: '180,000,000',
-    profit: '36,000,000',
-    employees: '45',
-    founded: '2019',
-    investmentNeeded: '50,000,000',
-    investmentGoal: 'Открытие 5 новых точек в Астане',
-    equity: '15%',
-    verified: true,
-  },
-  {
-    id: 'biz2',
-    name: 'ProLogistics KZ',
-    industry: 'Логистика',
-    location: 'Астана',
-    description: 'Логистическая компания с собственным автопарком из 25 грузовых автомобилей. Работаем с крупными ритейлерами СНГ.',
-    revenue: '420,000,000',
-    profit: '84,000,000',
-    employees: '78',
-    founded: '2017',
-    investmentNeeded: '120,000,000',
-    investmentGoal: 'Покупка 15 новых грузовиков и IT-система',
-    equity: '20%',
-    verified: true,
-  },
-  {
-    id: 'biz3',
-    name: 'FitFactory',
-    industry: 'Фитнес',
-    location: 'Алматы',
-    description: 'Сеть премиум фитнес-клубов с 3 действующими локациями и 2,500 активными членами.',
-    revenue: '95,000,000',
-    profit: '19,000,000',
-    employees: '32',
-    founded: '2020',
-    investmentNeeded: '80,000,000',
-    investmentGoal: 'Открытие флагманского клуба 1500м²',
-    equity: '25%',
-    verified: true,
-  },
-  {
-    id: 'biz4',
-    name: 'EcoPackaging Solutions',
-    industry: 'Производство',
-    location: 'Шымкент',
-    description: 'Производство экологичной упаковки из переработанных материалов. Контракты с крупными FMCG компаниями.',
-    revenue: '220,000,000',
-    profit: '55,000,000',
-    employees: '65',
-    founded: '2018',
-    investmentNeeded: '150,000,000',
-    investmentGoal: 'Запуск второй производственной линии',
-    equity: '18%',
-    verified: false,
-  },
-  {
-    id: 'biz5',
-    name: 'Digital Marketing Pro',
-    industry: 'Маркетинг',
-    location: 'Алматы',
-    description: 'Digital-агентство с 50+ постоянными клиентами. Специализируемся на performance-маркетинге и продвижении e-commerce.',
-    revenue: '72,000,000',
-    profit: '21,600,000',
-    employees: '18',
-    founded: '2021',
-    investmentNeeded: '25,000,000',
-    investmentGoal: 'Расширение команды и запуск AI-инструментов',
-    equity: '12%',
-    verified: true,
-  },
-];
-*/
 
 const DEV_TYPE_LABELS: Record<string, string> = {
   FullStack: 'Full-Stack разработка',
@@ -615,7 +432,7 @@ const filteredDevelopers = developers.filter((developer) => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <Tabs defaultValue="for-you" className="w-full">
-        <div className="bg-card-bg border-b border-gray-700 px-4">
+        <div className="bg-card-bg border-gray-900 px-4 tabs-area no-lift">
 <TabsList className="w-full grid grid-cols-4 bg-card-bg p-1 rounded-2xl border border-gray-700">
   <TabsTrigger
     value="for-you"
@@ -1124,7 +941,7 @@ function DeveloperCard({ developer, isSaved, onSave }: any) {
               ) : (
                 <Badge
                   variant="secondary"
-                  className="text-xs bg-gray-100 text-gray-600"
+                  className="text-xs bg-gray-100 text-blue-700"
                 >
                   Заняты
                 </Badge>

@@ -8,6 +8,7 @@ import {
   Bookmark,
   FileText,
   Calculator,
+  Edit2,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Button } from './ui/button';
@@ -22,7 +23,7 @@ import { startupService } from '../services/startupService';
 
 interface ProfileScreenProps {
   user: any;
-  navigateTo: (screen: string) => void;
+  navigateTo: (screen: any) => void;
 }
 
 export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) {
@@ -68,6 +69,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
           }
           else navigateTo(screen);
         }}
+        onProjectClick={(id: string) => navigateTo('project-detail')}
       />
     );
   }
@@ -103,12 +105,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
       subtitle: '2,5% от инвестиций',
       action: () => navigateTo('pricing'),
     },
-    {
-      icon: Shield,
-      title: 'Верификация',
-      subtitle: 'Не верифицирован',
-      action: () => {},
-    },
+
     {
       icon: Settings,
       title: 'Настройки',
@@ -124,7 +121,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
   if (user?.role === 'Admin') {
     menuItems.unshift({
       icon: Shield,
-      title: 'Admin Panel',
+      title: 'Панель Администратора',
       subtitle: 'Управление системой',
       action: () => navigateTo('admin'),
     });
@@ -133,7 +130,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
   return (
     <div className="min-h-screen bg-gray-50">
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 tabs-area no-lift">
         <div className="bg-white rounded-2xl p-6 space-y-4">
           <div className="flex items-start gap-4">
             <Avatar className="w-16 h-16">
@@ -145,17 +142,27 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
               <h2 className="text-gray-900 mb-1">{user?.name || user?.email || 'Пользователь'}</h2>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">
-                  {user?.role === 'startup' ? 'Стартап' : user?.role === 'investor' ? 'Инвестор' : 'Ментор'}
+                  {user?.role === 'startup' ? 'Стартап' : user?.role === 'investor' ? 'Инвестор' : 'ClubMember'}
                 </Badge>
                 <Badge variant="outline">Алматы, Казахстан</Badge>
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1">
-              Редактировать профиль
-            </Button>
-          </div>
+          <button
+            onClick={() => navigateTo('profile-edit')}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl p-4 flex items-center justify-between transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <Edit2 className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold">Редактировать профиль</h3>
+                <p className="text-xs text-white/80">Обновить ваши данные</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-white/80" />
+          </button>
         </div>
 
         <div className="bg-white rounded-2xl overflow-hidden divide-y divide-gray-100">
@@ -168,7 +175,7 @@ export default function ProfileScreen({ user, navigateTo }: ProfileScreenProps) 
                 className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-gray-600" />
+                  <Icon className="w-5 h-5" color="#111827" />
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="text-gray-900">{item.title}</h3>

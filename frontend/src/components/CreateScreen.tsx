@@ -80,8 +80,16 @@ const [selectedType, setSelectedType] = useState<
   }
 
   if (selectedType === 'club') {
-  return <ClubMemberForm onClose={() => setSelectedType(null)} />;
-}
+    return (
+      <ClubMemberForm
+        onBack={() => setSelectedType(null)}
+        onSubmit={() => {
+          setSelectedType(null);
+          navigateTo('feed');
+        }}
+      />
+    );
+  }
 
 
   return (

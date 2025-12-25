@@ -91,14 +91,15 @@ export default function AboutUs({ navigateTo }: AboutUsProps) {
               <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
                 Parasat Business Club
               </h2>
-              <p className="mt-2 text-white/80 max-w-2xl leading-relaxed">
+              {/*<p className="mt-2 text-white/80 max-w-2xl leading-relaxed">
                 Сообщество предпринимателей, инвесторов и управленцев. Здесь
                 ценят вклад, культуру партнёрства и стратегическое мышление —
                 и строят долгую игру.
               </p>
+              /*/}
             </div>
 
-            <div className="flex gap-3 w-full sm:w-auto">
+            {/*<div className="flex gap-3 w-full sm:w-auto">
               <Button
                 onClick={handleWhatsAppClick}
                 className="w-full sm:w-auto rounded-2xl bg-blue-600 hover:bg-blue-700 text-white"
@@ -116,11 +117,12 @@ export default function AboutUs({ navigateTo }: AboutUsProps) {
               >
                 <ExternalLink className="w-5 h-5 mr-2" />
                 Forbes
-              </Button>
+              </Button>/
             </div>
+            */}
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5 md:p-6">
+          {/*<div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5 md:p-6">
             <div className="flex items-start gap-3">
               <Quote className="w-5 h-5 text-white mt-0.5" />
               <div className="text-white/85 leading-relaxed">
@@ -128,8 +130,9 @@ export default function AboutUs({ navigateTo }: AboutUsProps) {
                 Ключевая идея Parasat — личный вклад, ответственность и уважение
                 как основа партнёрства.
               </div>
+              *
             </div>
-          </div>
+          </div> */}
         </section>
 
         {/* Facts (clean, consistent spacing) */}
@@ -409,7 +412,7 @@ export default function AboutUs({ navigateTo }: AboutUsProps) {
             </div>
           </div>
 
-          <div className="card-blue rounded-2xl p-6 md:p-8 space-y-4">
+          {/*<div className="card-blue rounded-2xl p-6 md:p-8 space-y-4">
             <div className="text-white font-semibold">Контакты</div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -441,6 +444,7 @@ export default function AboutUs({ navigateTo }: AboutUsProps) {
               </button>
             </div>
           </div>
+          */}
         </section>
 
         {/* Podcast */}
@@ -463,39 +467,7 @@ export default function AboutUs({ navigateTo }: AboutUsProps) {
           </button>
         </section>
 
-        {/* CTA */}
-        <section className="pb-2">
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 md:p-7">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <div className="text-white font-semibold text-lg">
-                  Хочешь вступить или узнать условия?
-                </div>
-                <div className="text-white/70 text-sm mt-1">
-                  Напиши в WhatsApp — команда клуба быстро сориентирует.
-                </div>
-              </div>
 
-              <div className="flex gap-3 w-full md:w-auto">
-                <Button
-                  onClick={handleWhatsAppClick}
-                  className="w-full md:w-auto rounded-2xl bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Написать
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={() => navigateTo('parasat')}
-                  className="w-full md:w-auto rounded-2xl border-white/15 bg-white/5 hover:bg-white/10 text-white"
-                >
-                  Вернуться
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );

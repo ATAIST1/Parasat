@@ -144,8 +144,8 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
           void submitToBackend();
         }}
         className="p-4"
-        // ✅ запас снизу: таббар + наша панель + воздух
-        style={{ paddingBottom: `calc(${APP_BOTTOM_NAV_PX}px + 220px)` }}
+        // ✅ небольшой запас снизу
+        style={{ paddingBottom: '24px' }}
       >
         <div className="max-w-2xl mx-auto space-y-6">
           <div
@@ -268,76 +268,75 @@ export default function ClubMemberForm({ onBack, onSubmit }: ClubMemberFormProps
               <div className="min-[520px]:col-span-2 h-10" />
             </div>
           </div>
-        </div>
-      </form>
-
-      {/* Bottom bar */}
-      <div
-        className="fixed left-0 right-0 p-4 border-t"
-        style={{
-          bottom: `${APP_BOTTOM_NAV_PX}px`,
-          backgroundColor: 'rgba(8,26,95,0.92)',
-          borderColor: 'rgba(255,255,255,0.10)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <div className="max-w-2xl mx-auto space-y-3">
-          {/* ⚠️ ВАЖНО: кнопка вне формы, поэтому type=button и вручную submit */}
-          <Button
-            type="button"
-            className="w-full h-14 rounded-2xl text-white font-semibold shadow-lg"
-            style={{ backgroundColor: 'var(--color_g)' }}
-            disabled={
-              isSubmitting ||
-              isChecking ||
-              myStatus === 'Pending' ||
-              myStatus === 'Approved'
-            }
-            onClick={() => void submitToBackend()}
-          >
-            {isChecking
-              ? 'Проверяем...'
-              : myStatus === 'Approved'
-                ? 'ВЫ УЖЕ В КЛУБЕ'
-                : myStatus === 'Pending'
-                  ? 'ЗАЯВКА В ОБРАБОТКЕ'
-                  : isSubmitting
-                    ? 'Отправляем...'
-                    : 'ОТПРАВИТЬ'}
-          </Button>
-
-          <button
-            type="button"
-            className="w-full text-sm"
-            style={{ color: 'var(--color_d)' }}
-            onClick={async () => {
-              try {
-                const me = await clubMembershipService.getMy();
-                if (me.status === 'Approved') {
-                  toast.success('Вы уже член клуба ✅');
-                  return;
-                }
-                if (me.status === 'Pending') {
-                  toast('Заявка ещё на рассмотрении');
-                  return;
-                }
-                if (me.status === 'Rejected') {
-                  toast('Заявка была отклонена');
-                  return;
-                }
-              } catch (e: any) {
-                if (e?.response?.status === 404) {
-                  toast('Заявки ещё нет — заполните форму и отправьте');
-                  return;
-                }
-                toast('Ошибка проверки статуса');
-              }
+        
+          {/* Sticky bottom bar inside form: будет прикреплена под контентом и выше футера */}
+          <div
+            className="left-0 right-0 p-4 border-t mx-4"
+            style={{
+              backgroundColor: 'rgba(8,26,95,0.92)',
+              borderColor: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 20,
             }}
           >
-            Если вы уже являетесь членом клуба — войти
-          </button>
+            <div className="max-w-2xl mx-auto space-y-3">
+              {/* ⚠️ Кнопка внутри формы: тип submit можно оставить (мы уже перехватываем onSubmit формы) */}
+              <Button
+                type="submit"
+                className="w-full h-14 rounded-2xl text-white font-semibold shadow-lg"
+                style={{ backgroundColor: 'var(--color_g)' }}
+                disabled={
+                  isSubmitting ||
+                  isChecking ||
+                  myStatus === 'Pending' ||
+                  myStatus === 'Approved'
+                }
+              >
+                {isChecking
+                  ? 'Проверяем...'
+                  : myStatus === 'Approved'
+                    ? 'ВЫ УЖЕ В КЛУБЕ'
+                    : myStatus === 'Pending'
+                      ? 'ЗАЯВКА В ОБРАБОТКЕ'
+                      : isSubmitting
+                        ? 'Отправляем...'
+                        : 'ОТПРАВИТЬ'}
+              </Button>
+
+              <button
+                type="button"
+                className="w-full text-sm"
+                style={{ color: 'var(--color_d)' }}
+                onClick={async () => {
+                  try {
+                    const me = await clubMembershipService.getMy();
+                    if (me.status === 'Approved') {
+                      toast.success('Вы уже член клуба ✅');
+                      return;
+                    }
+                    if (me.status === 'Pending') {
+                      toast('Заявка ещё на рассмотрении');
+                      return;
+                    }
+                    if (me.status === 'Rejected') {
+                      toast('Заявка была отклонена');
+                      return;
+                    }
+                  } catch (e: any) {
+                    if (e?.response?.status === 404) {
+                      toast('Заявки ещё нет — заполните форму и отправьте');
+                      return;
+                    }
+                    toast('Ошибка проверки статуса');
+                  }
+                }}
+              >
+                Если вы уже являетесь членом клуба — войти
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

@@ -6,5 +6,8 @@ namespace Core.Dtos
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Role { get; set; } = "User";
+        public string? Phone { get; set; }
+        public string? Location { get; set; }
+        public string? About { get; set; }
     }
 }

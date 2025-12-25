@@ -644,7 +644,7 @@ export default function ParasatScreen({ navigateTo, openNews }: ParasatScreenPro
                             <h3 className="parasat-news-title">{item.title}</h3>
                             <p className="parasat-news-text line-clamp-2">{item.description}</p>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
+                          <ChevronRight className="w-5 h-5 text-gray-900 flex-shrink-0 mt-1" />
                         </div>
                       </div>
                     </Card>

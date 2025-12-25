@@ -41,6 +41,31 @@ namespace Application.Services
             await _userRepository.AddAsync(user);
         }
 
+        public async Task<UserDto?> UpdateUserAsync(string id, UpdateUserDto dto)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+                return null;
+
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                user.Name = dto.Name;
+
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+                user.Email = dto.Email;
+
+            if (!string.IsNullOrWhiteSpace(dto.Phone))
+                user.Phone = dto.Phone;
+
+            if (!string.IsNullOrWhiteSpace(dto.Location))
+                user.Location = dto.Location;
+
+            if (!string.IsNullOrWhiteSpace(dto.About))
+                user.About = dto.About;
+
+            await _userRepository.UpdateAsync(user);
+            return UserMapper.ToDto(user);
+        }
+
         // УДАЛИ ЭТОТ МЕТОД ИЗ СЕРВИСА — он не должен быть здесь!
         // public async Task<User?> GetByRefreshTokenAsync(...) — НЕТ!
     }

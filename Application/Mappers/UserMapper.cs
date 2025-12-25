@@ -12,8 +12,10 @@ public static class UserMapper
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
-            Role = user.Role
-            // Password и PasswordHash НЕ возвращаем в DTO — это секрет!
+            Role = user.Role,
+            Phone = user.Phone,
+            Location = user.Location,
+            About = user.About
         };
     }
 
@@ -23,7 +25,6 @@ public static class UserMapper
         {
             Name = dto.Name,
             Email = dto.Email,
-            // PasswordHash заполнится в AuthService, здесь НЕ трогаем
             Role = "User"
         };
     }

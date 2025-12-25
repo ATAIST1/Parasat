@@ -58,4 +58,11 @@ public class AdminController : ControllerBase
         var list = await _adminService.GetAllConversationsAsync();
         return Ok(list);
     }
+
+    [HttpGet("deals")]
+    public async Task<IActionResult> GetAllDeals()
+    {
+        var list = await _adminService.GetAllDealsAsync();
+        return Ok(list);
+    }
 }

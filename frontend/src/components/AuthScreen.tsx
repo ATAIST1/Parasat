@@ -3,14 +3,14 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Checkbox } from './ui/checkbox';
+// using native input checkbox here to avoid duplicate rendering
 import { UserRole } from '../App';
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import { authService } from '../services/authService';
 import { toast } from 'sonner';
 
 interface AuthScreenProps {
-  onLogin: (email: string, role: UserRole, userId: string) => void;
+  onLogin: (email: string, role: UserRole) => void;
   onRegister: (email: string) => void;
   onBack: () => void;
   navigateTo: (screen: any) => void;
@@ -108,10 +108,11 @@ useEffect(() => {
 
         if (accessToken) localStorage.setItem('accessToken', accessToken);
         if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        if (id) localStorage.setItem('userId', id);
 
         toast.success('Успешный вход');
 
-        onLogin(email, data.role, id || '');
+        onLogin(email, data.role);
       } else {
         // === РЕГИСТРАЦИЯ ===
         if (!acceptTerms) {
@@ -145,7 +146,6 @@ useEffect(() => {
         toast.success('Мы отправили письмо для подтверждения email. Проверьте почту.');
 
         onRegister(email);
-        navigateTo('role-selection');
       }
 
     } catch (err: any) {
@@ -265,10 +265,12 @@ useEffect(() => {
             {/* Чекбокс условий — только при регистрации */}
             {!isLogin && !isForgotPasswordMode && (
               <div className="flex items-start space-x-2">
-                <Checkbox
+                <input
                   id="terms"
+                  type="checkbox"
+                  className="w-4 h-4 rounded border text-blue-600"
                   checked={acceptTerms}
-                  onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
                 />
                 <label
                   htmlFor="terms"
