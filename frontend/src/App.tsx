@@ -17,11 +17,8 @@ import PricingScreen from './components/PricingScreen';
 import CalculatorScreen from './components/CalculatorScreen';
 import ParasatScreen from './components/ParasatScreen';
 import SubscriptionsScreen from './components/SubscriptionsScreen';
-<<<<<<< HEAD
 import TechSupportScreen from './components/TechSupportScreen';
-=======
 import AboutUs from './components/AboutUs';
->>>>>>> f332c49dbfa7f7b5f697d91e8a5bb185bb3b3f43
 
 import NewsDetailScreen from './components/NewsDetailScreen';
 import ResetPasswordScreen from './components/ResetPasswordScreen';
