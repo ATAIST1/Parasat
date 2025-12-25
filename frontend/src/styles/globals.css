@@ -792,13 +792,13 @@ form .bg-white.rounded-2xl,
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px; /* расстояние между лого и текстом */
+  gap: 12px;
   user-select: none;
-  margin-left: -120px; /* компенсируем padding контейнера */
+  margin-left: -50px;
 }
 
 .sn-nav__logo {
-  width: 34px;   /* можешь поставить 32–36 */
+  width: 34px;
   height: 34px;
   object-fit: contain;
 }
@@ -833,14 +833,11 @@ form .bg-white.rounded-2xl,
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
-  /* было: margin-left: -102px; */
   margin-left: 0;
 
-  /* новое: меню занимает всё пространство и прижимается к левому краю своего блока */
   flex: 1;
   justify-content: flex-start;
 
-  /* отступ от бренда — регулируй это число вместо минуса */
   padding-left: 24px; /* попробуй 16-32px */
 }
 

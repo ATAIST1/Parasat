@@ -15,11 +15,15 @@ export default function WelcomeScreen({ onLogin, onRegister, onContinueAsGuest }
         {/* Логотип и заголовок */}
         <div className="space-y-6 text-center">
           <div className="flex justify-center">
-            <div className="w-48 h-48 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 shadow-2xl flex items-center justify-center">
+              <img src={logo} alt="Parasat Invest" className="w-48 h-48 object-contain filter drop-shadow-lg" />
+          </div>
+          {/* 
+                      <div className="w-48 h-48 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 shadow-2xl flex items-center justify-center">
               <img src={logo} alt="Parasat Invest" className="w-full h-full object-contain filter drop-shadow-lg" />
             </div>
-          </div>
-          
+           */}
+
+
           <div className="space-y-3">
             <h1 className="text-3xl font-bold text-white">
               Найдите команду.<br />Найдите инвестиции.<br />Воплотите идею.

@@ -662,18 +662,19 @@
 .parasat-news-header h2 {
   font-size: 1rem;
   font-weight: 700;
-  color: #005cfa;
+  color: #fcfcfc;
 }
 
 .parasat-news-badge {
-  background-color: #fee2b3 !important;
-  color: #92400e !important;
+  background-color: #169eff95 !important;
+  color: #ffffff !important;
 }
 
 .parasat-news-card {
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+  background: #0b2a7a;
 }
 
 .parasat-news-card:hover {
@@ -684,12 +685,12 @@
 .parasat-news-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111827;
+  color: #e2e2e2;
 }
 
 .parasat-news-text {
   font-size: 0.85rem;
-  color: #4b5563;
+  color: #9ca4ae;
 }
 
 .parasat-news-empty {
