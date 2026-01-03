@@ -238,4 +238,30 @@ public class AdminService
 
           return result;
       }
+      public async Task UpdateInvestorVerificationAsync(string userId, InvestorVerificationStatus status, string? note, string adminIdOrEmail)
+    {
+        var user = await _userRepo.GetByIdAsync(userId)
+                ?? throw new Exception("User not found");
+
+        if (user.Role != "Investor")
+            throw new Exception("User is not an investor");
+
+        user.InvestorVerificationStatus = status;
+        user.InvestorVerificationNote = note;
+
+        if (status == InvestorVerificationStatus.Verified)
+        {
+            user.InvestorVerifiedAt = DateTime.UtcNow;
+            user.InvestorVerifiedBy = adminIdOrEmail;
+        }
+        else
+        {
+            user.InvestorVerifiedAt = null;
+            user.InvestorVerifiedBy = null;
+        }
+
+        await _userRepo.UpdateAsync(user);
+    }
+
+      
 }

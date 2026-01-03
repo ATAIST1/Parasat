@@ -14,6 +14,7 @@ public class Message
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string ToId { get; set; } = null!;
+    
     [BsonRepresentation(BsonType.ObjectId)]
     public string ConversationId { get; set; } = null!;
 

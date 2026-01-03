@@ -92,7 +92,7 @@ public class EmailService
         message.To.Add(new MailboxAddress(email, email));
         message.Subject = "Восстановление пароля Parasat";
 
-        // Ссылка на фронт (подгони под свой фронт)
+        // Ссылка на фронт (подгони под свой фронт)Я ща опушу, ну, ну, чтоб там поменять на 3 тысячи околхоста 
         var resetLink =
             $"http://localhost:3000/reset-password?token={token}&email={Uri.EscapeDataString(email)}";
 

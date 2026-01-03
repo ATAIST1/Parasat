@@ -46,5 +46,10 @@ namespace Core.Models
         
         public string? Location { get; set; }
         public string? About { get; set; }
+        public InvestorVerificationStatus InvestorVerificationStatus { get; set; } = InvestorVerificationStatus.None;
+        public DateTime? InvestorVerifiedAt { get; set; }
+        public string? InvestorVerifiedBy { get; set; } // admin userId или email
+        public string? InvestorVerificationNote { get; set; }
+
     }
 }
