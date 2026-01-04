@@ -6,6 +6,10 @@ export type AdminUserDto = {
     email: string;
     role: string;
     isBanned: boolean;
+    investorVerificationStatus?: number; // 0 = None, 1 = Verified, 2 = Rejected
+    investorVerificationNote?: string | null;
+    investorVerifiedAt?: string | null;
+    investorVerifiedBy?: string | null;
 };
 
 export type AdminConversationDto = {
@@ -154,6 +158,13 @@ export const adminService = {
         } catch {
             return null;
         }
+    },
+
+    updateInvestorVerification: async (id: string, status: number, note?: string | null) => {
+        await api.patch(`/api/admin/users/${id}/investor-verification`, {
+            status,
+            note: note || null,
+        });
     },
 };
 

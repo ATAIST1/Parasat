@@ -14,6 +14,11 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const [banConfirm, setBanConfirm] = useState<AdminUserDto | null>(null);
     const [makeAdminConfirm, setMakeAdminConfirm] = useState<AdminUserDto | null>(null);
     const [unbanConfirm, setUnbanConfirm] = useState<AdminUserDto | null>(null);
+    const [verificationModal, setVerificationModal] = useState<{
+        user: AdminUserDto;
+        action: 'verify' | 'reject';
+    } | null>(null);
+    const [verificationNote, setVerificationNote] = useState('');
     const [view, setView] = useState<'users' | 'deals' | 'news'>('users');
     // const [conversations, setConversations] = useState<AdminConversationDto[]>([]);
     const [news, setNews] = useState<AdminNewsDto[]>([]);
@@ -92,6 +97,16 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const unbanUser = async (id: string) => {
         await adminService.unban(id);
         loadUsers();
+    };
+
+    const updateInvestorVerification = async (id: string, status: number, note?: string | null) => {
+        try {
+            await adminService.updateInvestorVerification(id, status, note);
+            toast.success('Статус верификации обновлен');
+            loadUsers();
+        } catch (e: any) {
+            toast.error(e?.response?.data?.message || 'Ошибка при обновлении верификации');
+        }
     };
 
     const stats = useMemo(() => {
@@ -197,6 +212,10 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
 
                         {users.map(u => {
                             const isAdmin = (u.role || '').toLowerCase() === 'admin';
+                            const isInvestor = (u.role || '').toLowerCase() === 'investor';
+                            const verificationStatus = u.investorVerificationStatus ?? 0;
+                            const isVerified = verificationStatus === 1;
+                            const isRejected = verificationStatus === 2;
 
                             return (
                                 <div
@@ -220,14 +239,31 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                                 ) : (
                                                     <Badge variant="outline">Активен</Badge>
                                                 )}
+
+                                                {isInvestor && (
+                                                    <>
+                                                        {isVerified ? (
+                                                            <Badge variant="secondary">Верифицирован</Badge>
+                                                        ) : isRejected ? (
+                                                            <Badge variant="destructive">Отклонен</Badge>
+                                                        ) : (
+                                                            <Badge variant="outline">Не верифицирован</Badge>
+                                                        )}
+                                                    </>
+                                                )}
                                             </div>
 
                                             <p className="text-sm text-gray-600 truncate">{u.email}</p>
+                                            {isInvestor && u.investorVerificationNote && (
+                                                <p className="text-xs text-gray-500">
+                                                    Примечание: {u.investorVerificationNote}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
                                     {/* actions */}
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 flex-wrap">
                                         {!isAdmin && (
                                             <Button
                                                 size="sm"
@@ -237,6 +273,34 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                                 onClick={() => setMakeAdminConfirm(u)}
                                             >
                                                 Сделать админом
+                                            </Button>
+                                        )}
+
+                                        {isInvestor && !isVerified && (
+                                            <Button
+                                                size="sm"
+                                                variant="default"
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    setVerificationModal({ user: u, action: 'verify' });
+                                                    setVerificationNote('');
+                                                }}
+                                            >
+                                                Верифицировать
+                                            </Button>
+                                        )}
+
+                                        {isInvestor && !isRejected && (
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    setVerificationModal({ user: u, action: 'reject' });
+                                                    setVerificationNote('');
+                                                }}
+                                            >
+                                                Отклонить
                                             </Button>
                                         )}
 
@@ -850,6 +914,53 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                 }}
                             >
                                 Удалить
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {verificationModal && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-md rounded-2xl border p-5 space-y-3">
+                        <div className="text-gray-900 font-semibold text-lg">
+                            {verificationModal.action === 'verify' ? 'Верифицировать инвестора' : 'Отклонить верификацию'}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                            {verificationModal.action === 'verify' ? 'Верифицировать' : 'Отклонить'} инвестора{' '}
+                            <span className="font-medium text-gray-900">
+                                {verificationModal.user.name?.trim() ? verificationModal.user.name : verificationModal.user.email}
+                            </span>
+                            ?
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label>Примечание (опционально)</Label>
+                            <textarea
+                                className="w-full min-h-[80px] rounded-xl border border-gray-200 p-3 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                                value={verificationNote}
+                                onChange={e => setVerificationNote(e.target.value)}
+                                placeholder="Введите примечание..."
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button variant="outline" onClick={() => {
+                                setVerificationModal(null);
+                                setVerificationNote('');
+                            }}>
+                                Отмена
+                            </Button>
+                            <Button
+                                variant={verificationModal.action === 'verify' ? 'default' : 'destructive'}
+                                onClick={async () => {
+                                    const status = verificationModal.action === 'verify' ? 1 : 2;
+                                    const note = verificationNote.trim() || null;
+                                    await updateInvestorVerification(verificationModal.user.id, status, note);
+                                    setVerificationModal(null);
+                                    setVerificationNote('');
+                                }}
+                            >
+                                {verificationModal.action === 'verify' ? 'Верифицировать' : 'Отклонить'}
                             </Button>
                         </div>
                     </div>
