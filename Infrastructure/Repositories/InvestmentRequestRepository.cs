@@ -100,4 +100,10 @@ public class InvestmentRequestRepository : IInvestmentRequestRepository
         var result = await _collection.DeleteOneAsync(x => x.Id == id);
         return result.IsAcknowledged && result.DeletedCount > 0;
     }
+    public async Task<List<InvestmentRequest>> GetByIdsAsync(List<string> ids)
+    {
+        if (ids == null || ids.Count == 0) return new List<InvestmentRequest>();
+        return await _collection.Find(x => ids.Contains(x.Id!)).ToListAsync();
+    }
+
 }

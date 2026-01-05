@@ -10,5 +10,7 @@ namespace Core.Interfaces
         Task AddAsync(InvestorProfile profile);
         Task<bool> UpdateAsync(InvestorProfile profile);
         Task<bool> DeleteAsync(string id);
+        Task<List<InvestorProfile>> GetByIdsAsync(List<string> ids);
+
     }
 }

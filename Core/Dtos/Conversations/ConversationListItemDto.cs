@@ -10,4 +10,8 @@ public class ConversationListItemDto
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
     public int UnreadCount { get; set; }
+
+    public string Title { get; set; } = null!;       // что показываем жирным
+    public string? Subtitle { get; set; }            // второй ряд
+    public string? AvatarText { get; set; }   
 }
