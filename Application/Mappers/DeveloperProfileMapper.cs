@@ -5,7 +5,6 @@ namespace Application.Mappers
 {
     public static class DeveloperProfileMapper
     {
-        // ✅ userId приходит из JWT (контроллера/сервиса), не из dto
         public static DeveloperProfile ToModel(string userId, CreateDeveloperProfileDto dto)
         {
             return new DeveloperProfile
@@ -24,6 +23,7 @@ namespace Application.Mappers
                 About = dto.About,
                 IsAvailable = dto.IsAvailable,
                 ProjectCount = dto.ProjectCount
+                
             };
         }
 

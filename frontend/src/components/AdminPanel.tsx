@@ -99,15 +99,16 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
         loadUsers();
     };
 
-    const updateInvestorVerification = async (id: string, status: number, note?: string | null) => {
-        try {
-            await adminService.updateInvestorVerification(id, status, note);
-            toast.success('Статус верификации обновлен');
-            loadUsers();
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message || 'Ошибка при обновлении верификации');
-        }
-    };
+const updateVerification = async (id: string, status: number, note?: string | null) => {
+  try {
+    await adminService.updateVerification(id, status, note);
+    toast.success('Статус верификации обновлен');
+    loadUsers();
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message || 'Ошибка при обновлении верификации');
+  }
+};
+
 
     const stats = useMemo(() => {
         const total = users.length;
@@ -211,11 +212,13 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                         )}
 
                         {users.map(u => {
-                            const isAdmin = (u.role || '').toLowerCase() === 'admin';
-                            const isInvestor = (u.role || '').toLowerCase() === 'investor';
-                            const verificationStatus = u.investorVerificationStatus ?? 0;
+                            const role = (u.role || '').toLowerCase();
+                            const isAdmin = role === 'admin';
+
+                            const verificationStatus = u.verificationStatus ?? 0;
                             const isVerified = verificationStatus === 1;
                             const isRejected = verificationStatus === 2;
+
 
                             return (
                                 <div
@@ -240,25 +243,27 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                                     <Badge variant="outline">Активен</Badge>
                                                 )}
 
-                                                {isInvestor && (
-                                                    <>
-                                                        {isVerified ? (
-                                                            <Badge variant="secondary">Верифицирован</Badge>
-                                                        ) : isRejected ? (
-                                                            <Badge variant="destructive">Отклонен</Badge>
-                                                        ) : (
-                                                            <Badge variant="outline">Не верифицирован</Badge>
-                                                        )}
-                                                    </>
-                                                )}
+{!isAdmin && (
+  <>
+    {isVerified ? (
+      <Badge variant="secondary">Верифицирован</Badge>
+    ) : isRejected ? (
+      <Badge variant="destructive">Отклонен</Badge>
+    ) : (
+      <Badge variant="outline">Не верифицирован</Badge>
+    )}
+  </>
+)}
+
                                             </div>
 
                                             <p className="text-sm text-gray-600 truncate">{u.email}</p>
-                                            {isInvestor && u.investorVerificationNote && (
-                                                <p className="text-xs text-gray-500">
-                                                    Примечание: {u.investorVerificationNote}
-                                                </p>
-                                            )}
+{!isAdmin && u.verificationNote && (
+  <p className="text-xs text-gray-500">
+    Примечание: {u.verificationNote}
+  </p>
+)}
+
                                         </div>
                                     </div>
 
@@ -276,7 +281,7 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                             </Button>
                                         )}
 
-                                        {isInvestor && !isVerified && (
+                                        {!isAdmin && !isVerified && (
                                             <Button
                                                 size="sm"
                                                 variant="default"
@@ -290,7 +295,7 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                             </Button>
                                         )}
 
-                                        {isInvestor && !isRejected && (
+                                        {!isAdmin && !isRejected && (
                                             <Button
                                                 size="sm"
                                                 variant="destructive"
@@ -955,8 +960,7 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                                 onClick={async () => {
                                     const status = verificationModal.action === 'verify' ? 1 : 2;
                                     const note = verificationNote.trim() || null;
-                                    await updateInvestorVerification(verificationModal.user.id, status, note);
-                                    setVerificationModal(null);
+                                    await updateVerification(verificationModal.user.id, status, note);
                                     setVerificationNote('');
                                 }}
                             >

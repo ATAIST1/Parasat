@@ -86,7 +86,6 @@ public class AdminService
         {
             var conversations = await _conversationRepo.GetAllAsync();
 
-            // собираем все userIds (Owner/Initiator + participants на всякий)
             var userIds = conversations
                 .SelectMany(c => new[] { c.OwnerId, c.InitiatorId }.Concat(c.ParticipantIds))
                 .Distinct()
@@ -169,7 +168,6 @@ public class AdminService
       {
           var deals = await _dealRepo.GetAllAsync();
 
-          // подтянем conversations, чтобы взять context + owner/initiator
           var conversationIds = deals.Select(d => d.ConversationId).Distinct().ToList();
           var conversations = new List<Conversation>();
 
@@ -196,7 +194,6 @@ public class AdminService
           {
               convMap.TryGetValue(d.ConversationId, out var c);
 
-              // если конверсейшен удалили/нет — все равно покажем, но без контекста
               var contextType = c != null ? (int)c.ContextType : -1;
               var contextId = c != null ? c.ContextId : "—";
               var title = c != null ? await ResolveContextTitle(c.ContextType, c.ContextId) : "—";
@@ -238,30 +235,35 @@ public class AdminService
 
           return result;
       }
-      public async Task UpdateInvestorVerificationAsync(string userId, InvestorVerificationStatus status, string? note, string adminIdOrEmail)
+public async Task UpdateVerificationAsync(
+    string userId,
+    VerificationStatus status,
+    string? note,
+    string adminIdOrEmail)
+{
+    var user = await _userRepo.GetByIdAsync(userId)
+        ?? throw new Exception("User not found");
+
+    if ((user.Role ?? "").Equals("Admin", StringComparison.OrdinalIgnoreCase))
+        throw new Exception("Admin verification is not allowed");
+
+    user.VerificationStatus = status;
+    user.VerificationNote = note;
+
+    if (status == VerificationStatus.Verified)
     {
-        var user = await _userRepo.GetByIdAsync(userId)
-                ?? throw new Exception("User not found");
-
-        if (user.Role != "Investor")
-            throw new Exception("User is not an investor");
-
-        user.InvestorVerificationStatus = status;
-        user.InvestorVerificationNote = note;
-
-        if (status == InvestorVerificationStatus.Verified)
-        {
-            user.InvestorVerifiedAt = DateTime.UtcNow;
-            user.InvestorVerifiedBy = adminIdOrEmail;
-        }
-        else
-        {
-            user.InvestorVerifiedAt = null;
-            user.InvestorVerifiedBy = null;
-        }
-
-        await _userRepo.UpdateAsync(user);
+        user.VerifiedAt = DateTime.UtcNow;
+        user.VerifiedBy = adminIdOrEmail;
     }
+    else
+    {
+        user.VerifiedAt = null;
+        user.VerifiedBy = null;
+    }
+
+    await _userRepo.UpdateAsync(user);
+}
+
 
       
 }

@@ -35,10 +35,10 @@ namespace Application.Services
         public async Task CreateAsync(CreateInvestorProfileDto dto, string userId)
         {
             var existing = await _repo.GetByUserIdAsync(userId);
-            if (existing != null)
+            /*if (existing != null)
             {
                 throw new InvalidOperationException("Профиль инвестора уже существует для этого пользователя.");
-            }
+            }*/
 
             var model = InvestorProfileMapper.ToModel(dto, userId);
             await _repo.AddAsync(model);

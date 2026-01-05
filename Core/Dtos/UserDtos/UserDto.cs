@@ -9,7 +9,7 @@ namespace Core.Dtos
         public string? Phone { get; set; }
         public string? Location { get; set; }
         public string? About { get; set; }
-        public bool IsInvestorVerified { get; set; }
+        public bool IsVerified { get; set; }
 
     }
 }

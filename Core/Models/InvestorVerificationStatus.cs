@@ -1,10 +1,9 @@
 namespace Core.Models
 {
-    public enum InvestorVerificationStatus
+    public enum VerificationStatus
     {
         None = 0,
         Verified = 1,
         Rejected = 2
-        // Pending можешь добавить позже, если реально надо
     }
 }
