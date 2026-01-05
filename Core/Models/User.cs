@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Core.Models
 {
+    [BsonIgnoreExtraElements]
     public class User
     {
         [BsonId]
@@ -10,7 +11,7 @@ namespace Core.Models
         public string Id { get; set; } = null!;
         public string Name { get; set; }
         public string Email { get; set; }
-        public string PasswordHash { get; set; } = null!;   // ← теперь хеш, а не пароль
+        public string PasswordHash { get; set; } = null!;
         public string Role { get; set; } = "User";
 
         public List<string>? RefreshTokenHashes { get; set; } = new();
@@ -46,10 +47,10 @@ namespace Core.Models
         
         public string? Location { get; set; }
         public string? About { get; set; }
-        public InvestorVerificationStatus InvestorVerificationStatus { get; set; } = InvestorVerificationStatus.None;
-        public DateTime? InvestorVerifiedAt { get; set; }
-        public string? InvestorVerifiedBy { get; set; } // admin userId или email
-        public string? InvestorVerificationNote { get; set; }
+        public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.None;
+        public DateTime? VerifiedAt { get; set; }
+        public string? VerifiedBy { get; set; }
+        public string? VerificationNote { get; set; }
 
     }
 }

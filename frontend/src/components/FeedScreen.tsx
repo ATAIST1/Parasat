@@ -245,7 +245,7 @@ const [isLoadingBusinesses, setIsLoadingBusinesses] = useState<boolean>(true);
         checkSize: i.investmentRange,
         industries: i.industries || [],
         deals: i.dealCount ?? 0,
-        verified: true, // пока просто показываем галочку всегда
+        verified: false
       }));
 
       setInvestors(mapped);
