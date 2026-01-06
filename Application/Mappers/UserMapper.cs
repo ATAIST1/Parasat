@@ -16,8 +16,7 @@ public static class UserMapper
             Phone = user.Phone,
             Location = user.Location,
             About = user.About,
-                IsInvestorVerified = user.Role == "Investor" 
-        && user.InvestorVerificationStatus == InvestorVerificationStatus.Verified,
+            IsVerified = user.VerificationStatus == VerificationStatus.Verified,
         };
     }
 

@@ -16,4 +16,6 @@ public interface IInvestmentRequestRepository
     Task AddAsync(InvestmentRequest request);
     Task<bool> UpdateAsync(InvestmentRequest request);
     Task<bool> DeleteAsync(string id);
+    Task<List<InvestmentRequest>> GetByIdsAsync(List<string> ids);
+
 }

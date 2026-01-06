@@ -85,18 +85,18 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
           {chats.map((c) => (
               <button
                   key={c.conversationId}
-                  onClick={() => openChat(c.conversationId, 'Чат')}
+                  onClick={() => openChat(c.conversationId, c.title)}
                   className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors bg-white"
               >
                 <Avatar className="w-12 h-12 flex-shrink-0">
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                    {String(c.itemType)}
+                    {c.avatarText ?? c.title?.charAt(0) ?? "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-baseline justify-between mb-1">
                     <h3 className={`truncate ${c.unreadCount > 0 ? 'font-semibold text-gray-900' : 'text-gray-900'}`}>
-                      Диалог #{c.conversationId.slice(-6)}
+                      {c.title}
                     </h3>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                       {c.unreadCount > 0 && (
@@ -110,7 +110,7 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
                     </div>
                   </div>
                   <p className="text-sm text-gray-600 truncate">
-                    Нажмите, чтобы открыть
+                    {c.subtitle ?? 'Нажмите, чтобы открыть'}
                   </p>
                 </div>
               </button>

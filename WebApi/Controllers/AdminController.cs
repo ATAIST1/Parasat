@@ -66,15 +66,15 @@ public class AdminController : ControllerBase
         var list = await _adminService.GetAllDealsAsync();
         return Ok(list);
     }
-    [HttpPatch("users/{id}/investor-verification")]
-    public async Task<IActionResult> UpdateInvestorVerification(string id, [FromBody] UpdateInvestorVerificationDto dto)
+    [HttpPatch("users/{id}/verification")]
+
+    public async Task<IActionResult> UpdateInvestorVerification(string id, [FromBody] UpdateVerificationDto dto)
     {
-        // кто именно сделал: можно email из claims, но минимум — NameIdentifier
         var adminId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
                     ?? User.Identity?.Name
                     ?? "admin";
 
-        await _adminService.UpdateInvestorVerificationAsync(id, dto.Status, dto.Note, adminId);
+        await _adminService.UpdateVerificationAsync(id, dto.Status, dto.Note, adminId);
         return Ok(new { message = "Investor verification updated" });
     }
 

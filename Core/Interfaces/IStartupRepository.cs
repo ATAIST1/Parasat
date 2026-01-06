@@ -11,11 +11,14 @@ namespace Core.Interfaces
         Task<bool> DeleteAsync(string id);
         Task<IEnumerable<Startup>> GetByOwnerAsync(string ownerId);
 
-         Task<IEnumerable<Startup>> GetAllAsync(
+        Task<IEnumerable<Startup>> GetAllAsync(
             string? search = null,
             string? industry = null,
             string? evidence = null,
             string? city = null);
+        Task<List<Startup>> GetByIdsAsync(List<string> ids);
+
     }
+    
 
 }

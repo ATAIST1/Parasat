@@ -17,12 +17,14 @@ export default function SiteNavbar({
     () => [
       { key: "home", label: "Главная", to: "home" },
       { key: "parasat", label: "Parasat Business Club", to: "parasat" },
+      { key: "create", label: "Создание", to: "create" },
       { key: "feed", label: "Лента", to: "feed" },
       { key: "chats", label: "Чаты", to: "chats" },
-        { key: "about-us", label: "О нас", to: "about-us" },
+      { key: "about-us", label: "О нас", to: "about-us" },
     ],
     []
   );
+  
 
   return (
     <header className="sn-nav">

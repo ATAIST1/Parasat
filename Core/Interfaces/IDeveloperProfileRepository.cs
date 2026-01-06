@@ -12,6 +12,8 @@ namespace Core.Interfaces
         Task AddAsync(DeveloperProfile profile);
         Task<bool> UpdateAsync(DeveloperProfile profile);
         Task<bool> DeleteAsync(string id);
+        Task<List<DeveloperProfile>> GetByIdsAsync(List<string> ids);
+
 
         Task<List<DeveloperProfile>> SearchAsync(
             List<string>? types = null,

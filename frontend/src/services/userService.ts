@@ -8,6 +8,7 @@ export interface UserDto {
   phone?: string;
   location?: string;
   about?: string;
+  isVerified: boolean;
 }
 
 export interface UpdateUserDto {

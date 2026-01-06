@@ -100,5 +100,10 @@ namespace Infrastructure.Repositories
                 .SortByDescending(x => x.CreatedAt)
                 .ToListAsync();
         }
+        public async Task<List<Startup>> GetByIdsAsync(List<string> ids)
+        {
+            return await _collection.Find(x => ids.Contains(x.Id)).ToListAsync();
+        }
+
     }
 }
