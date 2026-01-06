@@ -419,7 +419,7 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
 
         {/* Запрос инвестиций */}
         {investmentRequested && investmentRequested > 0 && (
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+            <div className="bg-white rounded-2xl p-6 space-y-2">
             <h3 className="text-gray-900 mb-2">Запрос инвестиций</h3>
             <p className="text-gray-700">
               {formatNumber(investmentRequested)} {currency}
