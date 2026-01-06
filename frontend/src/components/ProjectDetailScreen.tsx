@@ -253,8 +253,8 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 space-y-2">
-              <h3 className="text-gray-900">Запрос инвестиций</h3>
+            <div className="bg-white rounded-2xl p-6 space-y-2">
+            <h3 className="text-gray-900">Запрос инвестиций</h3>
               <p className="text-gray-700">{formatNumber(investmentNeeded)} ₸</p>
 
               {investmentPurpose && <p className="text-sm text-gray-600">{investmentPurpose}</p>}
