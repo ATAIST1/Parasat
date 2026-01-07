@@ -14,6 +14,9 @@ export interface ConversationListItemDto {
   createdAtUtc: string;
   updatedAtUtc: string;
   unreadCount: number;
+  title: string;
+  subtitle?: string;
+  avatarText?: string;
 }
 
 export interface ChatMessageDto {

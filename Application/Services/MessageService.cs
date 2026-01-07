@@ -183,7 +183,10 @@ public class MessageService
 
             var otherId = c.ParticipantIds.First(x => x != userId);
             if (!userNameById.TryGetValue(otherId, out var otherName))
-                throw new Exception($"User not found for id={otherId}");
+            {
+                // Пропускаем разговоры с отсутствующими пользователями
+                continue;
+            }
 
             string title;
             string subtitle;
@@ -192,30 +195,43 @@ public class MessageService
             {
                 case ConversationContextType.Startup:
                     if (!startupTitleById.TryGetValue(c.ContextId, out title!))
-                        throw new Exception($"Startup not found for id={c.ContextId}");
+                    {
+                        // Пропускаем разговоры с удаленными стартапами
+                        continue;
+                    }
                     subtitle = otherName;
                     break;
 
                 case ConversationContextType.Business:
                     if (!requestTitleById.TryGetValue(c.ContextId, out title!))
-                        throw new Exception($"InvestmentRequest not found for id={c.ContextId}");
+                    {
+                        // Пропускаем разговоры с удаленными запросами
+                        continue;
+                    }
                     subtitle = otherName;
                     break;
 
                 case ConversationContextType.Investor:
                     if (!investorTitleById.TryGetValue(c.ContextId, out title!))
-                        throw new Exception($"InvestorProfile not found for id={c.ContextId}");
+                    {
+                        // Пропускаем разговоры с удаленными профилями инвесторов
+                        continue;
+                    }
                     subtitle = otherName;
                     break;
 
                 case ConversationContextType.Developer:
                     if (!developerTitleById.TryGetValue(c.ContextId, out title!))
-                        throw new Exception($"DeveloperProfile not found for id={c.ContextId}");
+                    {
+                        // Пропускаем разговоры с удаленными профилями разработчиков
+                        continue;
+                    }
                     subtitle = otherName;
                     break;
 
                 default:
-                    throw new Exception($"Unknown ConversationContextType={(int)c.ContextType}");
+                    // Пропускаем разговоры с неизвестным типом контекста
+                    continue;
             }
 
             result.Add(new ConversationListItemDto

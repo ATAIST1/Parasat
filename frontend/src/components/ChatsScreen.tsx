@@ -30,6 +30,9 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
         return timeB - timeA;
       });
       setChats(sorted);
+    } catch (error) {
+      console.error('Failed to load conversations:', error);
+      setChats([]);
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +108,7 @@ export default function ChatsScreen({ navigateTo, openChat  }: ChatsScreenProps)
                         </span>
                       )}
                       <span className="text-xs text-gray-500">
-                        {new Date(c.updatedAtUtc).toLocaleDateString('ru-RU')}
+                        {new Date(c.updatedAtUtc || c.createdAtUtc).toLocaleDateString('ru-RU')}
                       </span>
                     </div>
                   </div>
