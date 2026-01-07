@@ -32,7 +32,7 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
     <div className="min-h-screen bg-white text-gray-900">
       <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onBack} className="p-2 hover:bg-gray-300 rounded-lg transition-colors">
             <ArrowLeft className="w-5 h-5 text-gray-900 " />
           </button>
           <h1 className="text-gray-900">Настройки</h1>

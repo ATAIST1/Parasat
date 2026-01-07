@@ -90,7 +90,7 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center"
+            className="w-10 h-10 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
@@ -108,7 +108,7 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
         {/* Status card */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-800 flex items-center justify-center">
               <Shield className="w-5 h-5 text-gray-700" />
             </div>
             <div className="flex-1">
@@ -156,8 +156,7 @@ export default function SubscriptionsScreen({ onBack, userRole }: SubscriptionsS
         {/* Plans */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-gray-700" />
-            <h2 className="text-gray-900">Выбери срок</h2>
+            <h2 className="text-gray-900">Выберите срок</h2>
           </div>
 
           {!canBuy && (

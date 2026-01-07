@@ -266,7 +266,7 @@ useEffect(() => {
               <div className="text-right">
                 <button
                   type="button"
-                  className="text-sm text-blue-600 hover:text-blue-700"
+                  className="text-sm text-gray-500 hover:text-gray-900"
                   onClick={() => {
                     setIsForgotPasswordMode(true);
                   }}

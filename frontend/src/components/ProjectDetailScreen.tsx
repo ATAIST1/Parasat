@@ -266,7 +266,8 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
             </div>
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 space-y-2">
+          <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200 p-4 space-y-2">
+
             <Button onClick={() => setShowInterestDialog(true)} className="w-full" size="lg">
               Отправить интерес
             </Button>
@@ -522,7 +523,8 @@ export default function ProjectDetailScreen({ projectId, onBack, navigateTo }: P
 
         </div>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 space-y-2">
+      <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-gray-200 p-4 space-y-2">
+
         <Button
           onClick={() => setShowInterestDialog(true)}
           className="w-full"

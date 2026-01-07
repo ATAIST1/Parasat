@@ -153,7 +153,7 @@ export default function ProfileEditScreen({ navigateTo }: ProfileEditScreenProps
       <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center gap-3 z-10">
         <button
           onClick={() => navigateTo('back')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-300 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-900" />
         </button>

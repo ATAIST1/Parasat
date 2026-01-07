@@ -74,7 +74,7 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigateTo('profile')}
-            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-300 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
@@ -197,7 +197,7 @@ export default function CalculatorScreen({ navigateTo }: CalculatorScreenProps) 
 
               <div className="card-white-compact rounded-xl p-4 space-y-2 border border-blue-200">
                 <p className="text-l">Чистая прибыль</p>
-                <p className="text-2xl text-green-700">{formatNumber(results.netProfit)} ₸</p>
+                <p className="text-2xl text-green-900">{formatNumber(results.netProfit)} ₸</p>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
