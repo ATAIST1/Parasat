@@ -123,12 +123,6 @@ public class AuthService
             throw new UnauthorizedAccessException("User is banned");
         }
 
-        if (!user.EmailConfirmed)
-        {
-            _logger.LogWarning("Login blocked: email not confirmed");
-            throw new UnauthorizedAccessException("Email not confirmed. Check your inbox.");
-        }
-
         // If 2FA disabled => issue tokens immediately
         if (!user.IsTwoFactorEnabled)
         {

@@ -60,17 +60,19 @@ public class AuthController : ControllerBase
                 });
             }
 
-            // 2) Есть, но email не подтверждён
-            if (!user.EmailConfirmed)
+            // 2) Пользователь заблокирован
+            if (user.IsBanned || (user.BannedUntil.HasValue && user.BannedUntil > DateTime.UtcNow))
             {
                 return Unauthorized(new
                 {
-                    code = "EMAIL_NOT_CONFIRMED",
-                    message = "Email не подтверждён. Проверьте почту."
+                    code = "USER_BANNED",
+                    message = user.BannedUntil.HasValue
+                        ? $"Пользователь заблокирован до {user.BannedUntil:yyyy-MM-dd HH:mm:ss} UTC"
+                        : "Пользователь заблокирован"
                 });
             }
 
-            // 3) Есть, подтверждён, но пароль неверный
+            // 3) Есть, но пароль неверный или иная ошибка авторизации
             return Unauthorized(new
             {
                 code = "INVALID_CREDENTIALS",

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Home, Search, PlusCircle, MessageCircle, User, Building2 } from 'lucide-react';
 import WelcomeScreen from './components/WelcomeScreen';
 import AuthScreen from './components/AuthScreen';
@@ -102,11 +102,11 @@ function App() {
     setCurrentScreen('feed');
   };
 
-  const handleRegister = (email: string) => {
+  const handleRegister = (email: string, role: UserRole, userId: string) => {
     setUser({
-      id: '1',
+      id: userId,
       email,
-      role: null,
+      role,
       onboarded: false,
     });
     setCurrentScreen('create');
@@ -185,7 +185,7 @@ function App() {
         return (
           <FeedScreen
             onProjectClick={handleProjectClick}
-            navigateTo={navigateTo}
+            navigateTo={navigateTo as any}
             openChat={openChat}
           />
         );
@@ -194,7 +194,12 @@ function App() {
         return <SearchScreen onProjectClick={handleProjectClick} />;
 
       case 'create':
-        return <CreateScreen userRole={user?.role || 'startup'} navigateTo={navigateTo} />;
+        return (
+          <CreateScreen
+            userRole={user?.role === 'Admin' ? 'startup' : user?.role || 'startup'}
+            navigateTo={navigateTo as any}
+          />
+        );
 
       case 'chats':
         if (!user || user.id === 'guest') {
@@ -226,7 +231,7 @@ function App() {
           return (
             <FeedScreen
               onProjectClick={handleProjectClick}
-              navigateTo={navigateTo}
+              navigateTo={navigateTo as any}
               openChat={openChat}
             />
           );
@@ -237,7 +242,7 @@ function App() {
         return (
           <TechSupportScreen
             user={user}
-            navigateTo={navigateTo}
+            navigateTo={navigateTo as any}
             selectedTicketId={selectedSupportTicketId}
             onSelectTicket={(ticketId) => setSelectedSupportTicketId(ticketId)}
           />

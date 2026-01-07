@@ -1,29 +1,24 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 // using native input checkbox here to avoid duplicate rendering
 import { UserRole } from '../App';
+// @ts-ignore: virtual figma asset path used by bundler
 import logo from 'figma:asset/22fd026accecba7795b910052b9400af1c7bdebf.png';
 import { authService } from '../services/authService';
 import { toast } from 'sonner';
 
 interface AuthScreenProps {
-  onLogin: (email: string, role: UserRole) => void;
-  onRegister: (email: string) => void;
+  onLogin: (email: string, role: UserRole, userId: string) => void;
+  onRegister: (email: string, role: UserRole, userId: string) => void;
   onBack: () => void;
-  navigateTo: (screen: any) => void;
   mode?: 'login' | 'register';
 }
 
 
-export default function AuthScreen({
-  onLogin,
-  onRegister,
-  onBack,
-  mode = 'login',
-}: AuthScreenProps) {
+export default function AuthScreen({ onLogin, onRegister, onBack, mode = 'login' }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(mode !== 'register');
 useEffect(() => {
   setIsLogin(mode !== 'register');
@@ -66,53 +61,31 @@ useEffect(() => {
 
 
       if (isForgotPasswordMode) {
-  if (!email) {
-    toast.error('Введите email');
-    return;
-  }
+        if (!email) {
+          toast.error('Введите email');
+          return;
+        }
 
-  try {
-    await authService.login({ email, password: '__FORGOT_CHECK__' });
-  } catch (checkErr: any) {
-    const data = checkErr?.response?.data;
-    const code = typeof data === 'object' ? data.code : undefined;
+        await authService.forgotPassword({ email });
 
-    if (code === 'EMAIL_NOT_CONFIRMED') {
-      toast.error(
-        'Email не подтверждён. Сначала подтвердите email, затем попробуйте восстановить пароль.'
-      );
-      return; 
-    }
+        toast.success(
+          'Мы отправили Вам письмо для восстановления пароля. Пожалуйста, проверьте свою почту.'
+        );
 
-    
-  }
-
-  
-  await authService.forgotPassword({ email });
-
-  toast.success(
-    'Мы отправили Вам письмо для восстановления пароля. Пожалуйста, проверьте свою почту.'
-  );
-
-  setIsForgotPasswordMode(false);
-  setIsLogin(true);
-  return;
-}
+        setIsForgotPasswordMode(false);
+        setIsLogin(true);
+        return;
+      }
 
 
       // === ВХОД ===
       if (isLogin) {
         const data = await authService.login({ email, password });
-
-        const { accessToken, refreshToken, id } = data || {};
-
-        if (accessToken) localStorage.setItem('accessToken', accessToken);
-        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-        if (id) localStorage.setItem('userId', id);
+        const userId = data.id ?? localStorage.getItem('userId') ?? '';
 
         toast.success('Успешный вход');
 
-        onLogin(email, data.role);
+        onLogin(email, (data.role ?? null) as UserRole, userId);
       } else {
         // === РЕГИСТРАЦИЯ ===
         if (!acceptTerms) {
@@ -141,11 +114,18 @@ useEffect(() => {
           return;
         }
 
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userId');
+
         await authService.register({ name, email, password });
 
-        toast.success('Мы отправили письмо для подтверждения email. Проверьте почту.');
+        const loginData = await authService.login({ email, password });
+        const userId = loginData.id ?? localStorage.getItem('userId') ?? '';
 
-        onRegister(email);
+        toast.success('Аккаунт создан, вы вошли в систему');
+
+        onRegister(email, (loginData.role ?? null) as UserRole, userId);
       }
 
     } catch (err: any) {
@@ -176,8 +156,8 @@ useEffect(() => {
         return;
       }
 
-      if (isLogin && !isForgotPasswordMode && code === 'EMAIL_NOT_CONFIRMED') {
-        toast.error('Email не подтверждён. Проверьте почту и перейдите по ссылке.');
+      if (isLogin && !isForgotPasswordMode && code === 'USER_BANNED') {
+        toast.error(message || 'Пользователь заблокирован');
         return;
       }
 
